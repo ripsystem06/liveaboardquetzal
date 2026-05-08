@@ -8,6 +8,7 @@ import { UpcomingTripsSlider } from '@/components/upcoming-trips-slider'
 import { TestimonialsSection } from '@/components/testimonials-section'
 import { ScrollGallery } from '@/components/scroll-gallery'
 import { ContactFormSection } from '@/components/contact-form-section'
+import { Footer } from '@/components/footer'
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
       <TestimonialsSection />
       <ScrollGallery />
       <ContactFormSection />
+      <Footer />
     </main>
   )
 }
