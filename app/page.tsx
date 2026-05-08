@@ -1,0 +1,27 @@
+import { Navigation } from '@/components/navigation'
+import { Hero } from '@/components/hero'
+import { ExperienceSection } from '@/components/experience-section'
+import { DestinationSection } from '@/components/destination-section'
+import { MarineLifeSection } from '@/components/marine-life-section'
+import { DestinationsGrid } from '@/components/destinations-grid'
+import { UpcomingTripsSlider } from '@/components/upcoming-trips-slider'
+import { TestimonialsSection } from '@/components/testimonials-section'
+import { ScrollGallery } from '@/components/scroll-gallery'
+import { ContactFormSection } from '@/components/contact-form-section'
+
+export default function Home() {
+  return (
+    <main className="min-h-screen">
+      <Navigation />
+      <Hero />
+      <ExperienceSection />
+      <DestinationSection />
+      <MarineLifeSection />
+      <DestinationsGrid />
+      <UpcomingTripsSlider />
+      <TestimonialsSection />
+      <ScrollGallery />
+      <ContactFormSection />
+    </main>
+  )
+}

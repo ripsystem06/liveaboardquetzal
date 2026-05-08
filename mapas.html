@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expediciones Náuticas | Travesía de Fantasía</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <style>
+        :root {
+            --gold: #d4af37;
+            --ink: #1a1612;
+            --parchment: #f2e1b8;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Georgia', serif; }
+
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--ink); z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; alignItems: center;
+            color: var(--gold);
+        }
+
+        /* --- MAPA --- */
+        #map { height: 100vh; width: 100%; background: #1a1612; }
+
+        /* --- PANEL DE INFORMACIÓN (SLIDE) --- */
+        #info-panel {
+            position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
+            background: linear-gradient(rgba(242, 225, 184, 0.95), rgba(212, 175, 55, 0.8)), 
+                        url('https://www.transparenttextures.com/patterns/papyros.png');
+            z-index: 5000; padding: 30px; box-sizing: border-box;
+            border-left: 5px double var(--ink); box-shadow: -10px 0 30px rgba(0,0,0,0.7);
+            display: flex; flex-direction: column;
+        }
+
+        .close-btn { 
+            background: var(--ink); color: var(--gold); border: none; 
+            padding: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px;
+        }
+
+        .video-box { 
+            width: 100%; border: 4px solid var(--ink); border-radius: 4px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); margin: 15px 0;
+        }
+
+        /* --- MARCADORES ANIMADOS --- */
+        .magic-marker {
+            width: 20px; height: 20px; background: var(--gold);
+            border: 2px solid var(--ink); border-radius: 50%;
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        h2 { border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+        p { line-height: 1.6; font-style: italic; color: #333; }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <h1 id="loader-text" style="text-align:center; letter-spacing: 8px;">BITÁCORA DE VIAJE</h1>
+        <div id="loader-bar" style="width:0; height:2px; background: var(--gold); margin-top:20px;"></div>
+    </div>
+
+    <div id="map"></div>
+
+    <aside id="info-panel">
+        <button class="close-btn" onclick="hideInfo()">× CERRAR MAPA</button>
+        <h2 id="title">Destino Desconocido</h2>
+        <div class="video-box">
+            <video id="vid" src="" loop muted autoplay style="width:100%"></video>
+        </div>
+        <p id="desc">Cargando crónica de viaje...</p>
+        <button style="margin-top:auto; padding:15px; background:var(--ink); color:white; border:none; cursor:pointer;">RESERVAR LUGAR EN EL BARCO</button>
+    </aside>
+
+    <script>
+        // 1. DATOS DE LOS DESTINOS
+        const destinos = [
+            { id: 'magdalena', name: "Bahía Magdalena", coords: [24.60, -112.15], video: "https://vjs.zencdn.net/v/oceans.mp4", desc: "Refugio de gigantes marinos y susurros de la península." },
+            { id: 'socorro', name: "Isla Socorro", coords: [18.78, -110.97], video: "https://vjs.zencdn.net/v/oceans.mp4", desc: "El corazón del archipiélago, tierra de fuego y mantas gigantes." },
+            { id: 'revilla', name: "Arch. Revillagigedo", coords: [18.35, -114.75], video: "https://vjs.zencdn.net/v/oceans.mp4", desc: "Las Galápagos del Norte, un santuario virgen en el Pacífico." },
+            { id: 'clipperton', name: "Isla Clipperton", coords: [10.29, -109.21], video: "https://vjs.zencdn.net/v/oceans.mp4", desc: "El atolón olvidado, una joya de coral en la inmensidad oceánica." }
+        ];
+
+        // 2. INICIALIZACIÓN DEL MAPA
+        const map = L.map('map', { zoomControl: false }).setView([18.5, -112.5], 5);
+
+        // Capa de Mapa Estilo Fantasía (Aquí pones tu imagen generada con el prompt)
+        const mapImage = 'https://images.fineartamerica.com/images/artworkimages/mediumlarge/1/old-world-map-sepia-sharon-cummings.jpg'; // Reemplazar con tu imagen
+        const bounds = [[5.0, -125.0], [35.0, -100.0]];
+        L.imageOverlay(mapImage, bounds).addTo(map);
+
+        // 3. ANIMACIONES CON ANIME.JS
+        
+        // Animación de Entrada (Preloader)
+        const intro = anime.timeline({
+            easing: 'easeInOutQuad',
+            complete: () => document.getElementById('preloader').style.display = 'none'
+        });
+
+        intro.add({
+            targets: '#loader-text',
+            opacity: [0, 1],
+            scale: [0.9, 1],
+            duration: 1500
+        })
+        .add({
+            targets: '#loader-bar',
+            width: '300px',
+            duration: 1000
+        })
+        .add({
+            targets: '#preloader',
+            opacity: 0,
+            duration: 800,
+            delay: 500
+        });
+
+        // 4. CREACIÓN DE MARCADORES INTERACTIVOS
+        destinos.forEach(sitio => {
+            const divIcon = L.divIcon({ className: 'magic-marker' });
+            const marker = L.marker(sitio.coords, { icon: divIcon }).addTo(map);
+
+            marker.on('click', () => {
+                showInfo(sitio);
+            });
+        });
+
+        // Función para mostrar el Slide
+        function showInfo(sitio) {
+            // Vuelo de cámara
+            map.flyTo(sitio.coords, 9, { duration: 2 });
+
+            // Rellenar datos
+            document.getElementById('title').innerText = sitio.name;
+            document.getElementById('desc').innerText = sitio.desc;
+            document.getElementById('vid').src = sitio.video;
+
+            // Animación del panel con Anime.js
+            anime({
+                targets: '#info-panel',
+                right: 0,
+                easing: 'easeOutElastic(1, .8)',
+                duration: 1200
+            });
+        }
+
+        // Función para ocultar el Slide
+        function hideInfo() {
+            anime({
+                targets: '#info-panel',
+                right: '-420px',
+                easing: 'easeInOutQuad',
+                duration: 600
+            });
+            map.flyTo([18.5, -112.5], 5, { duration: 1.5 });
+        }
+
+        // Animación continua de los marcadores (Latido)
+        anime({
+            targets: '.magic-marker',
+            scale: [1, 1.3],
+            opacity: [1, 0.7],
+            easing: 'easeInOutSine',
+            duration: 1000,
+            direction: 'alternate',
+            loop: true
+        });
+
+    </script>
+</body>
+</html>
