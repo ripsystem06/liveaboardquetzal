@@ -24,11 +24,12 @@ export function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/quetzal-logo.jpg"
+              src="/iso-monocromatico.svg"
               alt="Quetzal Liveaboard"
-              width={50}
-              height={50}
+              width={48}
+              height={48}
               className="h-12 w-auto"
+              priority
             />
           </Link>
 
