@@ -41,7 +41,7 @@ export function DestinationSection() {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90 text-base px-6 py-6 font-semibold font-sans"
             >
-              <Link href="/contact">
+              <Link href="/contacto">
                 <MessageCircle className="mr-2 h-5 w-5" />
                 {t('destination.cta')}
               </Link>

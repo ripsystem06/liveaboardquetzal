@@ -28,7 +28,7 @@ export function MarineLifeSection() {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold group"
             >
-              <Link href="/calendario" className="flex items-center gap-2">
+              <Link href="/contacto?subject=booking" className="flex items-center gap-2">
                 {t('marine.cta')}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
