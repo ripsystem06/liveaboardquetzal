@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -120,9 +120,9 @@ export function Navigation() {
 
           {/* CTA Button & Language Switcher */}
           <div className={`hidden lg:flex items-center gap-3 transition-all duration-300 ${isCompactDesktop ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
-            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium whitespace-nowrap">
-              <Link href="/contacto?subject=booking">{t('nav.calendar')}</Link>
-            </Button>
+<Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2">
+                <Link href="/contacto?subject=booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
+              </Button>
             <button
               onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
               className="flex items-center justify-center w-10 h-10 hover:scale-110 transition-transform cursor-pointer rounded-full border-2 border-white/20 hover:border-accent bg-white/10"
@@ -190,8 +190,8 @@ export function Navigation() {
                     {t('nav.contact')}
                   </Link>
                   <div className="flex items-center justify-center gap-3 pt-4 border-t border-primary-foreground/20">
-                    <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-medium">
-                      <Link href="/contacto?subject=booking">{t('nav.calendar')}</Link>
+                    <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
+                      <Link href="/contacto?subject=booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
                     </Button>
                     <button
                       onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
@@ -269,8 +269,8 @@ export function Navigation() {
             
             {/* Mobile Language & Calendar */}
             <div className="flex items-center justify-center gap-3 pt-4">
-              <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link href="/contacto?subject=booking" onClick={() => setIsOpen(false)}>{t('nav.calendar')}</Link>
+              <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
+                <Link href="/contacto?subject=booking" onClick={() => setIsOpen(false)}><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
               </Button>
               <button
                 onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}

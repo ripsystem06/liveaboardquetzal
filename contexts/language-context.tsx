@@ -24,7 +24,7 @@ const translations = {
     'nav.testimonials': 'Testimonials',
     'nav.blogs': 'Blogs',
     'nav.contact': 'Contact',
-    'nav.calendar': 'View Calendar',
+    'nav.bookNow': 'Book Now',
     'nav.menu': 'Menu',
     
     // Hero
@@ -310,7 +310,7 @@ const translations = {
     'nav.testimonials': 'Testimonios',
     'nav.blogs': 'Blog',
     'nav.contact': 'Contacto',
-    'nav.calendar': 'Ver Calendario',
+    'nav.bookNow': 'Reservar',
     'nav.menu': 'Menú',
     
     // Hero
