@@ -226,7 +226,7 @@ export function Navigation() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="lg:hidden pb-4 space-y-3">
+          <div className="lg:hidden pb-4 space-y-3 bg-primary/95 backdrop-blur-sm">
             <Link href="/" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
               {t('nav.home')}
             </Link>
