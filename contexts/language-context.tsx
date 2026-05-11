@@ -286,6 +286,17 @@ const translations = {
 
     // Shared
     'shared.backHome': 'Back to Home',
+
+    // Nav dropdown
+    'nav.socorro': 'Socorro Islands',
+    'nav.cortez': 'Sea of Cortez',
+    'nav.magbay': 'Magdalena Bay',
+
+    // Legal
+    'privacy.title': 'Privacy Policy',
+    'privacy.content': 'We are committed to protecting your privacy. This policy outlines how we collect, use, and protect your personal information when you use our website and book our services. For the full privacy policy, please contact us directly.',
+    'terms.title': 'Terms of Service',
+    'terms.content': 'By using our website and booking our services, you agree to these terms. All bookings are subject to our cancellation policy. For complete terms and conditions, please contact us directly.',
   },
   es: {
     // Navigation
@@ -558,6 +569,17 @@ const translations = {
 
     // Shared
     'shared.backHome': 'Volver al Inicio',
+
+    // Nav dropdown
+    'nav.socorro': 'Islas Socorro',
+    'nav.cortez': 'Mar de Cortés',
+    'nav.magbay': 'Bahía Magdalena',
+
+    // Legal
+    'privacy.title': 'Política de Privacidad',
+    'privacy.content': 'Estamos comprometidos con la protección de tu privacidad. Esta política describe cómo recopilamos, usamos y protegemos tu información personal al utilizar nuestro sitio web y reservar nuestros servicios. Para la política completa, contáctanos directamente.',
+    'terms.title': 'Términos de Servicio',
+    'terms.content': 'Al utilizar nuestro sitio web y reservar nuestros servicios, aceptas estos términos. Todas las reservaciones están sujetas a nuestra política de cancelación. Para los términos completos, contáctanos directamente.',
   },
 }
 

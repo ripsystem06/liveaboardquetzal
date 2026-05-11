@@ -55,13 +55,13 @@ export function Navigation() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-card border-border">
                 <DropdownMenuItem asChild>
-                  <Link href="/destinos/islas-socorro">Socorro Islands</Link>
+                  <Link href="/destinos/islas-socorro">{t('nav.socorro')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/destinos/mar-de-cortes">Sea of Cortez</Link>
+                  <Link href="/destinos/mar-de-cortes">{t('nav.cortez')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/destinos/bahia-magdalena">Magdalena Bay</Link>
+                  <Link href="/destinos/bahia-magdalena">{t('nav.magbay')}</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -112,7 +112,7 @@ export function Navigation() {
           {/* CTA Button & Language Switcher */}
           <div className="hidden lg:flex items-center gap-3">
             <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium whitespace-nowrap">
-              <Link href="/calendario">{t('nav.calendar')}</Link>
+              <Link href="/contacto?subject=booking">{t('nav.calendar')}</Link>
             </Button>
             <button
               onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
@@ -153,13 +153,13 @@ export function Navigation() {
             <div className="space-y-2 pl-4">
               <p className="text-primary-foreground font-medium">{t('nav.destinations')}</p>
               <Link href="/destinos/islas-socorro" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
-                Socorro Islands
+                {t('nav.socorro')}
               </Link>
               <Link href="/destinos/mar-de-cortes" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
-                Sea of Cortez
+                {t('nav.cortez')}
               </Link>
               <Link href="/destinos/bahia-magdalena" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
-                Magdalena Bay
+                {t('nav.magbay')}
               </Link>
             </div>
             <Link href="/faqs" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
@@ -187,7 +187,7 @@ export function Navigation() {
             {/* Mobile Language & Calendar */}
             <div className="flex items-center gap-3 pt-4">
               <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link href="/calendario" onClick={() => setIsOpen(false)}>{t('nav.calendar')}</Link>
+                <Link href="/contacto?subject=booking" onClick={() => setIsOpen(false)}>{t('nav.calendar')}</Link>
               </Button>
               <button
                 onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}

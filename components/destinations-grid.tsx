@@ -14,21 +14,21 @@ export function DestinationsGrid() {
       title: t('destinations.socorro.title'),
       description: t('destinations.socorro.description'),
       image: '/socorro-destination.jpg',
-      href: '/destinos/socorro'
+      href: '/destinos/islas-socorro'
     },
     {
       id: 'mag-bay-socorro',
       title: t('destinations.magbay.title'),
       description: t('destinations.magbay.description'),
       image: '/mag-bay-destination.jpg',
-      href: '/destinos/mag-bay-socorro'
+      href: '/destinos/bahia-magdalena'
     },
     {
       id: 'sea-of-cortez',
       title: t('destinations.cortez.title'),
       description: t('destinations.cortez.description'),
       image: '/sea-cortez-destination.jpg',
-      href: '/destinos/sea-of-cortez'
+      href: '/destinos/mar-de-cortes'
     }
   ]
   return (

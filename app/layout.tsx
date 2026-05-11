@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Roboto, Old_Standard_TT } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { LanguageProvider } from '@/contexts/language-context'
+import { HtmlLangSetter } from '@/components/html-lang-setter'
 import './globals.css'
 
 const _roboto = Roboto({ 
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <LanguageProvider>
           {children}
+          <HtmlLangSetter />
         </LanguageProvider>
         <Analytics />
       </body>

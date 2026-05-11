@@ -96,7 +96,7 @@ export function UpcomingTripsSlider() {
                   size="lg"
                   className="bg-white text-primary hover:bg-white/90 font-sans font-semibold"
                 >
-                  <Link href={`/trip-details/${trip.id}`}>
+                  <Link href="/contacto?subject=booking">
                     {t('trips.details')}
                     <ChevronRight className="ml-2 h-5 w-5" />
                   </Link>

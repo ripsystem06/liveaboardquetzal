@@ -81,7 +81,7 @@ export function Hero() {
             size="default"
             className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6 py-5 font-semibold font-sans"
           >
-            <Link href="/calendario">
+            <Link href="/contacto?subject=booking">
               {t('hero.button')}
             </Link>
           </Button>
