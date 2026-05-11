@@ -45,17 +45,18 @@ export function DestinationsGrid() {
         </div>
 
         {/* Destinations Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-0">
           {destinations.map((destination) => (
             <div
               key={destination.id}
-              className="relative h-96 overflow-hidden group"
+              className="relative h-72 sm:h-80 md:h-96 overflow-hidden group rounded-lg md:rounded-none"
             >
               {/* Background Image */}
               <Image
                 src={destination.image || "/placeholder.svg"}
                 alt={destination.title}
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
               
@@ -63,19 +64,19 @@ export function DestinationsGrid() {
               <div className="absolute inset-0 bg-primary/60 transition-opacity duration-500 group-hover:bg-primary/70" />
               
               {/* Content */}
-              <div className="relative h-full flex flex-col justify-end p-8 text-white">
-                <h3 className="font-serif text-3xl md:text-4xl font-normal mb-4 transform transition-transform duration-500 group-hover:-translate-y-2">
+              <div className="relative h-full flex flex-col justify-end p-6 sm:p-8 text-white">
+                <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal mb-3 sm:mb-4 transform transition-transform duration-500 group-hover:-translate-y-2">
                   {destination.title}
                 </h3>
                 
-                <p className="font-sans text-sm mb-6 leading-relaxed opacity-90 max-w-md">
+                <p className="font-sans text-xs sm:text-sm mb-4 sm:mb-6 leading-relaxed opacity-90">
                   {destination.description}
                 </p>
                 
                 <Button
                   asChild
                   variant="secondary"
-                  className="w-fit bg-white text-primary hover:bg-white/90 font-sans font-medium transition-all duration-300 group-hover:shadow-lg"
+                  className="w-fit bg-white text-primary hover:bg-white/90 font-sans font-medium transition-all duration-300 group-hover:shadow-lg text-sm sm:text-base"
                 >
                   <Link href={destination.href}>
                     {t('destinations.explore')}

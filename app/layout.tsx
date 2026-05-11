@@ -1,21 +1,21 @@
 import React from "react"
 import type { Metadata } from 'next'
-import { Roboto, Old_Standard_TT } from 'next/font/google'
+import { Montserrat, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { LanguageProvider } from '@/contexts/language-context'
 import { HtmlLangSetter } from '@/components/html-lang-setter'
 import './globals.css'
 
-const _roboto = Roboto({ 
-  subsets: ["latin"],
-  weight: ['300', '400', '500', '700'],
-  variable: '--font-roboto'
+const _montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-montserrat'
 });
 
-const _oldStandardTT = Old_Standard_TT({ 
-  subsets: ["latin"],
-  weight: ['400', '700'],
-  variable: '--font-old-standard'
+const _playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['700'],
+  variable: '--font-heading'
 });
 
 export const metadata: Metadata = {
@@ -46,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`${_montserrat.variable} ${_playfairDisplay.variable} font-sans antialiased`}>
         <LanguageProvider>
           {children}
           <HtmlLangSetter />

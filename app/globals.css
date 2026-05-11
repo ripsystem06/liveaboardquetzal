@@ -75,8 +75,9 @@
 }
 
 @theme inline {
-  --font-sans: 'Roboto', 'Roboto Fallback', sans-serif;
-  --font-serif: 'Old Standard TT', 'Old Standard TT Fallback', serif;
+  --font-sans: 'Montserrat', 'Montserrat Fallback', sans-serif;
+  --font-serif: 'Playfair Display', 'Playfair Display Fallback', serif;
+  --font-heading: 'Playfair Display', 'Playfair Display Fallback', serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

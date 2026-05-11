@@ -149,47 +149,47 @@ export function Navigation() {
                 </button>
               </SheetTrigger>
               <SheetContent side="top" className="bg-primary text-primary-foreground w-full max-h-[80vh] overflow-y-auto">
-                <nav className="flex flex-col gap-4 py-6">
-                  <Link href="/" className="text-primary-foreground hover:text-accent py-2 text-lg" onClick={() => {}}>
+                <nav className="flex flex-col items-center gap-4 py-6">
+                  <Link href="/" className="text-primary-foreground hover:text-accent py-2 text-lg font-bold" onClick={() => {}}>
                     {t('nav.home')}
                   </Link>
-                  <Link href="/nuestro-barco" className="text-primary-foreground hover:text-accent py-2 text-lg">
+                  <Link href="/nuestro-barco" className="text-primary-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.ourBoat')}
                   </Link>
-                  <div className="pl-4 space-y-2">
-                    <p className="text-primary-foreground font-medium text-lg">{t('nav.destinations')}</p>
-                    <Link href="/destinos/islas-socorro" className="block text-primary-foreground/80 hover:text-accent py-1">
+                  <div className="text-center space-y-2">
+                    <p className="text-primary-foreground font-bold text-lg">{t('nav.destinations')}</p>
+                    <Link href="/destinos/islas-socorro" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal">
                       {t('nav.socorro')}
                     </Link>
-                    <Link href="/destinos/mar-de-cortes" className="block text-primary-foreground/80 hover:text-accent py-1">
+                    <Link href="/destinos/mar-de-cortes" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal">
                       {t('nav.cortez')}
                     </Link>
-                    <Link href="/destinos/bahia-magdalena" className="block text-primary-foreground/80 hover:text-accent py-1">
+                    <Link href="/destinos/bahia-magdalena" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal">
                       {t('nav.magbay')}
                     </Link>
                   </div>
-                  <Link href="/faqs" className="text-primary-foreground hover:text-accent py-2 text-lg">
+                  <Link href="/faqs" className="text-primary-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.faqs')}
                   </Link>
-                  <div className="pl-4 space-y-2">
-                    <p className="text-primary-foreground font-medium text-lg">{t('nav.aboutUs')}</p>
-                    <Link href="/about" className="block text-primary-foreground/80 hover:text-accent py-1">
+                  <div className="text-center space-y-2">
+                    <p className="text-primary-foreground font-bold text-lg">{t('nav.aboutUs')}</p>
+                    <Link href="/about" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal">
                       {t('nav.aboutUs')}
                     </Link>
-                    <Link href="/about/colaboraciones" className="block text-primary-foreground/80 hover:text-accent py-1">
+                    <Link href="/about/colaboraciones" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal">
                       {t('nav.collaborations')}
                     </Link>
                   </div>
-                  <Link href="/testimonios" className="text-primary-foreground hover:text-accent py-2 text-lg">
+                  <Link href="/testimonios" className="text-primary-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.testimonials')}
                   </Link>
-                  <Link href="/blog" className="text-primary-foreground hover:text-accent py-2 text-lg">
+                  <Link href="/blog" className="text-primary-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.blogs')}
                   </Link>
-                  <Link href="/contacto" className="text-primary-foreground hover:text-accent py-2 text-lg">
+                  <Link href="/contacto" className="text-primary-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.contact')}
                   </Link>
-                  <div className="flex items-center gap-3 pt-4 border-t border-primary-foreground/20">
+                  <div className="flex items-center justify-center gap-3 pt-4 border-t border-primary-foreground/20">
                     <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-medium">
                       <Link href="/contacto?subject=booking">{t('nav.calendar')}</Link>
                     </Button>
@@ -226,49 +226,49 @@ export function Navigation() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="lg:hidden pb-4 space-y-3 bg-primary/95 backdrop-blur-sm">
-            <Link href="/" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
+          <div className="lg:hidden pb-4 space-y-3 bg-primary/95 backdrop-blur-sm text-center">
+            <Link href="/" className="block text-primary-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.home')}
             </Link>
-            <Link href="/nuestro-barco" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
+            <Link href="/nuestro-barco" className="block text-primary-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.ourBoat')}
             </Link>
-            <div className="space-y-2 pl-4">
-              <p className="text-primary-foreground font-medium">{t('nav.destinations')}</p>
-              <Link href="/destinos/islas-socorro" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
+            <div className="space-y-2">
+              <p className="text-primary-foreground font-bold">{t('nav.destinations')}</p>
+              <Link href="/destinos/islas-socorro" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal" onClick={() => setIsOpen(false)}>
                 {t('nav.socorro')}
               </Link>
-              <Link href="/destinos/mar-de-cortes" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
+              <Link href="/destinos/mar-de-cortes" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal" onClick={() => setIsOpen(false)}>
                 {t('nav.cortez')}
               </Link>
-              <Link href="/destinos/bahia-magdalena" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
+              <Link href="/destinos/bahia-magdalena" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal" onClick={() => setIsOpen(false)}>
                 {t('nav.magbay')}
               </Link>
             </div>
-            <Link href="/faqs" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
+            <Link href="/faqs" className="block text-primary-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.faqs')}
             </Link>
-            <div className="space-y-2 pl-4">
-              <p className="text-primary-foreground font-medium">{t('nav.aboutUs')}</p>
-              <Link href="/about" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
+            <div className="space-y-2">
+              <p className="text-primary-foreground font-bold">{t('nav.aboutUs')}</p>
+              <Link href="/about" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal" onClick={() => setIsOpen(false)}>
                 {t('nav.aboutUs')}
               </Link>
-              <Link href="/about/colaboraciones" className="block text-primary-foreground/80 hover:text-accent py-1" onClick={() => setIsOpen(false)}>
+              <Link href="/about/colaboraciones" className="block text-primary-foreground/80 hover:text-accent py-1 font-normal" onClick={() => setIsOpen(false)}>
                 {t('nav.collaborations')}
               </Link>
             </div>
-            <Link href="/testimonios" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
+            <Link href="/testimonios" className="block text-primary-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.testimonials')}
             </Link>
-            <Link href="/blog" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
+            <Link href="/blog" className="block text-primary-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.blogs')}
             </Link>
-            <Link href="/contacto" className="block text-primary-foreground hover:text-accent py-2" onClick={() => setIsOpen(false)}>
+            <Link href="/contacto" className="block text-primary-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.contact')}
             </Link>
             
             {/* Mobile Language & Calendar */}
-            <div className="flex items-center gap-3 pt-4">
+            <div className="flex items-center justify-center gap-3 pt-4">
               <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90">
                 <Link href="/contacto?subject=booking" onClick={() => setIsOpen(false)}>{t('nav.calendar')}</Link>
               </Button>
