@@ -25,6 +25,7 @@ const translations = {
     'nav.blogs': 'Blogs',
     'nav.contact': 'Contact',
     'nav.calendar': 'View Calendar',
+    'nav.menu': 'Menu',
     
     // Hero
     'hero.title': 'Quetzal',
@@ -310,6 +311,7 @@ const translations = {
     'nav.blogs': 'Blog',
     'nav.contact': 'Contacto',
     'nav.calendar': 'Ver Calendario',
+    'nav.menu': 'Menú',
     
     // Hero
     'hero.title': 'Quetzal',
