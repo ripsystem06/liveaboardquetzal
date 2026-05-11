@@ -29,7 +29,9 @@ export function Hero() {
     const nextRef = currentVideoIndex === 0 ? videoRef2 : videoRef1
 
     if (currentRef.current) {
-      currentRef.current.play()
+      currentRef.current.play().catch(() => {
+        // Browser may block autoplay on power-save mode — silently ignore
+      })
     }
 
     if (nextRef.current) {
