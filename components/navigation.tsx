@@ -121,7 +121,7 @@ export function Navigation() {
           {/* CTA Button & Language Switcher */}
           <div className={`hidden lg:flex items-center gap-3 transition-all duration-300 ${isCompactDesktop ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
 <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2">
-                <Link href="/contacto?subject=booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
+                <Link href="/booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
               </Button>
             <button
               onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
@@ -191,7 +191,7 @@ export function Navigation() {
                   </Link>
                   <div className="flex items-center justify-center gap-3 pt-4 border-t border-primary-foreground/20">
                     <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
-                      <Link href="/contacto?subject=booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
+                      <Link href="/booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
                     </Button>
                     <button
                       onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
@@ -270,7 +270,7 @@ export function Navigation() {
             {/* Mobile Language & Calendar */}
             <div className="flex items-center justify-center gap-3 pt-4">
               <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
-                <Link href="/contacto?subject=booking" onClick={() => setIsOpen(false)}><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
+                <Link href="/booking" onClick={() => setIsOpen(false)}><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
               </Button>
               <button
                 onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
