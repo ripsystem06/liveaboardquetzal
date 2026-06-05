@@ -70,6 +70,25 @@ describe('LoginForm', () => {
     expect(screen.getByText(/please enter a valid email/i)).toBeInTheDocument()
   })
 
+  it('shows error message on invalid email (non-empty)', async () => {
+    const user = userEvent.setup()
+    const onSuccess = vi.fn()
+    renderWithProviders(<LoginForm onSuccess={onSuccess} />)
+
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText(/password/i)
+
+    // Spec: GIVEN email 'other' and password '123456'
+    await user.type(emailInput, 'other')
+    await user.type(passwordInput, '123456')
+
+    const form = emailInput.closest('form')!
+    fireEvent.submit(form)
+
+    expect(onSuccess).not.toHaveBeenCalled()
+    expect(screen.getByText(/invalid email or password/i)).toBeInTheDocument()
+  })
+
   it('password is case-sensitive', async () => {
     const user = userEvent.setup()
     const onSuccess = vi.fn()

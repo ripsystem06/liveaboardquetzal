@@ -51,6 +51,36 @@ describe('BookingPageClient integration', () => {
         expect(screen.getByText(/booking confirmed/i)).toBeInTheDocument()
       }, { timeout: 2000 })
     })
+
+    it('does not persist any session token after login', async () => {
+      const user = userEvent.setup()
+
+      // Set up localStorage and sessionStorage before render so they exist in jsdom
+      const storageGetItem = vi.fn(() => null)
+      const storageSetItem = vi.fn()
+      vi.stubGlobal('localStorage', { getItem: storageGetItem, setItem: storageSetItem })
+      vi.stubGlobal('sessionStorage', { getItem: storageGetItem, setItem: storageSetItem })
+
+      renderWithProviders(<BookingPageClient />)
+
+      // Login with valid credentials
+      const emailInput = screen.getByLabelText(/email/i)
+      const passwordInput = screen.getByLabelText(/password/i)
+      await user.type(emailInput, 'user123')
+      await user.type(passwordInput, '123456')
+
+      const form = emailInput.closest('form')!
+      fireEvent.submit(form)
+
+      // Advance to step 2 to confirm login succeeded
+      await waitFor(() => {
+        expect(screen.getByText(/select your cruise/i)).toBeInTheDocument()
+      })
+
+      // Verify no token was ever written to storage
+      expect(storageSetItem).not.toHaveBeenCalled()
+      expect(document.cookie).not.toContain('token')
+    })
   })
 
   describe('Step 3 is inaccessible without completing steps 1-2', () => {
