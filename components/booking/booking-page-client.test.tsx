@@ -11,20 +11,6 @@ describe('bookingReducer', () => {
     pricePerPerson: 3500,
   }
 
-  describe('AUTH_SUCCESS', () => {
-    it('sets isAuthenticated to true', () => {
-      const action: BookingAction = { type: 'AUTH_SUCCESS' }
-      const result = bookingReducer(initialBookingState, action)
-      expect(result.isAuthenticated).toBe(true)
-    })
-
-    it('does not change step', () => {
-      const action: BookingAction = { type: 'AUTH_SUCCESS' }
-      const result = bookingReducer(initialBookingState, action)
-      expect(result.step).toBe(1)
-    })
-  })
-
   describe('SELECT_CRUISE', () => {
     it('sets selectedCruise to the given cruise', () => {
       const action: BookingAction = { type: 'SELECT_CRUISE', cruise: mockCruise }
@@ -42,36 +28,29 @@ describe('bookingReducer', () => {
   })
 
   describe('ADVANCE_STEP', () => {
-    it('advances from step 1 to 2 when authenticated', () => {
-      const state: BookingState = { ...initialBookingState, isAuthenticated: true }
+    it('advances from step 1 to 2', () => {
+      const state: BookingState = { ...initialBookingState }
       const action: BookingAction = { type: 'ADVANCE_STEP' }
       const result = bookingReducer(state, action)
       expect(result.step).toBe(2)
     })
 
     it('advances from step 2 to 3 when cruise is selected', () => {
-      const state: BookingState = { ...initialBookingState, step: 2, isAuthenticated: true, selectedCruise: mockCruise }
+      const state: BookingState = { ...initialBookingState, step: 2, selectedCruise: mockCruise }
       const action: BookingAction = { type: 'ADVANCE_STEP' }
       const result = bookingReducer(state, action)
       expect(result.step).toBe(3)
     })
 
-    it('rejects ADVANCE_STEP from step 1 without authentication', () => {
-      const state: BookingState = { ...initialBookingState, isAuthenticated: false }
-      const action: BookingAction = { type: 'ADVANCE_STEP' }
-      const result = bookingReducer(state, action)
-      expect(result.step).toBe(1)
-    })
-
     it('rejects ADVANCE_STEP from step 2 without cruise selected', () => {
-      const state: BookingState = { ...initialBookingState, step: 2, isAuthenticated: true, selectedCruise: null }
+      const state: BookingState = { ...initialBookingState, step: 2, selectedCruise: null }
       const action: BookingAction = { type: 'ADVANCE_STEP' }
       const result = bookingReducer(state, action)
       expect(result.step).toBe(2)
     })
 
     it('does not advance beyond step 3', () => {
-      const state: BookingState = { ...initialBookingState, step: 3, isAuthenticated: true, selectedCruise: mockCruise }
+      const state: BookingState = { ...initialBookingState, step: 3, selectedCruise: mockCruise }
       const action: BookingAction = { type: 'ADVANCE_STEP' }
       const result = bookingReducer(state, action)
       expect(result.step).toBe(3)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/contexts/language-context'
+import { useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { LoginForm } from './login-form'
 import { CruiseCard } from './cruise-card'
@@ -31,10 +32,15 @@ export function BookingFlow({
 }: BookingFlowProps) {
   const { t } = useLanguage()
 
-  const handleLoginSuccess = () => {
-    dispatch({ type: 'AUTH_SUCCESS' })
-    dispatch({ type: 'ADVANCE_STEP' })
-  }
+  const didAutoAdvance = useRef(false)
+
+  // Auto-advance past login for returning users (only once, not after GO_BACK)
+  useEffect(() => {
+    if (!didAutoAdvance.current && isAuthenticated && step === 1 && !state.loginCompleted) {
+      didAutoAdvance.current = true
+      dispatch({ type: 'LOGIN_COMPLETED' })
+    }
+  }, [isAuthenticated, step, state.loginCompleted, dispatch])
 
   const handleCruiseSelect = (cruise: Cruise) => {
     dispatch({ type: 'SELECT_CRUISE', cruise })
@@ -86,7 +92,7 @@ export function BookingFlow({
                   : 'bg-muted text-muted-foreground'
               }`}
             >
-              {step > s ? <Check className="h-5 w-5" /> : s}
+              {            step > s ? <Check className="h-5 w-5" /> : s}
             </div>
             {index < 2 && (
               <div
@@ -109,7 +115,7 @@ export function BookingFlow({
 
       {/* Step Content */}
       {step === 1 && (
-        <LoginForm onSuccess={handleLoginSuccess} />
+        <LoginForm dispatch={dispatch} />
       )}
 
       {step === 2 && (
@@ -118,7 +124,7 @@ export function BookingFlow({
             <h2 className="text-2xl font-serif text-primary">{t('booking.cruise.title')}</h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="flex flex-col gap-4">
             {MOCK_CRUISES.map((cruise) => (
               <CruiseCard
                 key={cruise.id}

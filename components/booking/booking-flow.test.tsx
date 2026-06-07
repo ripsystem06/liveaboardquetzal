@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderWithProviders, screen, fireEvent } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { BookingFlow } from './booking-flow'
@@ -15,10 +15,10 @@ const mockCruise: Cruise = {
 describe('BookingFlow', () => {
   const mockState: BookingState = {
     step: 1,
-    isAuthenticated: false,
     selectedCruise: null,
     guestCount: 1,
     bookingConfirmed: false,
+    loginCompleted: false,
   }
 
   const mockDispatch = vi.fn()
@@ -62,7 +62,7 @@ describe('BookingFlow', () => {
   })
 
   it('renders cruise cards on step 2', () => {
-    const state: BookingState = { ...mockState, step: 2, isAuthenticated: true }
+    const state: BookingState = { ...mockState, step: 2, loginCompleted: true }
     renderWithProviders(
       <BookingFlow
         step={2}
@@ -79,7 +79,7 @@ describe('BookingFlow', () => {
   })
 
   it('renders back button on step 2', () => {
-    const state: BookingState = { ...mockState, step: 2, isAuthenticated: true }
+    const state: BookingState = { ...mockState, step: 2, loginCompleted: true }
     renderWithProviders(
       <BookingFlow
         step={2}
@@ -96,7 +96,7 @@ describe('BookingFlow', () => {
   })
 
   it('renders payment section on step 3', () => {
-    const state: BookingState = { ...mockState, step: 3, isAuthenticated: true, selectedCruise: mockCruise }
+    const state: BookingState = { ...mockState, step: 3, loginCompleted: true, selectedCruise: mockCruise }
     renderWithProviders(
       <BookingFlow
         step={3}
@@ -115,7 +115,7 @@ describe('BookingFlow', () => {
 
   it('dispatches GO_BACK when Back is clicked on step 2', async () => {
     const user = userEvent.setup()
-    const state: BookingState = { ...mockState, step: 2, isAuthenticated: true }
+    const state: BookingState = { ...mockState, step: 2, loginCompleted: true }
     renderWithProviders(
       <BookingFlow
         step={2}
@@ -134,7 +134,7 @@ describe('BookingFlow', () => {
   })
 
   it('shows confirmation view when bookingConfirmed is true', () => {
-    const state: BookingState = { ...mockState, step: 3, isAuthenticated: true, selectedCruise: mockCruise, bookingConfirmed: true }
+    const state: BookingState = { ...mockState, step: 3, loginCompleted: true, selectedCruise: mockCruise, bookingConfirmed: true }
     renderWithProviders(
       <BookingFlow
         step={3}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Montserrat, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { LanguageProvider } from '@/contexts/language-context'
+import { UserProvider } from '@/contexts/user-context'
 import { HtmlLangSetter } from '@/components/html-lang-setter'
 import './globals.css'
 
@@ -45,11 +46,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${_montserrat.variable} ${_playfairDisplay.variable} font-sans antialiased`}>
         <LanguageProvider>
-          {children}
-          <HtmlLangSetter />
+          <UserProvider>
+            {children}
+            <HtmlLangSetter />
+          </UserProvider>
         </LanguageProvider>
         <Analytics />
       </body>

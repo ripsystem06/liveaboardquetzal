@@ -17,11 +17,13 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { useLanguage } from '@/contexts/language-context'
+import { useUser } from '@/contexts/user-context'
 import { useScrollDirection } from '@/hooks/use-scroll-direction'
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const { language, setLanguage, t } = useLanguage()
+  const { isAuthenticated } = useUser()
   const { direction, isPastThreshold } = useScrollDirection(50)
   const isCompactDesktop = direction === 'down' && isPastThreshold
 
@@ -120,6 +122,11 @@ export function Navigation() {
 
           {/* CTA Button & Language Switcher */}
           <div className={`hidden lg:flex items-center gap-3 transition-all duration-300 ${isCompactDesktop ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
+            {isAuthenticated && (
+              <Button asChild size="sm" variant="outline" className="border-accent text-accent-foreground hover:bg-accent/10 whitespace-nowrap gap-2">
+                <Link href="/account">My Account</Link>
+              </Button>
+            )}
 <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2">
                 <Link href="/booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
               </Button>
@@ -190,6 +197,11 @@ export function Navigation() {
                     {t('nav.contact')}
                   </Link>
                   <div className="flex items-center justify-center gap-3 pt-4 border-t border-primary-foreground/20">
+                    {isAuthenticated && (
+                      <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
+                        <Link href="/account">My Account</Link>
+                      </Button>
+                    )}
                     <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
                       <Link href="/booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
                     </Button>
@@ -269,6 +281,11 @@ export function Navigation() {
             
             {/* Mobile Language & Calendar */}
             <div className="flex items-center justify-center gap-3 pt-4">
+              {isAuthenticated && (
+                <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
+                  <Link href="/account" onClick={() => setIsOpen(false)}>My Account</Link>
+                </Button>
+              )}
               <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
                 <Link href="/booking" onClick={() => setIsOpen(false)}><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
               </Button>

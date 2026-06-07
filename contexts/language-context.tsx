@@ -318,6 +318,8 @@ const translations = {
     'booking.cruise.departure': 'Departure',
     'booking.cruise.route': 'Route',
     'booking.cruise.pricePerPerson': 'per person',
+    'booking.cruise.boat': 'Ship',
+    'booking.cruise.tripDetails': 'Trip & Price details',
     'booking.guest.title': 'Number of Guests',
     'booking.guest.label': 'Guests',
     'booking.guest.increment': 'Add guest',
@@ -337,6 +339,21 @@ const translations = {
     'booking.confirmation.title': 'Booking Confirmed',
     'booking.confirmation.message': 'Thank you for your booking. Our team will be in touch with next steps.',
     'booking.confirmation.backHome': 'Back to Home',
+
+    // Account Page
+    'account.title': 'My Account',
+    'account.profile': 'Profile',
+    'account.reservations': 'Reservation History',
+    'account.save': 'Save',
+    'account.edit': 'Edit',
+    'account.name': 'Name',
+    'account.email': 'Email',
+    'account.phone': 'Phone',
+    'account.noReservations': 'No reservations yet',
+    'account.saveSuccess': 'Profile updated successfully',
+    'account.status.pending': 'Pending',
+    'account.status.confirmed': 'Confirmed',
+    'account.status.completed': 'Completed',
   },
   es: {
     // Navigation
@@ -351,12 +368,12 @@ const translations = {
     'nav.contact': 'Contacto',
     'nav.bookNow': 'Reservar',
     'nav.menu': 'Menú',
-    
+
     // Hero
     'hero.title': 'Quetzal',
     'hero.subtitle': 'LA MEJOR AVENTURA DE BUCEO EN EL OCÉANO TE ESPERA',
     'hero.button': 'Ver Calendario',
-    
+
     // Experience Section
     'experience.title': 'Lo Que Te Espera A Bordo',
     'experience.subtitle': 'Descubre lo que hace de esta expedición algo verdaderamente inolvidable.',
@@ -364,19 +381,19 @@ const translations = {
     'experience.item2': 'Embarcación clásica de lujo lista para tu aventura',
     'experience.item3': 'Encuentros inolvidables con vida marina',
     'experience.item4': 'Equipo profesional garantizando tu seguridad y comodidad',
-    
+
     // Destination Section
     'destination.days': '7 DÍAS DE EXPLORACIÓN',
     'destination.title': 'MAR DE CORTÉS',
     'destination.year': '2026 DESDE',
     'destination.price': '$2,350 USD POR PERSONA',
     'destination.cta': 'Consulta con Nuestro Experto',
-    
+
     // Marine Life Section
     'marine.title': 'Esto Es Lo Que Verás Con Nosotros',
     'marine.description': 'Únete a la aventura a bordo de Quetzal y presencia la impresionante vida marina—exactamente lo que nuestros huéspedes ven en esta inolvidable experiencia submarina.',
     'marine.cta': 'Ver Próximos Viajes',
-    
+
     // Destinations Grid
     'destinations.title': 'Nuestros Destinos',
     'destinations.subtitle': 'Donde Comienza La Aventura',
@@ -387,7 +404,7 @@ const translations = {
     'destinations.cortez.title': 'MAR DE CORTÉS',
     'destinations.cortez.description': '¡Visita uno de los lugares más hermosos del planeta, con días llenos de agua salada y sol, montañas, vida silvestre, cultura e historia!',
     'destinations.explore': 'Explorar Destino',
-    
+
     // Upcoming Trips
     'trips.title': 'Próximo Destino',
     'trips.subtitle': 'Guiados por Experiencia Perfeccionados por Pasión',
@@ -401,15 +418,15 @@ const translations = {
     'trips.trip3.dates': '09 JUL 2026 - 16 JUL 2026',
     'trips.trip3.price': 'desde $2,350 USD por persona',
     'trips.details': 'Detalles del Viaje y Precios',
-    
+
     // Testimonials
     'testimonials.title': 'Lo Que Dicen Nuestros Huéspedes',
     'testimonials.subtitle': 'No solo confíes en nuestra palabra—escucha a los buzos que han experimentado la aventura de su vida',
-    
+
     // Gallery
     'gallery.title': 'Momentos Capturados',
     'gallery.subtitle': 'Experimenta la belleza bajo las olas',
-    
+
     // Contact Form
     'contact.title': 'Planifica Tu Viaje Con Nosotros',
     'contact.description': 'Usa el formulario para contactar a nuestro equipo — estamos aquí para ayudarte a reservar y preparar tu experiencia Quetzal.',
@@ -641,6 +658,8 @@ const translations = {
     'booking.cruise.departure': 'Salida',
     'booking.cruise.route': 'Ruta',
     'booking.cruise.pricePerPerson': 'por persona',
+    'booking.cruise.boat': 'Barco',
+    'booking.cruise.tripDetails': 'Detalles del viaje',
     'booking.guest.title': 'Número de Huéspedes',
     'booking.guest.label': 'Huéspedes',
     'booking.guest.increment': 'Agregar huésped',
@@ -660,6 +679,21 @@ const translations = {
     'booking.confirmation.title': 'Reserva Confirmada',
     'booking.confirmation.message': 'Gracias por tu reserva. Nuestro equipo se pondrá en contacto contigo con los siguientes pasos.',
     'booking.confirmation.backHome': 'Volver al Inicio',
+
+    // Account Page
+    'account.title': 'Mi Cuenta',
+    'account.profile': 'Perfil',
+    'account.reservations': 'Historial de Reservas',
+    'account.save': 'Guardar',
+    'account.edit': 'Editar',
+    'account.name': 'Nombre',
+    'account.email': 'Correo Electrónico',
+    'account.phone': 'Teléfono',
+    'account.noReservations': 'Sin reservas aún',
+    'account.saveSuccess': 'Perfil actualizado correctamente',
+    'account.status.pending': 'Pendiente',
+    'account.status.confirmed': 'Confirmado',
+    'account.status.completed': 'Completado',
   },
 }
 

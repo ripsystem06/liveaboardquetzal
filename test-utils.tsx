@@ -1,7 +1,10 @@
+/// <reference types="vitest/globals" />
+
 'use client'
 
 import { render, type RenderOptions } from '@testing-library/react'
 import { LanguageProvider } from '@/contexts/language-context'
+import { UserProvider } from '@/contexts/user-context'
 
 // Mock next/image
 vi.mock('next/image', () => ({
@@ -23,7 +26,11 @@ vi.mock('next/navigation', () => ({
 }))
 
 const AllProviders = ({ children }: { children: React.ReactNode }) => {
-  return <LanguageProvider>{children}</LanguageProvider>
+  return (
+    <LanguageProvider>
+      <UserProvider>{children}</UserProvider>
+    </LanguageProvider>
+  )
 }
 
 export const renderWithProviders = (ui: React.ReactElement, options?: RenderOptions) => {

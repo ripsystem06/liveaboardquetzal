@@ -10,17 +10,21 @@ const mockCruise: Cruise = {
   departureDate: '2026-03-15',
   route: 'Revillagigedo Archipelago',
   pricePerPerson: 3500,
+  boat: 'Quetzal',
 }
 
 describe('CruiseCard', () => {
-  it('renders cruise name, route, date, and price', () => {
+  it('renders cruise name, route, date parts, and price', () => {
     const onSelect = vi.fn()
     renderWithProviders(<CruiseCard cruise={mockCruise} onSelect={onSelect} />)
 
     expect(screen.getByText('Socorro Islands')).toBeInTheDocument()
     expect(screen.getByText('Revillagigedo Archipelago')).toBeInTheDocument()
-    expect(screen.getByText('2026-03-15')).toBeInTheDocument()
-    expect(screen.getByText('$3,500')).toBeInTheDocument()
+    // Date rendered as separate elements: "Mar", "15", "2026"
+    expect(screen.getByText('15')).toBeInTheDocument()
+    expect(screen.getByText('Mar')).toBeInTheDocument()
+    expect(screen.getByText('2026')).toBeInTheDocument()
+    expect(screen.getByText(/3,500/)).toBeInTheDocument()
   })
 
   it('renders a Select button', () => {

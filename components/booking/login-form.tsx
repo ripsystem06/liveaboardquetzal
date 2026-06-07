@@ -2,23 +2,23 @@
 
 import { useState } from 'react'
 import { useLanguage } from '@/contexts/language-context'
+import { useUser } from '@/contexts/user-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import type { BookingAction } from './booking-page-client'
 
 interface LoginFormProps {
-  onSuccess: () => void
+  dispatch: React.Dispatch<BookingAction>
 }
 
-const VALID_EMAIL = 'user123'
-const VALID_PASSWORD = '123456'
-
-export function LoginForm({ onSuccess }: LoginFormProps) {
+export function LoginForm({ dispatch }: LoginFormProps) {
   const { t } = useLanguage()
+  const { login } = useUser()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -27,8 +27,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       return
     }
 
-    if (email === VALID_EMAIL && password === VALID_PASSWORD) {
-      onSuccess()
+    const ok = await login(email, password)
+    if (ok) {
+      dispatch({ type: 'LOGIN_COMPLETED' })
     } else {
       setError(t('booking.login.error'))
     }
@@ -59,7 +60,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             type="email"
             value={email}
             onChange={handleEmailChange}
-            placeholder="user123"
+            placeholder="demo@quetzal.com"
             aria-label={t('booking.login.email')}
           />
         </div>
