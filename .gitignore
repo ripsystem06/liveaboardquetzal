@@ -25,3 +25,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SDD artifacts
+.atl/
+openspec/specs/
+
+# pnpm
+.pnpmrc.json
+pnpm-workspace.yaml
+
+# documents
+*.docx
+*.pdf
+.~lock.*
