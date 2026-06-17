@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-import { renderWithProviders, screen } from '@/test-utils'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { renderWithProviders, screen, routerPushMock } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { CruiseCard } from './cruise-card'
 import type { Cruise } from './booking-page-client'
@@ -14,6 +14,10 @@ const mockCruise: Cruise = {
 }
 
 describe('CruiseCard', () => {
+  beforeEach(() => {
+    routerPushMock.mockClear()
+  })
+
   it('renders cruise name, route, date parts, and price', () => {
     const onSelect = vi.fn()
     renderWithProviders(<CruiseCard cruise={mockCruise} onSelect={onSelect} />)
@@ -57,5 +61,23 @@ describe('CruiseCard', () => {
     renderWithProviders(<CruiseCard cruise={mockCruise} onSelect={onSelect} isSelected={false} />)
 
     expect(screen.getByRole('button', { name: /select/i })).toBeInTheDocument()
+  })
+
+  it('renders "Sign in" button when isLoginRequired is true', () => {
+    const onSelect = vi.fn()
+    renderWithProviders(<CruiseCard cruise={mockCruise} onSelect={onSelect} isLoginRequired />)
+
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
+  })
+
+  it('does not call onSelect and redirects when clicking sign-in button', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    renderWithProviders(<CruiseCard cruise={mockCruise} onSelect={onSelect} isLoginRequired />)
+
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+
+    expect(onSelect).not.toHaveBeenCalled()
+    expect(routerPushMock).toHaveBeenCalledWith('/booking?step=1')
   })
 })

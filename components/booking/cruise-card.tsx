@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Anchor, ShipWheel, ChevronRight } from 'lucide-react'
 import type { Cruise } from './booking-page-client'
+import { useRouter } from 'next/navigation'
 
 interface CruiseCardProps {
   cruise: Cruise
   onSelect: (cruise: Cruise) => void
   isSelected?: boolean
+  isLoginRequired?: boolean
 }
 
 const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -25,11 +27,20 @@ function parseDate(dateStr: string) {
   }
 }
 
-export function CruiseCard({ cruise, onSelect, isSelected = false }: CruiseCardProps) {
+export function CruiseCard({ cruise, onSelect, isSelected = false, isLoginRequired = false }: CruiseCardProps) {
   const { t, language } = useLanguage()
+  const router = useRouter()
   const { day, monthIndex, year, dayStr } = parseDate(cruise.departureDate)
   const months = language === 'es' ? MONTHS_ES : MONTHS_EN
   const monthName = months[monthIndex]
+
+  const handleButtonClick = () => {
+    if (isLoginRequired) {
+      router.push('/booking?step=1')
+    } else {
+      onSelect(cruise)
+    }
+  }
 
   return (
     <div
@@ -106,7 +117,7 @@ export function CruiseCard({ cruise, onSelect, isSelected = false }: CruiseCardP
 
           {/* Select Button */}
           <Button
-            onClick={() => onSelect(cruise)}
+            onClick={handleButtonClick}
             className={cn(
               'rounded-full px-6 py-3 text-sm font-semibold transition',
               isSelected
@@ -114,7 +125,7 @@ export function CruiseCard({ cruise, onSelect, isSelected = false }: CruiseCardP
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
             )}
           >
-            {isSelected ? t('booking.cruise.selected') : t('booking.cruise.select')}
+            {isLoginRequired ? t('booking.cruise.signIn') : (isSelected ? t('booking.cruise.selected') : t('booking.cruise.select'))}
           </Button>
         </div>
       </div>

@@ -26,7 +26,8 @@ const translations = {
     'nav.contact': 'Contact',
     'nav.bookNow': 'Book Now',
     'nav.menu': 'Menu',
-    
+    'nav.signOut': 'Sign out',
+
     // Hero
     'hero.title': 'Quetzal',
     'hero.subtitle': 'THE GREATEST LIVEABOARD ADVENTURE IN THE OCEAN AWAITS YOU',
@@ -314,6 +315,7 @@ const translations = {
     'booking.login.invalid': 'Please enter a valid email address',
     'booking.cruise.title': 'Select Your Cruise',
     'booking.cruise.select': 'Select',
+    'booking.cruise.signIn': 'Sign in',
     'booking.cruise.selected': 'Selected',
     'booking.cruise.departure': 'Departure',
     'booking.cruise.route': 'Route',
@@ -368,6 +370,7 @@ const translations = {
     'nav.contact': 'Contacto',
     'nav.bookNow': 'Reservar',
     'nav.menu': 'Menú',
+    'nav.signOut': 'Cerrar sesión',
 
     // Hero
     'hero.title': 'Quetzal',
@@ -654,6 +657,7 @@ const translations = {
     'booking.login.invalid': 'Por favor ingresa una dirección de correo válida',
     'booking.cruise.title': 'Selecciona Tu Crucero',
     'booking.cruise.select': 'Seleccionar',
+    'booking.cruise.signIn': 'Inicia sesión',
     'booking.cruise.selected': 'Seleccionado',
     'booking.cruise.departure': 'Salida',
     'booking.cruise.route': 'Ruta',

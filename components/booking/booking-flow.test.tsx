@@ -149,4 +149,22 @@ describe('BookingFlow', () => {
 
     expect(screen.getByText(/booking confirmed/i)).toBeInTheDocument()
   })
+
+  it('shows sign-in buttons on step 2 when user is unauthenticated', () => {
+    const state: BookingState = { ...mockState, step: 2, loginCompleted: false }
+    renderWithProviders(
+      <BookingFlow
+        step={2}
+        isAuthenticated={false}
+        selectedCruise={null}
+        guestCount={1}
+        bookingConfirmed={false}
+        state={state}
+        dispatch={mockDispatch}
+      />
+    )
+
+    expect(screen.getByText(/select your cruise/i)).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /sign in/i })).toHaveLength(3)
+  })
 })

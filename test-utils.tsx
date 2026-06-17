@@ -14,10 +14,12 @@ vi.mock('next/image', () => ({
   },
 }))
 
-// Mock next/navigation
+// Mock next/navigation — push is exported so tests can assert redirects
+export const routerPushMock = vi.fn()
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: routerPushMock,
     replace: vi.fn(),
     back: vi.fn(),
   }),

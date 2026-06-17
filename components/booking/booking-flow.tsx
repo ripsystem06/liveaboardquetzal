@@ -1,7 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/contexts/language-context'
-import { useEffect, useRef } from 'react'
+import type { Dispatch } from 'react'
 import { Button } from '@/components/ui/button'
 import { LoginForm } from './login-form'
 import { CruiseCard } from './cruise-card'
@@ -18,7 +18,7 @@ interface BookingFlowProps {
   guestCount: number
   bookingConfirmed: boolean
   state: BookingState
-  dispatch: React.Dispatch<BookingAction>
+  dispatch: Dispatch<BookingAction>
 }
 
 export function BookingFlow({
@@ -31,16 +31,6 @@ export function BookingFlow({
   dispatch,
 }: BookingFlowProps) {
   const { t } = useLanguage()
-
-  const didAutoAdvance = useRef(false)
-
-  // Auto-advance past login for returning users (only once, not after GO_BACK)
-  useEffect(() => {
-    if (!didAutoAdvance.current && isAuthenticated && step === 1 && !state.loginCompleted) {
-      didAutoAdvance.current = true
-      dispatch({ type: 'LOGIN_COMPLETED' })
-    }
-  }, [isAuthenticated, step, state.loginCompleted, dispatch])
 
   const handleCruiseSelect = (cruise: Cruise) => {
     dispatch({ type: 'SELECT_CRUISE', cruise })
@@ -131,6 +121,7 @@ export function BookingFlow({
                 cruise={cruise}
                 onSelect={handleCruiseSelect}
                 isSelected={selectedCruise?.id === cruise.id}
+                isLoginRequired={!isAuthenticated}
               />
             ))}
           </div>
