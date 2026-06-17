@@ -9,17 +9,14 @@ import { TestimonialsSection } from '@/components/testimonials-section'
 import { ScrollGallery } from '@/components/scroll-gallery'
 import { ContactFormSection } from '@/components/contact-form-section'
 import { Footer } from '@/components/footer'
-import { PerspectiveTransition } from '@/components/perspective-transition'
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <Navigation />
-      <PerspectiveTransition
-        first={<Hero />}
-        second={<DestinationSection />}
-      />
+      <Hero />
       <ExperienceSection />
+      <DestinationSection />
       <MarineLifeSection />
       <DestinationsGrid />
       <UpcomingTripsSlider />

@@ -8,10 +8,10 @@ import { useLanguage } from '@/contexts/language-context'
 export function DestinationSection() {
   const { t } = useLanguage()
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-[500px] w-full overflow-hidden">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
         style={{
           backgroundImage: 'url(https://solmarv.com/wp-content/uploads/2025/10/ASDADSASD.png)',
         }}
