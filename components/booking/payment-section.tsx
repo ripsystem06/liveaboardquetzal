@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { CreditCard, Building2, Wallet } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
-import { Button } from '@/components/ui/button'
 import type { Cruise } from './booking-page-client'
 
 interface PaymentSectionProps {
@@ -28,64 +27,60 @@ export function PaymentSection({ cruise, guestCount, onPay }: PaymentSectionProp
   }
 
   return (
-    <div className="space-y-6">
-      {/* Summary */}
-      <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h3 className="text-xl font-serif text-primary">{t('booking.payment.summary')}</h3>
+    <div className="space-y-8">
+      {/* Summary Card */}
+      <div className="rounded-2xl bg-card p-8 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)]">
+        <h3 className="text-xl font-serif font-bold text-primary mb-6 text-balance">{t('booking.payment.summary')}</h3>
 
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">{t('booking.payment.cruise')}:</span>
-            <span className="font-medium text-primary">{cruise.name}</span>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t('booking.payment.cruise')}</span>
+            <span className="text-sm font-semibold text-primary">{cruise.name}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">{t('booking.payment.guests')}:</span>
-            <span className="font-medium text-primary">{guestCount}</span>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t('booking.payment.guests')}</span>
+            <span className="text-sm font-semibold text-primary">{guestCount}</span>
           </div>
-          <div className="flex justify-between border-t pt-2 mt-2">
-            <span className="font-medium text-primary">{t('booking.payment.total')}:</span>
-            <span className="font-serif text-xl text-accent">${total.toLocaleString()}</span>
+          <div className="flex justify-between items-center pt-4 border-t border-border">
+            <span className="text-base font-semibold text-primary">{t('booking.payment.total')}</span>
+            <span className="font-serif text-2xl font-bold text-accent tabular-nums">${total.toLocaleString()}</span>
           </div>
         </div>
       </div>
 
-      {/* Payment Buttons */}
+      {/* Payment Methods */}
       <div className="space-y-3">
-        <Button
-          onClick={() => handlePay('card')}
-          disabled={isProcessing}
-          className="w-full bg-secondary hover:bg-secondary/90"
-          size="lg"
-        >
-          <CreditCard className="h-4 w-4 mr-2" />
-          {t('booking.payment.payWithCard')}
-        </Button>
+        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4">
+          {t('booking.payment.payWithCard') ? 'Payment Method' : ''}
+        </p>
 
-        <Button
-          onClick={() => handlePay('paypal')}
-          disabled={isProcessing}
-          variant="outline"
-          className="w-full"
-          size="lg"
-        >
-          <Wallet className="h-4 w-4 mr-2" />
-          {t('booking.payment.payWithPaypal')}
-        </Button>
-
-        <Button
-          onClick={() => handlePay('bank')}
-          disabled={isProcessing}
-          variant="outline"
-          className="w-full"
-          size="lg"
-        >
-          <Building2 className="h-4 w-4 mr-2" />
-          {t('booking.payment.payWithBank')}
-        </Button>
+        {[
+          { method: 'card' as const, icon: CreditCard, label: t('booking.payment.payWithCard') },
+          { method: 'paypal' as const, icon: Wallet, label: t('booking.payment.payWithPaypal') },
+          { method: 'bank' as const, icon: Building2, label: t('booking.payment.payWithBank') },
+        ].map(({ method, icon: Icon, label }) => (
+          <button
+            key={method}
+            onClick={() => handlePay(method)}
+            disabled={isProcessing}
+            className="flex w-full items-center gap-4 rounded-2xl border-2 border-border bg-card px-6 py-5 text-left transition-all hover:border-accent/40 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+          >
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-accent/10">
+              <Icon className="size-6 text-accent" />
+            </div>
+            <span className="text-base font-semibold text-primary">{label}</span>
+            <svg className="ml-auto size-5 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        ))}
       </div>
 
       {isProcessing && (
-        <p className="text-center text-muted-foreground">{t('booking.payment.confirming')}</p>
+        <div className="flex items-center justify-center gap-3 py-6">
+          <div className="size-5 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+          <p className="text-sm text-muted-foreground">{t('booking.payment.confirming')}</p>
+        </div>
       )}
     </div>
   )

@@ -58,14 +58,14 @@ export function BookingFlow({
   if (bookingConfirmed) {
     return (
       <div className="max-w-md mx-auto p-6 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="rounded-full bg-green-100 p-4">
-            <Check className="h-12 w-12 text-green-600" />
+        <div className="flex justify-center mb-6">
+          <div className="flex size-20 items-center justify-center rounded-full bg-accent/10">
+            <Check className="size-10 text-accent" />
           </div>
         </div>
-        <h2 className="text-2xl font-serif text-primary mb-4">{t('booking.confirmation.title')}</h2>
-        <p className="text-muted-foreground mb-6">{t('booking.confirmation.message')}</p>
-        <Button asChild className="bg-secondary hover:bg-secondary/90">
+        <h2 className="text-3xl font-serif font-bold text-primary mb-3 text-balance">{t('booking.confirmation.title')}</h2>
+        <p className="text-muted-foreground mb-8 text-pretty">{t('booking.confirmation.message')}</p>
+        <Button asChild className="rounded-full px-8 py-3 bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform">
           <Link href="/">{t('booking.confirmation.backHome')}</Link>
         </Button>
       </div>
@@ -75,21 +75,21 @@ export function BookingFlow({
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       {/* Step Indicator */}
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-2 mb-4">
         {[1, 2, 3].map((s, index) => (
           <div key={s} className="flex items-center">
             <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-colors ${
+              className={`flex size-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
                 step >= s
-                  ? 'bg-accent text-accent-foreground'
+                  ? 'bg-accent text-accent-foreground shadow-sm'
                   : 'bg-muted text-muted-foreground'
               }`}
             >
-              {            step > s ? <Check className="h-5 w-5" /> : s}
+              {step > s ? <Check className="size-5" /> : s}
             </div>
             {index < 2 && (
               <div
-                className={`w-16 h-1 mx-2 ${
+                className={`w-12 h-0.5 mx-1 rounded-full transition-colors duration-300 ${
                   step > s ? 'bg-accent' : 'bg-muted'
                 }`}
               />

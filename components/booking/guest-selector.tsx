@@ -2,7 +2,6 @@
 
 import { Minus, Plus } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
-import { Button } from '@/components/ui/button'
 
 interface GuestSelectorProps {
   value: number
@@ -28,31 +27,29 @@ export function GuestSelector({ value, onChange }: GuestSelectorProps) {
   }
 
   return (
-    <div className="flex items-center justify-center gap-4">
-      <Button
-        variant="outline"
-        size="icon"
+    <div className="flex items-center justify-center gap-6">
+      <button
         onClick={handleDecrement}
         disabled={!canDecrement}
         aria-label={t('booking.guest.decrement')}
+        className="flex size-10 items-center justify-center rounded-full border-2 border-border text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
       >
-        <Minus className="h-4 w-4" />
-      </Button>
+        <Minus className="size-4" />
+      </button>
 
       <div className="flex flex-col items-center min-w-[80px]">
-        <span className="text-3xl font-serif text-primary">{value}</span>
-        <span className="text-sm text-muted-foreground">{t('booking.guest.label')}</span>
+        <span className="text-4xl font-serif font-bold text-primary tabular-nums">{value}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-1">{t('booking.guest.label')}</span>
       </div>
 
-      <Button
-        variant="outline"
-        size="icon"
+      <button
         onClick={handleIncrement}
         disabled={!canIncrement}
         aria-label={t('booking.guest.increment')}
+        className="flex size-10 items-center justify-center rounded-full border-2 border-border text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
       >
-        <Plus className="h-4 w-4" />
-      </Button>
+        <Plus className="size-4" />
+      </button>
     </div>
   )
 }

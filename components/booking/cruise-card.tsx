@@ -45,14 +45,16 @@ export function CruiseCard({ cruise, onSelect, isSelected = false, isLoginRequir
   return (
     <div
       className={cn(
-        'w-full rounded-2xl border bg-card px-6 py-5 shadow-sm transition-all',
+        'group w-full rounded-2xl bg-card px-6 py-5 transition-all duration-300',
+        'shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)]',
+        'hover:shadow-[0_4px_16px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.04)] hover:-translate-y-0.5',
         isSelected
-          ? 'border-accent ring-1 ring-accent/30'
-          : 'border-border hover:border-secondary/30'
+          ? 'ring-2 ring-accent/40 shadow-[0_4px_16px_rgba(0,0,0,0.10)]'
+          : ''
       )}
     >
       {/* Month / Year Header */}
-      <div className="mb-4 text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+      <div className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
         {monthName} {year}
       </div>
 
@@ -61,7 +63,7 @@ export function CruiseCard({ cruise, onSelect, isSelected = false, isLoginRequir
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           {/* Big Departure Date */}
           <div className="flex items-start gap-1.5">
-            <span className="text-5xl font-bold leading-none text-primary">
+            <span className="text-5xl font-bold leading-none text-primary tabular-nums">
               {dayStr}
             </span>
             <div className="mt-1.5 flex flex-col leading-none">
@@ -74,27 +76,31 @@ export function CruiseCard({ cruise, onSelect, isSelected = false, isLoginRequir
 
           {/* Cruise Details */}
           <div className="flex flex-col gap-2">
-            <h2 className="text-xl font-serif font-bold text-primary sm:text-2xl">
+            <h2 className="text-xl font-serif font-bold text-primary sm:text-2xl text-balance">
               {cruise.name}
             </h2>
 
             <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
               {cruise.boat && (
                 <div className="flex items-center gap-1.5">
-                  <ShipWheel size={16} className="text-secondary" />
+                  <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
+                    <ShipWheel size={14} className="text-accent" />
+                  </div>
                   <span className="text-sm font-medium">{cruise.boat}</span>
                 </div>
               )}
 
               <div className="flex items-center gap-1.5">
-                <Anchor size={16} className="text-secondary" />
+                <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
+                  <Anchor size={14} className="text-accent" />
+                </div>
                 <span className="text-sm font-medium">{cruise.route}</span>
               </div>
             </div>
 
-            <button className="mt-0.5 flex w-fit items-center gap-1 text-sm font-semibold text-secondary transition hover:text-secondary/80">
+            <button className="mt-0.5 flex w-fit items-center gap-1 text-sm font-semibold text-accent transition hover:text-accent/80">
               {t('booking.cruise.tripDetails')}
-              <ChevronRight size={15} />
+              <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
         </div>
@@ -103,13 +109,13 @@ export function CruiseCard({ cruise, onSelect, isSelected = false, isLoginRequir
         <div className="flex flex-col items-end gap-3">
           {/* Price */}
           <div className="text-right">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">
+            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
               {t('booking.cruise.pricePerPerson')}
             </div>
 
-            <div className="flex items-start gap-1">
-              <span className="mt-1 text-sm font-semibold text-primary">USD</span>
-              <span className="text-5xl font-bold tracking-tight text-primary">
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-semibold text-muted-foreground">USD</span>
+              <span className="text-4xl font-bold tracking-tight text-primary tabular-nums">
                 {cruise.pricePerPerson.toLocaleString()}
               </span>
             </div>
@@ -119,10 +125,12 @@ export function CruiseCard({ cruise, onSelect, isSelected = false, isLoginRequir
           <Button
             onClick={handleButtonClick}
             className={cn(
-              'rounded-full px-6 py-3 text-sm font-semibold transition',
+              'rounded-full px-6 py-3 text-sm font-semibold transition-all active:scale-[0.96]',
               isSelected
                 ? 'bg-accent text-accent-foreground hover:bg-accent/90'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
+                : isLoginRequired
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
             )}
           >
             {isLoginRequired ? t('booking.cruise.signIn') : (isSelected ? t('booking.cruise.selected') : t('booking.cruise.select'))}
