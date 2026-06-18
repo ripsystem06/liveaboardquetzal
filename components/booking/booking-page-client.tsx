@@ -1,6 +1,6 @@
 'use client'
 
-import { useReducer } from 'react'
+import { useReducer, useEffect } from 'react'
 import { useUser } from '@/contexts/user-context'
 import { BookingFlow } from './booking-flow'
 
@@ -42,6 +42,7 @@ export type BookingAction =
   | { type: 'GO_BACK' }
   | { type: 'CONFIRM_PAYMENT' }
   | { type: 'LOGIN_COMPLETED' }
+  | { type: 'RESET_TO_LOGIN' }
 
 export function bookingReducer(state: BookingState, action: BookingAction): BookingState {
   switch (action.type) {
@@ -72,14 +73,26 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
       return { ...state, bookingConfirmed: true }
     case 'LOGIN_COMPLETED':
       return { ...state, loginCompleted: true, step: 2 }
+    case 'RESET_TO_LOGIN':
+      return { ...initialBookingState, step: 1 }
     default:
       return state
   }
 }
 
 export function BookingPageClient() {
-  const [state, dispatch] = useReducer(bookingReducer, initialBookingState)
   const { isAuthenticated } = useUser()
+  const [state, dispatch] = useReducer(bookingReducer, {
+    ...initialBookingState,
+    step: isAuthenticated ? 2 : 1,
+  })
+
+  // Reset to login step when user logs out while on a later step
+  useEffect(() => {
+    if (!isAuthenticated && state.step > 1) {
+      dispatch({ type: 'RESET_TO_LOGIN' })
+    }
+  }, [isAuthenticated, state.step])
 
   return (
     <div className="min-h-screen bg-[#f3f1ec]">

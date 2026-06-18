@@ -5,10 +5,14 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/contexts/language-context'
+import { useUser } from '@/contexts/user-context'
 
 export function UpcomingTripsSlider() {
   const { t } = useLanguage()
+  const router = useRouter()
+  const { isAuthenticated } = useUser()
   
   const trips = [
     {
@@ -91,16 +95,27 @@ export function UpcomingTripsSlider() {
                 <p className="font-sans text-xl md:text-2xl mb-8 font-bold">
                   {trip.price}
                 </p>
-                <Button 
-                  asChild
-                  size="lg"
-                  className="bg-white text-primary hover:bg-white/90 font-sans font-semibold"
-                >
-                  <Link href="/contacto?subject=booking">
-                    {t('trips.details')}
+                {isAuthenticated ? (
+                  <Button 
+                    asChild
+                    size="lg"
+                    className="bg-white text-primary hover:bg-white/90 font-sans font-semibold"
+                  >
+                    <Link href="/booking">
+                      {t('booking.cruise.select')}
+                      <ChevronRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button 
+                    size="lg"
+                    onClick={() => router.push('/booking?step=1')}
+                    className="bg-white text-primary hover:bg-white/90 font-sans font-semibold"
+                  >
+                    {t('booking.cruise.signIn')}
                     <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
+                  </Button>
+                )}
               </div>
             </div>
           </div>
