@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, Calendar, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,12 +23,18 @@ import { useScrollDirection } from '@/hooks/use-scroll-direction'
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { language, setLanguage, t } = useLanguage()
   const { isAuthenticated, logout } = useUser()
   const { direction, isPastThreshold } = useScrollDirection(50)
   const isCompactDesktop = direction === 'down' && isPastThreshold
   const pathname = usePathname()
-  const hideBookNow = isAuthenticated && pathname === '/booking'
+
+  useEffect(() => { setMounted(true) }, [])
+
+  // Defer auth-dependent UI until after hydration to avoid Radix ID mismatches
+  const showAuthUI = mounted && isAuthenticated
+  const hideBookNow = mounted && isAuthenticated && pathname === '/booking'
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-sm border-b border-primary/20 transition-all duration-300">
@@ -125,7 +131,7 @@ export function Navigation() {
 
           {/* CTA Button & Language Switcher */}
           <div className={`hidden lg:flex items-center gap-3 transition-all duration-300 ${isCompactDesktop ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
-            {isAuthenticated && (
+            {showAuthUI && (
               <>
                 <Button asChild size="sm" variant="outline" className="border-accent text-accent-foreground hover:bg-accent/10 whitespace-nowrap gap-2">
                   <Link href="/account">My Account</Link>
@@ -207,7 +213,7 @@ export function Navigation() {
                     {t('nav.contact')}
                   </Link>
                   <div className="flex items-center justify-center gap-3 pt-4 border-t border-primary-foreground/20">
-                    {isAuthenticated && (
+                    {showAuthUI && (
                       <>
                         <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
                           <Link href="/account">My Account</Link>
@@ -298,7 +304,7 @@ export function Navigation() {
             
             {/* Mobile Language & Calendar */}
             <div className="flex items-center justify-center gap-3 pt-4">
-              {isAuthenticated && (
+              {showAuthUI && (
                 <>
                   <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
                     <Link href="/account" onClick={() => setIsOpen(false)}>My Account</Link>
