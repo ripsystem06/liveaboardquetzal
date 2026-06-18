@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/account',
 }))
 
-// Mock localStorage
+// Mock localStorage and sessionStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {}
   return {
@@ -23,19 +23,31 @@ const localStorageMock = (() => {
   }
 })()
 
+const sessionStorageMock = (() => {
+  let store: Record<string, string> = {}
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value },
+    removeItem: (key: string) => { delete store[key] },
+    clear: () => { store = {} },
+  }
+})()
+
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock })
 
 describe('app/account/page', () => {
   beforeEach(() => {
     localStorageMock.clear()
+    sessionStorageMock.clear()
     replaceMock.mockClear()
   })
 
   describe('authenticated access', () => {
     it('renders account page when user is authenticated', async () => {
-      // Pre-populate localStorage with user data
+      // Pre-populate sessionStorage with user data
       const userData = { id: '1', name: 'Test User', email: 'test@example.com', phone: '+1 555 0100' }
-      localStorageMock.setItem('quetzal_user', JSON.stringify(userData))
+      sessionStorageMock.setItem('quetzal_user', JSON.stringify(userData))
 
       renderWithProviders(<AccountPageClient />)
 

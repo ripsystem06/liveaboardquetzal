@@ -27,10 +27,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined)
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
 
-  // Restore session from localStorage on mount
+  // Restore session from sessionStorage on mount (survives refresh, dies on tab close)
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('quetzal_user')
+      const stored = sessionStorage.getItem('quetzal_user')
       if (stored !== null) {
         const parsed = JSON.parse(stored) as User
         setUser(parsed)
@@ -43,7 +43,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     if (email === VALID_EMAIL && password === VALID_PASSWORD) {
       setUser(MOCK_USER)
-      localStorage.setItem('quetzal_user', JSON.stringify(MOCK_USER))
+      sessionStorage.setItem('quetzal_user', JSON.stringify(MOCK_USER))
       return true
     }
     return false
@@ -51,14 +51,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('quetzal_user')
+    sessionStorage.removeItem('quetzal_user')
   }
 
   const updateProfile = (data: { name?: string; phone?: string }) => {
     if (user === null) return
     const updated = { ...user, ...data }
     setUser(updated)
-    localStorage.setItem('quetzal_user', JSON.stringify(updated))
+    sessionStorage.setItem('quetzal_user', JSON.stringify(updated))
   }
 
   return (

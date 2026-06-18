@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { UserProvider, useUser } from '@/contexts/user-context'
 
-// Mock localStorage
+// Mock localStorage and sessionStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {}
   return {
@@ -13,7 +13,18 @@ const localStorageMock = (() => {
   }
 })()
 
+const sessionStorageMock = (() => {
+  let store: Record<string, string> = {}
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value },
+    removeItem: (key: string) => { delete store[key] },
+    clear: () => { store = {} },
+  }
+})()
+
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock })
 
 // Helper to wrap hook with provider
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -23,6 +34,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('useUser', () => {
   beforeEach(() => {
     localStorageMock.clear()
+    sessionStorageMock.clear()
   })
 
   describe('login', () => {
@@ -92,10 +104,10 @@ describe('useUser', () => {
   })
 
   describe('session restore on mount', () => {
-    it('restores session from localStorage when valid data exists', async () => {
-      // Pre-populate localStorage with user data
+    it('restores session from sessionStorage when valid data exists', async () => {
+      // Pre-populate sessionStorage with user data
       const userData = { id: '1', name: 'Demo User', email: 'demo@quetzal.com', phone: '+1 555 0100' }
-      localStorageMock.setItem('quetzal_user', JSON.stringify(userData))
+      sessionStorageMock.setItem('quetzal_user', JSON.stringify(userData))
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
@@ -105,7 +117,7 @@ describe('useUser', () => {
       expect(result.current.user).toEqual(userData)
     })
 
-    it('does not restore session when localStorage has no data', async () => {
+    it('does not restore session when sessionStorage has no data', async () => {
       const { result } = renderHook(() => useUser(), { wrapper })
 
       await waitFor(() => {
