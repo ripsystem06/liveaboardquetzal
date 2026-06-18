@@ -19,7 +19,7 @@ export default function BookingPage() {
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent/0 via-accent/40 to-accent/0" />
         <div className="container mx-auto px-4 lg:px-8 text-center relative">
           <p className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-4">
-            {t('booking.steps.login')}
+            Expeditions
           </p>
           <h1 className="font-serif text-4xl md:text-5xl font-normal text-foreground mb-4 text-balance">
             Book Your Expedition
