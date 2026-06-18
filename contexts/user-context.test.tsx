@@ -83,6 +83,38 @@ describe('useUser', () => {
     })
   })
 
+  describe('register', () => {
+    it('creates a new user and sets authenticated state', async () => {
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      let newUser: { id: string; name: string; email: string; phone: string } | undefined
+      await act(async () => {
+        newUser = await result.current.register('Jane Doe', 'jane@example.com', 'password123')
+      })
+
+      expect(newUser).toBeDefined()
+      expect(newUser!.name).toBe('Jane Doe')
+      expect(newUser!.email).toBe('jane@example.com')
+      expect(newUser!.phone).toBe('')
+      expect(result.current.isAuthenticated).toBe(true)
+      expect(result.current.user).toEqual(newUser)
+    })
+
+    it('persists registered user to sessionStorage', async () => {
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      await act(async () => {
+        await result.current.register('Jane Doe', 'jane@example.com', 'password123')
+      })
+
+      const stored = sessionStorageMock.getItem('quetzal_user')
+      expect(stored).not.toBeNull()
+      const parsed = JSON.parse(stored!)
+      expect(parsed.name).toBe('Jane Doe')
+      expect(parsed.email).toBe('jane@example.com')
+    })
+  })
+
   describe('logout', () => {
     it('clears user state when logout is called', async () => {
       const { result } = renderHook(() => useUser(), { wrapper })

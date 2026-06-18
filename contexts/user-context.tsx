@@ -8,6 +8,7 @@ interface UserContextType {
   user: User | null
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<User>
   logout: () => void
   updateProfile: (data: { name?: string; phone?: string }) => void
 }
@@ -40,6 +41,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const register = async (name: string, email: string, password: string): Promise<User> => {
+    // Mock: generate id from email hash, empty phone
+    const newUser: User = {
+      id: `user-${btoa(email).slice(0, 8)}`,
+      name,
+      email,
+      phone: '',
+    }
+    setUser(newUser)
+    sessionStorage.setItem('quetzal_user', JSON.stringify(newUser))
+    return newUser
+  }
+
   const login = async (email: string, password: string): Promise<boolean> => {
     if (email === VALID_EMAIL && password === VALID_PASSWORD) {
       setUser(MOCK_USER)
@@ -67,6 +81,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         user,
         isAuthenticated: user !== null,
         login,
+        register,
         logout,
         updateProfile,
       }}

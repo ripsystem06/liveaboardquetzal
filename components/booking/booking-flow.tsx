@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useLanguage } from '@/contexts/language-context'
 import type { Dispatch } from 'react'
 import { Button } from '@/components/ui/button'
 import { LoginForm } from './login-form'
+import { RegisterForm } from './register-form'
 import { CruiseCard } from './cruise-card'
 import { GuestSelector } from './guest-selector'
 import { PaymentSection } from './payment-section'
@@ -31,6 +33,7 @@ export function BookingFlow({
   dispatch,
 }: BookingFlowProps) {
   const { t } = useLanguage()
+  const [authTab, setAuthTab] = useState<'login' | 'register'>('login')
 
   const handleCruiseSelect = (cruise: Cruise) => {
     dispatch({ type: 'SELECT_CRUISE', cruise })
@@ -105,7 +108,37 @@ export function BookingFlow({
 
       {/* Step Content */}
       {step === 1 && (
-        <LoginForm dispatch={dispatch} />
+        <div className="max-w-md mx-auto">
+          {/* Auth Tabs */}
+          <div className="flex border-b border-border mb-6">
+            <button
+              onClick={() => setAuthTab('login')}
+              className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 ${
+                authTab === 'login'
+                  ? 'border-accent text-accent'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t('booking.register.loginTab')}
+            </button>
+            <button
+              onClick={() => setAuthTab('register')}
+              className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 ${
+                authTab === 'register'
+                  ? 'border-accent text-accent'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t('booking.register.registerTab')}
+            </button>
+          </div>
+
+          {authTab === 'login' ? (
+            <LoginForm dispatch={dispatch} />
+          ) : (
+            <RegisterForm dispatch={dispatch} />
+          )}
+        </div>
       )}
 
       {step === 2 && (
