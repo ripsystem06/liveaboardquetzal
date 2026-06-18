@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ChevronDown, Calendar, LogOut } from 'lucide-react'
@@ -26,6 +27,8 @@ export function Navigation() {
   const { isAuthenticated, logout } = useUser()
   const { direction, isPastThreshold } = useScrollDirection(50)
   const isCompactDesktop = direction === 'down' && isPastThreshold
+  const pathname = usePathname()
+  const hideBookNow = isAuthenticated && pathname === '/booking'
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-sm border-b border-primary/20 transition-all duration-300">
@@ -127,14 +130,16 @@ export function Navigation() {
                 <Button asChild size="sm" variant="outline" className="border-accent text-accent-foreground hover:bg-accent/10 whitespace-nowrap gap-2">
                   <Link href="/account">My Account</Link>
                 </Button>
-                <Button size="sm" variant="ghost" onClick={logout} className="text-muted-foreground hover:text-destructive whitespace-nowrap gap-2">
-                  <LogOut className="h-4 w-4" />{t('nav.signOut')}
+                <Button size="icon-sm" onClick={logout} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </>
             )}
-<Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2">
+            {!hideBookNow && (
+              <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2">
                 <Link href="/booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
               </Button>
+            )}
             <button
               onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
               className="flex items-center justify-center w-10 h-10 hover:scale-110 transition-transform cursor-pointer rounded-full border-2 border-white/20 hover:border-accent bg-white/10"
@@ -207,14 +212,16 @@ export function Navigation() {
                         <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
                           <Link href="/account">My Account</Link>
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={logout} className="text-muted-foreground hover:text-destructive gap-2">
-                          <LogOut className="h-4 w-4" />{t('nav.signOut')}
+                        <Button size="icon-sm" onClick={logout} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
+                          <LogOut className="h-4 w-4" />
                         </Button>
                       </>
                     )}
-                    <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
-                      <Link href="/booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
-                    </Button>
+                    {!hideBookNow && (
+                      <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
+                        <Link href="/booking"><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
+                      </Button>
+                    )}
                     <button
                       onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
                       className="flex items-center justify-center w-10 h-10 hover:scale-110 transition-transform cursor-pointer rounded-full border-2 border-white/20 hover:border-accent bg-white/10"
@@ -296,14 +303,16 @@ export function Navigation() {
                   <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
                     <Link href="/account" onClick={() => setIsOpen(false)}>My Account</Link>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => { logout(); setIsOpen(false) }} className="text-muted-foreground hover:text-destructive gap-2">
-                    <LogOut className="h-4 w-4" />{t('nav.signOut')}
+                  <Button size="icon-sm" onClick={() => { logout(); setIsOpen(false) }} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
+                    <LogOut className="h-4 w-4" />
                   </Button>
                 </>
               )}
-              <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
-                <Link href="/booking" onClick={() => setIsOpen(false)}><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
-              </Button>
+              {!hideBookNow && (
+                <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
+                  <Link href="/booking" onClick={() => setIsOpen(false)}><Calendar className="h-4 w-4" />{t('nav.bookNow')}</Link>
+                </Button>
+              )}
               <button
                 onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
                 className="flex items-center justify-center w-12 h-12 hover:scale-110 transition-transform cursor-pointer rounded-full border-2 border-white/20 hover:border-accent bg-white/10"
