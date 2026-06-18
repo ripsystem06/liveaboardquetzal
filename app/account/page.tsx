@@ -14,15 +14,8 @@ export default function AccountPage() {
       <Navigation />
 
       {/* Header */}
-      <section className="pt-32 pb-12 bg-muted/30">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl font-normal text-foreground mb-4">
-            My Account
-          </h1>
-          <p className="font-sans text-lg text-muted-foreground max-w-2xl mx-auto">
-            Manage your profile information and view your reservation history.
-          </p>
-        </div>
+      <section className="relative pt-32 pb-4 bg-muted/30 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent/0 via-accent/40 to-accent/0" />
       </section>
 
       {/* Account Content */}

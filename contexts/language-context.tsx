@@ -354,6 +354,7 @@ const translations = {
 
     // Account Page
     'account.title': 'My Account',
+    'account.welcome': 'Welcome, {name}',
     'account.profile': 'Profile',
     'account.reservations': 'Reservation History',
     'account.save': 'Save',
@@ -706,6 +707,7 @@ const translations = {
 
     // Account Page
     'account.title': 'Mi Cuenta',
+    'account.welcome': 'Bienvenido, {name}',
     'account.profile': 'Perfil',
     'account.reservations': 'Historial de Reservas',
     'account.save': 'Guardar',
