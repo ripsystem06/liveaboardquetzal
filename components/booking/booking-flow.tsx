@@ -109,24 +109,24 @@ export function BookingFlow({
       {/* Step Content */}
       {step === 1 && (
         <div className="max-w-md mx-auto">
-          {/* Auth Tabs */}
-          <div className="flex border-b border-border mb-6">
+          {/* Auth Tabs — pill style */}
+          <div className="flex gap-1 p-1 bg-muted/50 rounded-full mb-8">
             <button
               onClick={() => setAuthTab('login')}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 ${
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${
                 authTab === 'login'
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                  ? 'bg-accent text-accent-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {t('booking.register.loginTab')}
             </button>
             <button
               onClick={() => setAuthTab('register')}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 ${
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${
                 authTab === 'register'
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                  ? 'bg-accent text-accent-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {t('booking.register.registerTab')}

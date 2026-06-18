@@ -47,12 +47,19 @@ export function LoginForm({ dispatch }: LoginFormProps) {
   }
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h2 className="text-2xl font-serif text-primary mb-6">{t('booking.login.title')}</h2>
+    <div className="rounded-2xl bg-card p-8 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)]">
+      <div className="text-center mb-8">
+        <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-accent/10">
+          <svg className="size-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-serif text-primary text-balance">{t('booking.login.title')}</h2>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <label htmlFor="login-email" className="text-sm font-medium text-primary">
+          <label htmlFor="login-email" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t('booking.login.email')}
           </label>
           <Input
@@ -62,11 +69,12 @@ export function LoginForm({ dispatch }: LoginFormProps) {
             onChange={handleEmailChange}
             placeholder="demo@quetzal.com"
             aria-label={t('booking.login.email')}
+            className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="login-password" className="text-sm font-medium text-primary">
+          <label htmlFor="login-password" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t('booking.login.password')}
           </label>
           <Input
@@ -76,16 +84,20 @@ export function LoginForm({ dispatch }: LoginFormProps) {
             onChange={handlePasswordChange}
             placeholder="******"
             aria-label={t('booking.login.password')}
+            className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
           />
         </div>
 
         {error && (
-          <p className="text-destructive text-sm" role="alert">
-            {error}
-          </p>
+          <div className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10" role="alert">
+            <svg className="mt-0.5 size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            <span>{error}</span>
+          </div>
         )}
 
-        <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90">
+        <Button type="submit" className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform">
           {t('booking.login.submit')}
         </Button>
       </form>
