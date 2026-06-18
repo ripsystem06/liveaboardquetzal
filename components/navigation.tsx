@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { ChevronDown, Calendar, LogOut } from 'lucide-react'
+import { ChevronDown, Calendar, LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -131,15 +131,14 @@ export function Navigation() {
 
           {/* CTA Button & Language Switcher */}
           <div className={`hidden lg:flex items-center gap-3 transition-all duration-300 ${isCompactDesktop ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
+            {/* Profile icon — always visible: /account when authenticated, /booking?step=1 (login) otherwise */}
+            <Button asChild size="icon-sm" className="bg-muted text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground" title={showAuthUI ? 'My Account' : t('booking.cruise.signIn')}>
+              <Link href={showAuthUI ? '/account' : '/booking?step=1'}><User className="h-4 w-4" /></Link>
+            </Button>
             {showAuthUI && (
-              <>
-                <Button asChild size="sm" variant="outline" className="border-accent text-accent-foreground hover:bg-accent/10 whitespace-nowrap gap-2">
-                  <Link href="/account">My Account</Link>
-                </Button>
-                <Button size="icon-sm" onClick={logout} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </>
+              <Button size="icon-sm" onClick={logout} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
+                <LogOut className="h-4 w-4" />
+              </Button>
             )}
             {!hideBookNow && (
               <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2">
@@ -213,15 +212,14 @@ export function Navigation() {
                     {t('nav.contact')}
                   </Link>
                   <div className="flex items-center justify-center gap-3 pt-4 border-t border-primary-foreground/20">
+                    {/* Profile icon — always visible */}
+                    <Button asChild size="icon-sm" className="bg-muted text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground" title={showAuthUI ? 'My Account' : t('booking.cruise.signIn')}>
+                      <Link href={showAuthUI ? '/account' : '/booking?step=1'}><User className="h-4 w-4" /></Link>
+                    </Button>
                     {showAuthUI && (
-                      <>
-                        <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
-                          <Link href="/account">My Account</Link>
-                        </Button>
-                        <Button size="icon-sm" onClick={logout} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
-                          <LogOut className="h-4 w-4" />
-                        </Button>
-                      </>
+                      <Button size="icon-sm" onClick={logout} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
+                        <LogOut className="h-4 w-4" />
+                      </Button>
                     )}
                     {!hideBookNow && (
                       <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
@@ -304,15 +302,14 @@ export function Navigation() {
             
             {/* Mobile Language & Calendar */}
             <div className="flex items-center justify-center gap-3 pt-4">
+              {/* Profile icon — always visible */}
+              <Button asChild size="icon-sm" className="bg-muted text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground" title={showAuthUI ? 'My Account' : t('booking.cruise.signIn')}>
+                <Link href={showAuthUI ? '/account' : '/booking?step=1'} onClick={() => setIsOpen(false)}><User className="h-4 w-4" /></Link>
+              </Button>
               {showAuthUI && (
-                <>
-                  <Button asChild variant="outline" className="flex-1 border-accent text-accent-foreground hover:bg-accent/10 font-semibold gap-2">
-                    <Link href="/account" onClick={() => setIsOpen(false)}>My Account</Link>
-                  </Button>
-                  <Button size="icon-sm" onClick={() => { logout(); setIsOpen(false) }} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </>
+                <Button size="icon-sm" onClick={() => { logout(); setIsOpen(false) }} className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive" title={t('nav.signOut')}>
+                  <LogOut className="h-4 w-4" />
+                </Button>
               )}
               {!hideBookNow && (
                 <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2">
