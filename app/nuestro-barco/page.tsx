@@ -79,10 +79,10 @@ export default function OurBoatPage() {
         <div className="px-[5vw]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
             {[
-              { src: '/images/specsship/vistaperfil.webp', label: 'Vista de Perfil' },
-              { src: '/images/specsship/cubiertaprincipal.webp', label: 'Cubierta Principal' },
-              { src: '/images/specsship/cubiertasuperior.webp', label: 'Cubierta Superior' },
-              { src: '/images/specsship/distribuciondefondo.webp', label: 'Distribución de Fondo' },
+              { src: '/images/specsship/vistaperfil.png', label: 'Vista de Perfil' },
+              { src: '/images/specsship/cubiertaprincipal.png', label: 'Cubierta Principal' },
+              { src: '/images/specsship/cubiertasuperior.png', label: 'Cubierta Superior' },
+              { src: '/images/specsship/distribuciondefondo.png', label: 'Distribución de Fondo' },
             ].map((plan) => (
               <div key={plan.src} className="relative">
                 <Image
