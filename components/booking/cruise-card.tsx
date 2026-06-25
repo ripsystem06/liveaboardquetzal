@@ -3,9 +3,11 @@
 import { useLanguage } from '@/contexts/language-context'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Anchor, ShipWheel, ChevronRight, Fish, CalendarArrowDown } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import type { Cruise } from './booking-page-client'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { TripDetailsModal } from './trip-details-modal'
 
 interface CruiseCardProps {
   cruise: Cruise
@@ -40,6 +42,7 @@ function getEmbarkationDate(departureDate: string, language: string): string {
 export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false, isLoginRequired = false, selectedTier = null }: CruiseCardProps) {
   const { t, language } = useLanguage()
   const router = useRouter()
+  const [showDetails, setShowDetails] = useState(false)
   const { day, monthIndex, year, dayStr } = parseDate(cruise.departureDate)
   const months = language === 'es' ? MONTHS_ES : MONTHS_EN
   const monthName = months[monthIndex]
@@ -106,47 +109,16 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
             </span>
           </div>
 
-          {/* Cruise Details */}
+          {/* Cruise Name + Details Link */}
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-serif font-bold text-primary sm:text-2xl text-balance">
               {cruise.name}
             </h2>
 
-            <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-              {cruise.boat && (
-                <div className="flex items-center gap-1.5">
-                  <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
-                    <ShipWheel size={14} className="text-accent" />
-                  </div>
-                  <span className="text-sm font-medium">{cruise.boat}</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-1.5">
-                <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
-                  <Anchor size={14} className="text-accent" />
-                </div>
-                <span className="text-sm font-medium">{cruise.route}</span>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
-                  <CalendarArrowDown size={14} className="text-accent" />
-                </div>
-                <span className="text-sm font-medium">
-                  {cruise.departureDate} → {cruise.returnDate}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
-                  <Fish size={14} className="text-accent" />
-                </div>
-                <span className="text-sm font-medium">{cruise.dives} {t('booking.cruise.dives')}</span>
-              </div>
-            </div>
-
-            <button className="mt-0.5 flex w-fit items-center gap-1 text-sm font-semibold text-accent transition hover:text-accent/80">
+            <button
+              onClick={() => setShowDetails(true)}
+              className="mt-0.5 flex w-fit items-center gap-1 text-sm font-semibold text-accent transition hover:text-accent/80"
+            >
               {t('booking.cruise.tripDetails')}
               <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </button>
@@ -155,36 +127,38 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
 
         {/* Right: Price + Select */}
         <div className="flex flex-col items-end gap-3">
-          {/* Tier Selection */}
-          <div className="flex flex-col items-end gap-2">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
-              {t('booking.cruise.pricePerPerson')}
+          {/* Tier Selection — only visible when cruise is selected */}
+          {isSelected && (
+            <div className="flex flex-col items-end gap-2">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                {t('booking.tier.selectHint')}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {tiers.map(({ key, label }) => {
+                  const isActive = selectedTier === key
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => handleTierSelect(key)}
+                      className={cn(
+                        'rounded-full px-4 py-2 text-sm font-semibold border-2 transition-all',
+                        'border-border bg-card text-muted-foreground',
+                        'hover:border-accent/40 hover:shadow-sm',
+                        isActive && 'border-accent bg-accent/10 text-accent ring-2 ring-accent/30'
+                      )}
+                    >
+                      <span>{label}</span>
+                      <span className="ml-1.5">{formatPrice(cruise.tiers[key])}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              {!selectedTier && (
+                <p className="text-xs text-muted-foreground mt-1">{t('booking.tier.selectHint')}</p>
+              )}
             </div>
-            <div className="flex flex-wrap gap-2">
-              {tiers.map(({ key, label }) => {
-                const isActive = selectedTier === key
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => handleTierSelect(key)}
-                    className={cn(
-                      'rounded-full px-4 py-2 text-sm font-semibold border-2 transition-all',
-                      'border-border bg-card text-muted-foreground',
-                      'hover:border-accent/40 hover:shadow-sm',
-                      isActive && 'border-accent bg-accent/10 text-accent ring-2 ring-accent/30'
-                    )}
-                  >
-                    <span>{label}</span>
-                    <span className="ml-1.5">{formatPrice(cruise.tiers[key])}</span>
-                  </button>
-                )
-              })}
-            </div>
-            {!selectedTier && (
-              <p className="text-xs text-muted-foreground mt-1">{t('booking.tier.selectHint')}</p>
-            )}
-          </div>
+          )}
 
           {/* Select Button */}
           <Button
@@ -202,6 +176,15 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
           </Button>
         </div>
       </div>
+
+      {/* Trip Details Modal */}
+      {showDetails && (
+        <TripDetailsModal
+          cruise={cruise}
+          embarkDate={embarkDate}
+          onClose={() => setShowDetails(false)}
+        />
+      )}
     </div>
   )
 }

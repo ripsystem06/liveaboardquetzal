@@ -8,8 +8,10 @@ const mockCruise: Cruise = {
   id: 'socorro-1',
   name: 'Socorro Islands',
   departureDate: '2026-03-15',
+  returnDate: '2026-03-24',
   route: 'Revillagigedo Archipelago',
   tiers: { basic: 2500, standard: 3000, premium: 3500 },
+  dives: 5,
   boat: 'Quetzal',
 }
 
@@ -23,12 +25,12 @@ describe('CruiseCard', () => {
     renderWithProviders(<CruiseCard cruise={mockCruise} onSelect={onSelect} />)
 
     expect(screen.getByText('Socorro Islands')).toBeInTheDocument()
-    expect(screen.getByText('Revillagigedo Archipelago')).toBeInTheDocument()
+    // Route and details moved to TripDetailsModal
     // Date rendered as separate elements: "Mar", "15", "2026"
     expect(screen.getByText('15')).toBeInTheDocument()
     expect(screen.getByText('Mar')).toBeInTheDocument()
     expect(screen.getByText('2026')).toBeInTheDocument()
-    expect(screen.getByText(/3,500/)).toBeInTheDocument()
+    // Tier prices only visible when isSelected (flow: select cruise first, then choose tier)
   })
 
   it('renders a Select button', () => {

@@ -7,8 +7,10 @@ describe('bookingReducer', () => {
     id: 'socorro-1',
     name: 'Socorro Islands',
     departureDate: '2026-03-15',
+    returnDate: '2026-03-24',
     route: 'Revillagigedo Archipelago',
     tiers: { basic: 2500, standard: 3000, premium: 3500 },
+    dives: 5,
   }
 
   describe('SELECT_CRUISE', () => {
