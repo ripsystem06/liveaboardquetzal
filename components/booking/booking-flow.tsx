@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/contexts/language-context'
 import type { Dispatch } from 'react'
 import { Button } from '@/components/ui/button'
@@ -33,10 +34,15 @@ export function BookingFlow({
   dispatch,
 }: BookingFlowProps) {
   const { t } = useLanguage()
+  const router = useRouter()
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login')
 
   const handleCruiseSelect = (cruise: Cruise) => {
     dispatch({ type: 'SELECT_CRUISE', cruise })
+  }
+
+  const handleTierSelect = (tier: 'basic' | 'standard' | 'premium') => {
+    dispatch({ type: 'SET_TIER', tier })
   }
 
   const handleGuestChange = (count: number) => {
@@ -147,21 +153,40 @@ export function BookingFlow({
             <h2 className="text-2xl font-serif text-primary">{t('booking.cruise.title')}</h2>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 rounded-2xl bg-muted/20 p-4 sm:p-6">
             {MOCK_CRUISES.map((cruise) => (
               <CruiseCard
                 key={cruise.id}
                 cruise={cruise}
                 onSelect={handleCruiseSelect}
+                onSelectTier={handleTierSelect}
                 isSelected={selectedCruise?.id === cruise.id}
                 isLoginRequired={!isAuthenticated}
+                selectedTier={selectedCruise?.id === cruise.id ? state.selectedTier : null}
               />
             ))}
           </div>
 
+          {selectedCruise && !state.selectedTier && (
+            <p className="text-sm text-muted-foreground text-center">{t('booking.tier.selectHint')}</p>
+          )}
+
           <div className="border-t border-border pt-6">
-            <h3 className="text-lg font-serif text-primary mb-4">{t('booking.guest.title')}</h3>
             <GuestSelector value={guestCount} onChange={handleGuestChange} />
+          </div>
+
+          {/* Full Charter CTA */}
+          <div className="rounded-2xl border-2 border-dashed border-accent/40 bg-accent/5 px-6 py-5">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-lg font-semibold text-primary">{t('booking.fullCharter.label')}</h3>
+              <p className="text-sm text-muted-foreground">{t('booking.fullCharter.description')}</p>
+              <Button
+                onClick={() => router.push('/contacto')}
+                className="rounded-full px-6 py-3 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-fit"
+              >
+                {t('booking.fullCharter.cta')}
+              </Button>
+            </div>
           </div>
 
           <div className="flex justify-between">
@@ -170,7 +195,7 @@ export function BookingFlow({
             </Button>
             <Button
               onClick={handleNext}
-              disabled={!selectedCruise}
+              disabled={!selectedCruise || !state.selectedTier}
               className="bg-secondary hover:bg-secondary/90"
             >
               {t('booking.flow.next')}
@@ -179,10 +204,11 @@ export function BookingFlow({
         </div>
       )}
 
-      {step === 3 && selectedCruise && (
+      {step === 3 && selectedCruise && state.selectedTier && (
         <div className="space-y-6">
           <PaymentSection
             cruise={selectedCruise}
+            selectedTier={state.selectedTier}
             guestCount={guestCount}
             onPay={handlePay}
           />

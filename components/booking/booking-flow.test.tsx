@@ -9,13 +9,14 @@ const mockCruise: Cruise = {
   name: 'Socorro Islands',
   departureDate: '2026-03-15',
   route: 'Revillagigedo Archipelago',
-  pricePerPerson: 3500,
+  tiers: { basic: 2500, standard: 3000, premium: 3500 },
 }
 
 describe('BookingFlow', () => {
   const mockState: BookingState = {
     step: 1,
     selectedCruise: null,
+    selectedTier: null,
     guestCount: 1,
     bookingConfirmed: false,
     loginCompleted: false,
@@ -96,7 +97,7 @@ describe('BookingFlow', () => {
   })
 
   it('renders payment section on step 3', () => {
-    const state: BookingState = { ...mockState, step: 3, loginCompleted: true, selectedCruise: mockCruise }
+    const state: BookingState = { ...mockState, step: 3, loginCompleted: true, selectedCruise: mockCruise, selectedTier: 'standard' }
     renderWithProviders(
       <BookingFlow
         step={3}
@@ -134,7 +135,7 @@ describe('BookingFlow', () => {
   })
 
   it('shows confirmation view when bookingConfirmed is true', () => {
-    const state: BookingState = { ...mockState, step: 3, loginCompleted: true, selectedCruise: mockCruise, bookingConfirmed: true }
+    const state: BookingState = { ...mockState, step: 3, loginCompleted: true, selectedCruise: mockCruise, selectedTier: 'standard', bookingConfirmed: true }
     renderWithProviders(
       <BookingFlow
         step={3}

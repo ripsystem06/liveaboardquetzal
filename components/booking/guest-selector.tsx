@@ -1,6 +1,6 @@
 'use client'
 
-import { Minus, Plus } from 'lucide-react'
+import { Minus, Plus, Users } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 
 interface GuestSelectorProps {
@@ -27,29 +27,50 @@ export function GuestSelector({ value, onChange }: GuestSelectorProps) {
   }
 
   return (
-    <div className="flex items-center justify-center gap-6">
-      <button
-        onClick={handleDecrement}
-        disabled={!canDecrement}
-        aria-label={t('booking.guest.decrement')}
-        className="flex size-10 items-center justify-center rounded-full border-2 border-border text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
-      >
-        <Minus className="size-4" />
-      </button>
+    <div
+      className="rounded-2xl bg-card px-6 py-5 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)]"
+    >
+      <div className="flex items-center justify-between">
+        {/* Left: label + capacity */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex size-8 items-center justify-center rounded-full bg-accent/10">
+              <Users size={14} className="text-accent" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">
+              {t('booking.guest.title')}
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {t('booking.guest.capacity')}
+          </span>
+        </div>
 
-      <div className="flex flex-col items-center min-w-[80px]">
-        <span className="text-4xl font-serif font-bold text-primary tabular-nums">{value}</span>
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-1">{t('booking.guest.label')}</span>
+        {/* Right: counter */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleDecrement}
+            disabled={!canDecrement}
+            aria-label={t('booking.guest.decrement')}
+            className="flex size-10 items-center justify-center rounded-full bg-accent/10 text-accent transition-all hover:bg-accent/20 disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
+          >
+            <Minus size={16} />
+          </button>
+
+          <span className="text-5xl font-bold leading-none text-primary tabular-nums min-w-[2ch] text-center">
+            {value}
+          </span>
+
+          <button
+            onClick={handleIncrement}
+            disabled={!canIncrement}
+            aria-label={t('booking.guest.increment')}
+            className="flex size-10 items-center justify-center rounded-full bg-accent/10 text-accent transition-all hover:bg-accent/20 disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
+          >
+            <Plus size={16} />
+          </button>
+        </div>
       </div>
-
-      <button
-        onClick={handleIncrement}
-        disabled={!canIncrement}
-        aria-label={t('booking.guest.increment')}
-        className="flex size-10 items-center justify-center rounded-full border-2 border-border text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
-      >
-        <Plus className="size-4" />
-      </button>
     </div>
   )
 }

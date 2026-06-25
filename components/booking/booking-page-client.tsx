@@ -4,24 +4,31 @@ import { useReducer, useEffect } from 'react'
 import { useUser } from '@/contexts/user-context'
 import { BookingFlow } from './booking-flow'
 
+export interface CruiseTier {
+  basic: number
+  standard: number
+  premium: number
+}
+
 export interface Cruise {
   id: string
   name: string
   departureDate: string
   route: string
-  pricePerPerson: number
+  tiers: CruiseTier
   boat?: string
 }
 
 export const MOCK_CRUISES: Cruise[] = [
-  { id: 'socorro-1', name: 'Socorro Islands', departureDate: '2026-03-15', route: 'Revillagigedo Archipelago', pricePerPerson: 3500, boat: 'Quetzal' },
-  { id: 'cortez-1', name: 'Sea of Cortez', departureDate: '2026-07-09', route: 'Bahía de La Paz', pricePerPerson: 2350, boat: 'Quetzal' },
-  { id: 'magbay-1', name: 'Mag Bay + Socorro', departureDate: '2026-10-16', route: 'Bahía Magdalena → Socorro', pricePerPerson: 5199, boat: 'Quetzal' },
+  { id: 'socorro-1', name: 'Socorro Islands', departureDate: '2026-03-15', route: 'Revillagigedo Archipelago', tiers: { basic: 2500, standard: 3000, premium: 3500 }, boat: 'Quetzal' },
+  { id: 'cortez-1', name: 'Sea of Cortez', departureDate: '2026-07-09', route: 'Bahía de La Paz', tiers: { basic: 1800, standard: 2350, premium: 2900 }, boat: 'Quetzal' },
+  { id: 'magbay-1', name: 'Mag Bay + Socorro', departureDate: '2026-10-16', route: 'Bahía Magdalena → Socorro', tiers: { basic: 4200, standard: 5199, premium: 6200 }, boat: 'Quetzal' },
 ]
 
 export interface BookingState {
   step: 1 | 2 | 3
   selectedCruise: Cruise | null
+  selectedTier: 'basic' | 'standard' | 'premium' | null
   guestCount: number
   bookingConfirmed: boolean
   loginCompleted: boolean
@@ -30,6 +37,7 @@ export interface BookingState {
 export const initialBookingState: BookingState = {
   step: 1,
   selectedCruise: null,
+  selectedTier: null,
   guestCount: 1,
   bookingConfirmed: false,
   loginCompleted: false,
@@ -37,6 +45,7 @@ export const initialBookingState: BookingState = {
 
 export type BookingAction =
   | { type: 'SELECT_CRUISE'; cruise: Cruise }
+  | { type: 'SET_TIER'; tier: 'basic' | 'standard' | 'premium' }
   | { type: 'SET_GUEST_COUNT'; count: number }
   | { type: 'ADVANCE_STEP' }
   | { type: 'GO_BACK' }
@@ -47,12 +56,14 @@ export type BookingAction =
 export function bookingReducer(state: BookingState, action: BookingAction): BookingState {
   switch (action.type) {
     case 'SELECT_CRUISE':
-      return { ...state, selectedCruise: action.cruise }
+      return { ...state, selectedCruise: action.cruise, selectedTier: null }
+    case 'SET_TIER':
+      return { ...state, selectedTier: action.tier }
     case 'SET_GUEST_COUNT':
       return { ...state, guestCount: action.count }
     case 'ADVANCE_STEP': {
       // Step gating: reject advancement unless prerequisites are met
-      if (state.step === 2 && !state.selectedCruise) return state
+      if (state.step === 2 && (!state.selectedCruise || !state.selectedTier)) return state
       if (state.step >= 3) return state
       const newState = { ...state, step: (state.step + 1) as 1 | 2 | 3 }
       // Mark login as completed when advancing from step 1

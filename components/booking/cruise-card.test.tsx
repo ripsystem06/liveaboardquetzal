@@ -9,7 +9,7 @@ const mockCruise: Cruise = {
   name: 'Socorro Islands',
   departureDate: '2026-03-15',
   route: 'Revillagigedo Archipelago',
-  pricePerPerson: 3500,
+  tiers: { basic: 2500, standard: 3000, premium: 3500 },
   boat: 'Quetzal',
 }
 

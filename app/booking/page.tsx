@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
 import { BookingPageClient } from '@/components/booking/booking-page-client'
+import { ReservationInfoCards } from '@/components/booking/reservation-info-cards'
 
 export const metadata: Metadata = {
   title: 'Book Your Expedition | Quetzal Liveaboard',
@@ -31,8 +32,15 @@ export default function BookingPage() {
         </div>
       </section>
 
-      {/* Booking Flow */}
+      {/* Booking Flow (Login first, then cruise selection) */}
       <BookingPageClient />
+
+      {/* Reservation Info — always visible, below the booking flow */}
+      <section className="py-12 bg-[#f3f1ec]">
+        <div className="container mx-auto px-4 lg:px-8">
+          <ReservationInfoCards />
+        </div>
+      </section>
 
       <Footer />
     </main>

@@ -9,34 +9,34 @@ const mockCruise: Cruise = {
   name: 'Socorro Islands',
   departureDate: '2026-03-15',
   route: 'Revillagigedo Archipelago',
-  pricePerPerson: 3500,
+  tiers: { basic: 2500, standard: 3000, premium: 3500 },
 }
 
 describe('PaymentSection', () => {
   it('renders cruise name in summary', () => {
     const onPay = vi.fn()
-    renderWithProviders(<PaymentSection cruise={mockCruise} guestCount={2} onPay={onPay} />)
+    renderWithProviders(<PaymentSection cruise={mockCruise} selectedTier="standard" guestCount={2} onPay={onPay} />)
 
     expect(screen.getByText('Socorro Islands')).toBeInTheDocument()
   })
 
   it('renders guest count in summary', () => {
     const onPay = vi.fn()
-    renderWithProviders(<PaymentSection cruise={mockCruise} guestCount={2} onPay={onPay} />)
+    renderWithProviders(<PaymentSection cruise={mockCruise} selectedTier="standard" guestCount={2} onPay={onPay} />)
 
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
   it('renders correct total price (price × guests)', () => {
     const onPay = vi.fn()
-    renderWithProviders(<PaymentSection cruise={mockCruise} guestCount={2} onPay={onPay} />)
+    renderWithProviders(<PaymentSection cruise={mockCruise} selectedTier="standard" guestCount={2} onPay={onPay} />)
 
-    expect(screen.getByText('$7,000')).toBeInTheDocument()
+    expect(screen.getByText('$6,000')).toBeInTheDocument()
   })
 
   it('renders 3 payment buttons', () => {
     const onPay = vi.fn()
-    renderWithProviders(<PaymentSection cruise={mockCruise} guestCount={2} onPay={onPay} />)
+    renderWithProviders(<PaymentSection cruise={mockCruise} selectedTier="standard" guestCount={2} onPay={onPay} />)
 
     expect(screen.getByRole('button', { name: /credit card/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /paypal/i })).toBeInTheDocument()
@@ -46,7 +46,7 @@ describe('PaymentSection', () => {
   it('calls onPay with "card" when Credit Card is clicked', async () => {
     const user = userEvent.setup()
     const onPay = vi.fn()
-    renderWithProviders(<PaymentSection cruise={mockCruise} guestCount={2} onPay={onPay} />)
+    renderWithProviders(<PaymentSection cruise={mockCruise} selectedTier="standard" guestCount={2} onPay={onPay} />)
 
     const cardButton = screen.getByRole('button', { name: /credit card/i })
 
@@ -63,7 +63,7 @@ describe('PaymentSection', () => {
   it('calls onPay with "paypal" when PayPal is clicked', async () => {
     const user = userEvent.setup()
     const onPay = vi.fn()
-    renderWithProviders(<PaymentSection cruise={mockCruise} guestCount={2} onPay={onPay} />)
+    renderWithProviders(<PaymentSection cruise={mockCruise} selectedTier="standard" guestCount={2} onPay={onPay} />)
 
     const paypalButton = screen.getByRole('button', { name: /paypal/i })
     fireEvent.click(paypalButton)
@@ -77,7 +77,7 @@ describe('PaymentSection', () => {
   it('calls onPay with "bank" when Bank Transfer is clicked', async () => {
     const user = userEvent.setup()
     const onPay = vi.fn()
-    renderWithProviders(<PaymentSection cruise={mockCruise} guestCount={2} onPay={onPay} />)
+    renderWithProviders(<PaymentSection cruise={mockCruise} selectedTier="standard" guestCount={2} onPay={onPay} />)
 
     const bankButton = screen.getByRole('button', { name: /bank transfer/i })
     fireEvent.click(bankButton)

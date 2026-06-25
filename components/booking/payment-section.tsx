@@ -7,15 +7,25 @@ import type { Cruise } from './booking-page-client'
 
 interface PaymentSectionProps {
   cruise: Cruise
+  selectedTier: 'basic' | 'standard' | 'premium'
   guestCount: number
   onPay: (method: 'card' | 'paypal' | 'bank') => void
 }
 
-export function PaymentSection({ cruise, guestCount, onPay }: PaymentSectionProps) {
+function calculatePayment(tierPrice: number, guestCount: number) {
+  const freeSpaces = guestCount >= 8 ? Math.floor(guestCount / 8) : 0
+  const paidSpaces = guestCount - freeSpaces
+  const total = tierPrice * paidSpaces
+  return { freeSpaces, paidSpaces, total }
+}
+
+export function PaymentSection({ cruise, selectedTier, guestCount, onPay }: PaymentSectionProps) {
   const { t } = useLanguage()
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const total = cruise.pricePerPerson * guestCount
+  const tierPrice = cruise.tiers[selectedTier]
+  const { freeSpaces, paidSpaces, total } = calculatePayment(tierPrice, guestCount)
+  const isHalfCharter = guestCount >= 8
 
   const handlePay = (method: 'card' | 'paypal' | 'bank') => {
     setIsProcessing(true)
@@ -38,9 +48,25 @@ export function PaymentSection({ cruise, guestCount, onPay }: PaymentSectionProp
             <span className="text-sm font-semibold text-primary">{cruise.name}</span>
           </div>
           <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t('booking.confirmation.tier')}</span>
+            <span className="text-sm font-semibold text-primary capitalize">{t(`booking.tier.${selectedTier}`)} (${tierPrice.toLocaleString()} {t('booking.payment.tierPrice')})</span>
+          </div>
+          <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">{t('booking.payment.guests')}</span>
             <span className="text-sm font-semibold text-primary">{guestCount}</span>
           </div>
+          {isHalfCharter && (
+            <>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">{t('booking.payment.freeSpaces')}</span>
+                <span className="text-sm font-semibold text-primary">{freeSpaces}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">{t('booking.payment.paidSpaces')}</span>
+                <span className="text-sm font-semibold text-primary">{paidSpaces}</span>
+              </div>
+            </>
+          )}
           <div className="flex justify-between items-center pt-4 border-t border-border">
             <span className="text-base font-semibold text-primary">{t('booking.payment.total')}</span>
             <span className="font-serif text-2xl font-bold text-accent tabular-nums">${total.toLocaleString()}</span>

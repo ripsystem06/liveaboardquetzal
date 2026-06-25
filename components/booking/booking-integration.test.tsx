@@ -33,6 +33,10 @@ describe('BookingPageClient integration', () => {
       const selectButtons = screen.getAllByRole('button', { name: /select/i })
       await user.click(selectButtons[0])
 
+      // Select a tier (click "Standard" tier chip on the first cruise)
+      const standardTierButtons = screen.getAllByRole('button', { name: /Standard/i })
+      await user.click(standardTierButtons[0])
+
       // Should show the next button enabled
       const nextButton = screen.getByRole('button', { name: /next/i })
       expect(nextButton).toBeEnabled()
@@ -202,7 +206,11 @@ describe('BookingPageClient integration', () => {
       const selectButtons = screen.getAllByRole('button', { name: /select/i })
       await user.click(selectButtons[0])
 
-      // Advance to step 3
+      // Select a tier (click the Standard tier on the first/selected cruise)
+      const standardTierButtons = screen.getAllByRole('button', { name: /Standard/i })
+      await user.click(standardTierButtons[0])
+
+      // Should show the next button enabled
       const nextButton = screen.getByRole('button', { name: /next/i })
       expect(nextButton).toBeEnabled()
       await user.click(nextButton)
@@ -241,6 +249,10 @@ describe('BookingPageClient integration', () => {
       // Select cruise and advance
       const selectButtons = screen.getAllByRole('button', { name: /select/i })
       await user.click(selectButtons[0])
+
+      // Select a tier
+      const standardTierButtons = screen.getAllByRole('button', { name: /Standard/i })
+      await user.click(standardTierButtons[0])
 
       const nextButton = screen.getByRole('button', { name: /next/i })
       await user.click(nextButton)
