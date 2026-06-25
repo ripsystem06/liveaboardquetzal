@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Reservation {
+  id            String   @id @default(uuid())
+  userId        String
+  cruiseId      String
+  cruiseName    String
+  departureDate String
+  route         String
+  tier          String   // "basic" | "standard" | "premium"
+  tierPrice     Int      // price in USD (whole dollars)
+  guestCount    Int
+  freeSpaces    Int      @default(0)
+  paidSpaces    Int
+  totalAmount   Int      // total in USD (whole dollars)
+  paymentMethod String   // "paypal" | "bank_transfer"
+  status        String   @default("pending_approval") // pending_approval, confirmed, expired, cancelled
+  holdExpiry    DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([cruiseId, departureDate])  // for date blocking queries
+  @@index([holdExpiry])               // for expiry checks
+  @@index([userId])                   // for user reservation list
+}
