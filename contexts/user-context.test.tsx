@@ -52,6 +52,7 @@ describe('useUser', () => {
         name: 'Demo User',
         email: 'demo@quetzal.com',
         phone: '+1 555 0100',
+        isAdmin: false,
       })
       expect(result.current.isAuthenticated).toBe(true)
     })

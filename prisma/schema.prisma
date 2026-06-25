@@ -22,6 +22,7 @@ model Reservation {
   totalAmount   Int      // total in USD (whole dollars)
   paymentMethod String   // "paypal" | "bank_transfer"
   status        String   @default("pending_approval") // pending_approval, confirmed, expired, cancelled
+  notes         String?
   holdExpiry    DateTime
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -29,4 +30,30 @@ model Reservation {
   @@index([cruiseId, departureDate])  // for date blocking queries
   @@index([holdExpiry])               // for expiry checks
   @@index([userId])                   // for user reservation list
+}
+
+model Cruise {
+  id            String   @id @default(cuid())
+  name          String
+  departureDate String
+  returnDate    String   @default("")
+  route         String
+  boat          String   @default("Quetzal")
+  basicPrice    Int      // USD whole dollars
+  standardPrice Int
+  premiumPrice  Int
+  dives         Int      @default(5)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  imageUrl  String   @default("")
+  status    String   @default("draft") // "draft" | "published"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

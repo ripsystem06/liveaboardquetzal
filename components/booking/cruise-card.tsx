@@ -3,7 +3,7 @@
 import { useLanguage } from '@/contexts/language-context'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Anchor, ShipWheel, ChevronRight } from 'lucide-react'
+import { Anchor, ShipWheel, ChevronRight, Fish, CalendarArrowDown } from 'lucide-react'
 import type { Cruise } from './booking-page-client'
 import { useRouter } from 'next/navigation'
 
@@ -29,12 +29,21 @@ function parseDate(dateStr: string) {
   }
 }
 
+function getEmbarkationDate(departureDate: string, language: string): string {
+  const months = language === 'es' ? MONTHS_ES : MONTHS_EN
+  const [year, month, day] = departureDate.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  date.setDate(date.getDate() - 1)
+  return `${months[date.getMonth()]} ${date.getDate()}`
+}
+
 export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false, isLoginRequired = false, selectedTier = null }: CruiseCardProps) {
   const { t, language } = useLanguage()
   const router = useRouter()
   const { day, monthIndex, year, dayStr } = parseDate(cruise.departureDate)
   const months = language === 'es' ? MONTHS_ES : MONTHS_EN
   const monthName = months[monthIndex]
+  const embarkDate = getEmbarkationDate(cruise.departureDate, language)
 
   const handleButtonClick = () => {
     if (isLoginRequired) {
@@ -80,16 +89,21 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
         {/* Left: Date + Cruise Info */}
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           {/* Big Departure Date */}
-          <div className="flex items-start gap-1.5">
-            <span className="text-5xl font-bold leading-none text-primary tabular-nums">
-              {dayStr}
-            </span>
-            <div className="mt-1.5 flex flex-col leading-none">
-              <span className="text-sm font-bold uppercase text-primary">
-                {monthName}
+          <div className="flex flex-col items-start">
+            <div className="flex items-start gap-1.5">
+              <span className="text-5xl font-bold leading-none text-primary tabular-nums">
+                {dayStr}
               </span>
-              <span className="text-xs text-muted-foreground">{year}</span>
+              <div className="mt-1.5 flex flex-col leading-none">
+                <span className="text-sm font-bold uppercase text-primary">
+                  {monthName}
+                </span>
+                <span className="text-xs text-muted-foreground">{year}</span>
+              </div>
             </div>
+            <span className="text-xs text-muted-foreground mt-1.5 ml-0.5">
+              {t('booking.cruise.embarkation')}: {embarkDate}
+            </span>
           </div>
 
           {/* Cruise Details */}
@@ -113,6 +127,22 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
                   <Anchor size={14} className="text-accent" />
                 </div>
                 <span className="text-sm font-medium">{cruise.route}</span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
+                  <CalendarArrowDown size={14} className="text-accent" />
+                </div>
+                <span className="text-sm font-medium">
+                  {cruise.departureDate} → {cruise.returnDate}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <div className="flex size-6 items-center justify-center rounded-full bg-accent/10">
+                  <Fish size={14} className="text-accent" />
+                </div>
+                <span className="text-sm font-medium">{cruise.dives} {t('booking.cruise.dives')}</span>
               </div>
             </div>
 

@@ -1,12 +1,14 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { ADMIN_EMAIL } from '@/lib/config'
 
-type User = { id: string; name: string; email: string; phone: string }
+type User = { id: string; name: string; email: string; phone: string; isAdmin: boolean }
 
 interface UserContextType {
   user: User | null
   isAuthenticated: boolean
+  isAdmin: boolean
   login: (email: string, password: string) => Promise<boolean>
   register: (name: string, email: string, password: string) => Promise<User>
   logout: () => void
@@ -18,6 +20,7 @@ const MOCK_USER: User = {
   name: 'Demo User',
   email: 'demo@quetzal.com',
   phone: '+1 555 0100',
+  isAdmin: false,
 }
 
 const VALID_EMAIL = 'demo@quetzal.com'
@@ -48,6 +51,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       name,
       email,
       phone: '',
+      isAdmin: email === ADMIN_EMAIL,
     }
     setUser(newUser)
     sessionStorage.setItem('quetzal_user', JSON.stringify(newUser))
@@ -80,6 +84,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated: user !== null,
+        isAdmin: user?.isAdmin ?? false,
         login,
         register,
         logout,

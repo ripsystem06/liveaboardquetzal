@@ -14,15 +14,17 @@ export interface Cruise {
   id: string
   name: string
   departureDate: string
+  returnDate: string
   route: string
   tiers: CruiseTier
+  dives: number
   boat?: string
 }
 
 export const MOCK_CRUISES: Cruise[] = [
-  { id: 'socorro-1', name: 'Socorro Islands', departureDate: '2026-03-15', route: 'Revillagigedo Archipelago', tiers: { basic: 2500, standard: 3000, premium: 3500 }, boat: 'Quetzal' },
-  { id: 'cortez-1', name: 'Sea of Cortez', departureDate: '2026-07-09', route: 'Bahía de La Paz', tiers: { basic: 1800, standard: 2350, premium: 2900 }, boat: 'Quetzal' },
-  { id: 'magbay-1', name: 'Mag Bay + Socorro', departureDate: '2026-10-16', route: 'Bahía Magdalena → Socorro', tiers: { basic: 4200, standard: 5199, premium: 6200 }, boat: 'Quetzal' },
+  { id: 'socorro-1', name: 'Socorro Islands', departureDate: '2026-03-15', returnDate: '2026-03-24', route: 'Revillagigedo Archipelago', tiers: { basic: 2500, standard: 3000, premium: 3500 }, dives: 5, boat: 'Quetzal' },
+  { id: 'cortez-1', name: 'Sea of Cortez', departureDate: '2026-07-09', returnDate: '2026-07-18', route: 'Bahía de La Paz', tiers: { basic: 1800, standard: 2350, premium: 2900 }, dives: 5, boat: 'Quetzal' },
+  { id: 'magbay-1', name: 'Mag Bay + Socorro', departureDate: '2026-10-16', returnDate: '2026-10-25', route: 'Bahía Magdalena → Socorro', tiers: { basic: 4200, standard: 5199, premium: 6200 }, dives: 5, boat: 'Quetzal' },
 ]
 
 export interface BookingState {
