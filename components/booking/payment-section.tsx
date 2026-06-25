@@ -55,7 +55,6 @@ export function PaymentSection({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId,
           cruiseId,
           cruiseName: cruise.name,
           departureDate,
@@ -63,6 +62,9 @@ export function PaymentSection({
           tier: selectedTier,
           tierPrice,
           guestCount,
+          freeSpaces,
+          paidSpaces,
+          totalAmount,
           paymentMethod: selectedMethod,
         }),
       })
