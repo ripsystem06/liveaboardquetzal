@@ -44,4 +44,7 @@ pnpm-workspace.yaml
 
 # logo source files (processed versions in public/)
 /logosquetzal/
-/logosquetzal.zip*.db
+/logosquetzal.zip
+
+# Database files
+*.db
