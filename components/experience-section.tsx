@@ -1,92 +1,120 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
+import { Fish, Waves, Compass, ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
+
+const experiences = [
+  {
+    video: '/images/videoactividades/divers-descending.mov',
+    icon: Fish,
+    titleKey: 'experience.item1',
+    href: '/contacto?subject=booking',
+    span: 'md:col-span-8 md:row-span-2',
+  },
+  {
+    image: '/images/panoramicas/Manta Clariones.webp',
+    icon: Waves,
+    titleKey: 'experience.item2',
+    href: '/contacto?subject=booking',
+    span: 'md:col-span-4',
+  },
+  {
+    image: '/images/panoramicas/Delfin Kike.webp',
+    icon: Compass,
+    titleKey: 'experience.item3',
+    href: '/contacto?subject=booking',
+    span: 'md:col-span-4',
+  },
+]
 
 export function ExperienceSection() {
   const { t } = useLanguage()
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    video.play().catch(() => {})
+
+    const handleTime = () => {
+      if (video.currentTime >= 8) {
+        video.currentTime = 0
+      }
+    }
+
+    video.addEventListener('timeupdate', handleTime)
+    return () => {
+      video.removeEventListener('timeupdate', handleTime)
+    }
+  }, [])
+
   return (
-    <section className="py-20 bg-background">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground mb-4">
-            {t('experience.title')}
-          </h2>
-          <p className="font-sans text-lg text-muted-foreground">
+        <div className="mb-16 md:mb-20">
+          <p className="font-sans text-xs md:text-sm text-accent uppercase tracking-[0.2em] mb-3">
             {t('experience.subtitle')}
           </p>
+          <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight max-w-3xl leading-tight">
+            {t('experience.title')}
+          </h2>
         </div>
 
-        {/* Images Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Captain at helm */}
-          <div className="flex flex-col">
-            <div className="relative overflow-hidden rounded-lg group h-80 mb-4">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ViCy7qDO26tuJM5IULISWYpSY7CuKe.png"
-                alt="Professional crew at the helm"
-                width={600}
-                height={600}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <p className="font-sans text-sm text-muted-foreground text-center">
-              {t('experience.item1')}
-            </p>
-          </div>
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 md:auto-rows-[320px]">
+          {experiences.map((exp) => (
+            <Link
+              key={exp.titleKey}
+              href={exp.href}
+              className={`${exp.span} relative group overflow-hidden rounded-xl aspect-[4/3] md:aspect-auto`}
+            >
+              {/* Video or Image */}
+              {exp.video ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                >
+                  <source src={exp.video} type="video/quicktime" />
+                </video>
+              ) : (
+                <Image
+                  src={exp.image!}
+                  alt={t(exp.titleKey)}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              )}
 
-          {/* Quetzal vessel */}
-          <div className="flex flex-col">
-            <div className="relative overflow-hidden rounded-lg group h-80 mb-4">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-D7hEhqk5Qp6P4NrzyUfXZefge69pOW.png"
-                alt="Quetzal liveaboard vessel"
-                width={600}
-                height={600}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <p className="font-sans text-sm text-muted-foreground text-center">
-              {t('experience.item2')}
-            </p>
-          </div>
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
 
-          {/* Underwater diving */}
-          <div className="flex flex-col">
-            <div className="relative overflow-hidden rounded-lg group h-80 mb-4">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image.png-FlR3Xo3TTMZYYUcTcYBE3H0MZnWKr6.jpeg"
-                alt="Diver swimming with dolphin underwater"
-                width={600}
-                height={600}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <p className="font-sans text-sm text-muted-foreground text-center">
-              {t('experience.item3')}
-            </p>
-          </div>
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+                <div className="w-9 h-9 bg-white/15 backdrop-blur-sm rounded-lg flex items-center justify-center mb-3">
+                  <exp.icon className="w-4 h-4 text-white" />
+                </div>
 
-          {/* Crew at dock */}
-          <div className="flex flex-col">
-            <div className="relative overflow-hidden rounded-lg group h-80 mb-4">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-w8vpYrdmfPKyui4jqy1OxR8YUohO5f.png"
-                alt="Crew preparing the vessel"
-                width={600}
-                height={600}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <p className="font-sans text-sm text-muted-foreground text-center">
-              {t('experience.item4')}
-            </p>
-          </div>
+                <h3 className="font-serif text-xl md:text-2xl font-normal text-white mb-3 tracking-tight">
+                  {t(exp.titleKey)}
+                </h3>
+
+                {/* CTA — visible on hover */}
+                <span className="inline-flex items-center gap-2 text-white/90 font-sans font-medium text-sm border-b border-white/30 group-hover:border-white transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300">
+                  {t('experience.cta')}
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>

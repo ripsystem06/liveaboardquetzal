@@ -38,3 +38,10 @@ pnpm-workspace.yaml
 *.docx
 *.pdf
 .~lock.*
+
+# source images (raw, unprocessed)
+/images/
+
+# logo source files (processed versions in public/)
+/logosquetzal/
+/logosquetzal.zip

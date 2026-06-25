@@ -1,27 +1,32 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 
+const marineImages = [
+  { src: '/images/panoramicas/Manta Clariones.webp', alt: 'Giant manta ray in crystal-clear waters', span: 'col-span-2 row-span-2' },
+  { src: '/images/panoramicas/Delfin Kike.webp', alt: 'Dolphins swimming alongside the Quetzal', span: '' },
+  { src: '/images/panoramicas/Puntas blancas .webp', alt: 'Whitetip reef sharks in Socorro', span: '' },
+]
+
 export function MarineLifeSection() {
   const { t } = useLanguage()
   return (
-    <section className="py-20 bg-background">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content */}
           <div className="space-y-6">
             <h2 className="font-serif text-4xl md:text-5xl font-normal text-foreground leading-tight">
               {t('marine.title')}
             </h2>
             
-            <div className="space-y-4">
-              <p className="font-sans text-lg text-foreground">
-                {t('marine.description')}
-              </p>
-            </div>
+            <p className="font-sans text-lg text-muted-foreground leading-relaxed">
+              {t('marine.description')}
+            </p>
 
             <Button 
               asChild 
@@ -35,18 +40,24 @@ export function MarineLifeSection() {
             </Button>
           </div>
 
-          {/* Right Video */}
+          {/* Right — Marine Life Gallery */}
           <div className="relative">
-            <div className="relative overflow-hidden rounded-lg shadow-2xl aspect-video">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-              >
-                <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/14172259_3840_2160_60fps-HbKxQy5W1G5gumcCxIClgKkkHdaO3t.mp4" type="video/mp4" />
-              </video>
+            <div className="grid grid-cols-2 gap-3 md:auto-rows-[200px]">
+              {marineImages.map((img) => (
+                <div
+                  key={img.src}
+                  className={`${img.span} relative overflow-hidden rounded-lg group aspect-[4/3] md:aspect-auto`}
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </div>
+              ))}
             </div>
             
             {/* Decorative element */}

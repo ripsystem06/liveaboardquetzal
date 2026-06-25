@@ -37,11 +37,16 @@ const translations = {
     
     // Experience Section
     'experience.title': 'What Awaits You Onboard',
-    'experience.subtitle': 'Discover what makes this expedition truly unforgettable.',
-    'experience.item1': 'Experienced crew navigating through pristine waters',
-    'experience.item2': 'Classic luxury vessel ready for your adventure',
-    'experience.item3': 'Unforgettable encounters with marine wildlife',
-    'experience.item4': 'Professional team ensuring your safety and comfort',
+    'experience.subtitle': 'Every moment aboard the Quetzal is an invitation to the extraordinary.',
+    'experience.cta': 'Discover more',
+    'experience.item1': 'Dive into the Unknown',
+    'experience.item1Desc': 'Descend into a world few ever see. Every dive in Revillagigedo reveals something new — from volcanic seamounts to endless blue. Our expert divemasters guide you through the most spectacular sites in the archipelago.',
+    'experience.item2': 'Swim with Giants',
+    'experience.item2Desc': 'Share the water with graceful giant mantas, curious dolphins, and migrating whales. These encounters are not just sightings — they are moments that stay with you forever.',
+    'experience.item3': 'Explore Untouched Shores',
+    'experience.item3Desc': 'Between dives, discover remote beaches, hidden coves, and volcanic landscapes. The islands of Revillagigedo are as dramatic above water as they are below.',
+    'experience.item4': 'Witness the Spectacle',
+    'experience.item4Desc': 'Schools of hammerheads, whitetip reefs, silky sharks — the archipelago hosts some of the most dramatic marine congregations on Earth. Every dive is a front-row seat to nature at its wildest.',
     
     // Destination Section
     'destination.days': '7 DAYS OF EXPLORATION',
@@ -49,6 +54,12 @@ const translations = {
     'destination.year': '2026 STARTING AT',
     'destination.price': '$2,350 USD PER PERSON',
     'destination.cta': 'Ask Our Travel Expert',
+    
+    // Boat Gallery
+    'boat.gallery.title': 'Our Boat',
+    'boat.gallery.subtitle': 'Step aboard the Quetzal — a classic vessel designed for comfort, adventure, and unforgettable moments at sea.',
+    'boat.gallery.staterooms': 'Staterooms',
+    'boat.gallery.interior': 'Interior',
     
     // Marine Life Section
     'marine.title': 'This Is What You will See With Us',
@@ -74,7 +85,7 @@ const translations = {
     'trips.trip1.price': 'from $5,199 USD per person',
     'trips.trip2.title': 'Socorro Islands (Revillagigedo)',
     'trips.trip2.dates': '06 JAN 2026 - 14 JAN 2026',
-    'trips.trip2.price': 'from $3,499 USD per person',
+    'trips.trip2.price': 'from $3,500 USD per person',
     'trips.trip3.title': 'Sea of Cortez Trip',
     'trips.trip3.dates': '09 JUL 2026 - 16 JUL 2026',
     'trips.trip3.price': 'from $2,350 USD per person',
@@ -390,11 +401,16 @@ const translations = {
 
     // Experience Section
     'experience.title': 'Lo Que Te Espera A Bordo',
-    'experience.subtitle': 'Descubre lo que hace de esta expedición algo verdaderamente inolvidable.',
-    'experience.item1': 'Tripulación experimentada navegando aguas cristalinas',
-    'experience.item2': 'Embarcación clásica de lujo lista para tu aventura',
-    'experience.item3': 'Encuentros inolvidables con vida marina',
-    'experience.item4': 'Equipo profesional garantizando tu seguridad y comodidad',
+    'experience.subtitle': 'Cada momento a bordo del Quetzal es una invitación a lo extraordinario.',
+    'experience.cta': 'Descubre más',
+    'experience.item1': 'Sumérgete en lo Desconocido',
+    'experience.item1Desc': 'Desciende a un mundo que pocos llegan a ver. Cada inmersión en Revillagigedo revela algo nuevo — desde montañas submarinas volcánicas hasta un azul infinito. Nuestros guías expertos te llevan por los sitios más espectaculares del archipiélago.',
+    'experience.item2': 'Nada con Gigantes',
+    'experience.item2Desc': 'Comparte el agua con majestuosas mantas gigantes, delfines curiosos y ballenas migratorias. Estos encuentros no son solo avistamientos — son momentos que se quedan contigo para siempre.',
+    'experience.item3': 'Explora Costas Vírgenes',
+    'experience.item3Desc': 'Entre inmersiones, descubre playas remotas, calas escondidas y paisajes volcánicos. Las islas de Revillagigedo son tan dramáticas sobre el agua como debajo de ella.',
+    'experience.item4': 'Presencia el Espectáculo',
+    'experience.item4Desc': 'Cardúmenes de tiburones martillo, puntas blancas de arrecife, tiburones sedosos — el archipiélago alberga algunas de las congregaciones marinas más impresionantes de la Tierra. Cada inmersión es un asiento en primera fila a la naturaleza en su estado más salvaje.',
 
     // Destination Section
     'destination.days': '7 DÍAS DE EXPLORACIÓN',
@@ -402,6 +418,12 @@ const translations = {
     'destination.year': '2026 DESDE',
     'destination.price': '$2,350 USD POR PERSONA',
     'destination.cta': 'Consulta con Nuestro Experto',
+
+    // Boat Gallery
+    'boat.gallery.title': 'Nuestro Bote',
+    'boat.gallery.subtitle': 'Sube a bordo del Quetzal — una embarcación clásica diseñada para la comodidad, la aventura y momentos inolvidables en el mar.',
+    'boat.gallery.staterooms': 'Habitaciones',
+    'boat.gallery.interior': 'Interior',
 
     // Marine Life Section
     'marine.title': 'Esto Es Lo Que Verás Con Nosotros',
@@ -427,7 +449,7 @@ const translations = {
     'trips.trip1.price': 'desde $5,199 USD por persona',
     'trips.trip2.title': 'Islas Socorro (Revillagigedo)',
     'trips.trip2.dates': '06 ENE 2026 - 14 ENE 2026',
-    'trips.trip2.price': 'desde $3,499 USD por persona',
+    'trips.trip2.price': 'desde $3,500 USD por persona',
     'trips.trip3.title': 'Viaje al Mar de Cortés',
     'trips.trip3.dates': '09 JUL 2026 - 16 JUL 2026',
     'trips.trip3.price': 'desde $2,350 USD por persona',

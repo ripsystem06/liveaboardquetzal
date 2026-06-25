@@ -24,18 +24,7 @@ export const metadata: Metadata = {
   description: 'Experience the greatest liveaboard adventure in the Pacific Ocean. Diving expeditions to Socorro Islands, Sea of Cortez, and Bahía Magdalena.',
   
   icons: {
-    icon: [
-      {
-        url: '/favicon-black.svg',
-        type: 'image/svg+xml',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/favicon-white.svg',
-        type: 'image/svg+xml',
-        media: '(prefers-color-scheme: dark)',
-      },
-    ],
+    icon: '/isologo-blanco.svg',
     apple: '/apple-icon.png',
   },
 }

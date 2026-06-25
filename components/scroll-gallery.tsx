@@ -7,33 +7,33 @@ import { useLanguage } from '@/contexts/language-context'
 const galleryImages = [
   {
     id: 1,
-    src: '/gallery-1.jpg',
-    alt: 'Giant manta ray swimming underwater',
+    src: '/images/panoramicas/Manta el Boiler 1.webp',
+    alt: 'Giant manta ray gliding through crystal-clear waters at El Boiler',
   },
   {
     id: 2,
-    src: '/gallery-2.jpg',
-    alt: 'School of hammerhead sharks',
+    src: '/images/panoramicas/Puntas blancas 1.webp',
+    alt: 'Whitetip reef sharks resting on the ocean floor',
   },
   {
     id: 3,
-    src: '/gallery-3.jpg',
-    alt: 'Humpback whale underwater',
+    src: '/images/actividades/Dingui Coco.webp',
+    alt: 'Dinghy excursion to a pristine beach',
   },
   {
     id: 4,
-    src: '/gallery-4.jpg',
-    alt: 'Diver exploring coral reef',
+    src: '/images/panoramicas/Pargos Roca.webp',
+    alt: 'School of snappers at Roca Partida',
   },
   {
     id: 5,
-    src: '/gallery-5.jpg',
-    alt: 'Dolphins jumping at sunset',
+    src: '/images/panoramicas/Clariones.webp',
+    alt: 'Dramatic volcanic cliffs of Clarion Island',
   },
   {
     id: 6,
-    src: '/gallery-6.jpg',
-    alt: 'Sea lion swimming underwater',
+    src: '/images/actividades/Magda .webp',
+    alt: 'Exploring remote beaches and coastlines',
   },
 ]
 
@@ -96,7 +96,7 @@ export function ScrollGallery() {
               ref={(el) => {
                 imageRefs.current[index] = el
               }}
-              className={`relative overflow-hidden rounded-lg aspect-square transition-all duration-700 ease-out ${
+              className={`relative overflow-hidden rounded-lg transition-all duration-700 ease-out aspect-[4/3] lg:aspect-square ${
                 visibleImages.has(index)
                   ? 'opacity-100 translate-y-0 scale-100'
                   : 'opacity-0 translate-y-12 scale-95'

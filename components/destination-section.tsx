@@ -13,7 +13,7 @@ export function DestinationSection() {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-fixed"
         style={{
-          backgroundImage: 'url(https://solmarv.com/wp-content/uploads/2025/10/ASDADSASD.png)',
+          backgroundImage: 'url(/images/Exterior/quetzal-costado.webp)',
         }}
       >
         {/* Dark overlay for text readability */}

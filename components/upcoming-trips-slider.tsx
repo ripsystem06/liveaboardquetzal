@@ -20,21 +20,21 @@ export function UpcomingTripsSlider() {
       title: t('trips.trip1.title'),
       dates: t('trips.trip1.dates'),
       price: t('trips.trip1.price'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-zOW3sHZKRRTuF0njfToPjYP0rw8FRU.png',
+      image: '/images/panoramicas/burritos galapagos 1.webp',
     },
     {
       id: 2,
       title: t('trips.trip2.title'),
       dates: t('trips.trip2.dates'),
       price: t('trips.trip2.price'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-DsR49J4MkAHaKEmp8nsu44lrNfTR5Q.png',
+      image: '/images/panoramicas/Cabo Pearce .webp',
     },
     {
       id: 3,
       title: t('trips.trip3.title'),
       dates: t('trips.trip3.dates'),
       price: t('trips.trip3.price'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-n6P6ZsAtLPErxXwmOOtD6bg9uZRpv1.png',
+      image: '/images/panoramicas/Quetzal El Cañon.webp',
     },
   ]
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -138,21 +138,6 @@ export function UpcomingTripsSlider() {
         <ChevronRight className="h-6 w-6" />
       </button>
 
-      {/* Dots Navigation */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-3">
-        {trips.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all ${
-              index === currentSlide 
-                ? 'bg-white w-8' 
-                : 'bg-white/50 hover:bg-white/70'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
     </section>
   )
 }

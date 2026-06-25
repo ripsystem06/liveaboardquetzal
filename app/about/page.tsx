@@ -42,7 +42,7 @@ export default function AboutPage() {
             </div>
             <div className="relative overflow-hidden rounded-lg aspect-[4/3]">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-w8vpYrdmfPKyui4jqy1OxR8YUohO5f.png"
+                src="/images/Interior/interior-07.webp"
                 alt="Quetzal Crew"
                 fill
                 className="object-cover"

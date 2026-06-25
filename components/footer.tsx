@@ -15,11 +15,11 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center">
               <Image
-                src="/iso-monocromatico.svg"
+                src="/logosquetzal/logocompletoVertical.svg"
                 alt="Quetzal Liveaboard"
-                width={48}
-                height={48}
-                className="h-12 w-auto"
+                width={160}
+                height={80}
+                className="h-32 w-auto brightness-0 invert"
                 priority
               />
             </Link>

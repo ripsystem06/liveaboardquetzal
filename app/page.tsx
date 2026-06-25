@@ -1,7 +1,7 @@
 import { Navigation } from '@/components/navigation'
 import { Hero } from '@/components/hero'
+import { LoadingScreen } from '@/components/loading-screen'
 import { ExperienceSection } from '@/components/experience-section'
-import { DestinationSection } from '@/components/destination-section'
 import { MarineLifeSection } from '@/components/marine-life-section'
 import { DestinationsGrid } from '@/components/destinations-grid'
 import { UpcomingTripsSlider } from '@/components/upcoming-trips-slider'
@@ -13,15 +13,15 @@ import { Footer } from '@/components/footer'
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <LoadingScreen />
       <Navigation />
       <Hero />
       <ExperienceSection />
-      <DestinationSection />
+      <UpcomingTripsSlider />
       <MarineLifeSection />
       <DestinationsGrid />
-      <UpcomingTripsSlider />
-      <TestimonialsSection />
       <ScrollGallery />
+      <TestimonialsSection />
       <ContactFormSection />
       <Footer />
     </main>
