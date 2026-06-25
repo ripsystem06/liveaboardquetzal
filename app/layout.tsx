@@ -4,6 +4,7 @@ import { Montserrat, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { LanguageProvider } from '@/contexts/language-context'
 import { UserProvider } from '@/contexts/user-context'
+import { LoadingScreen } from '@/components/loading-screen'
 import { HtmlLangSetter } from '@/components/html-lang-setter'
 import './globals.css'
 
@@ -39,6 +40,7 @@ export default function RootLayout({
       <body className={`${_montserrat.variable} ${_playfairDisplay.variable} font-sans antialiased`}>
         <LanguageProvider>
           <UserProvider>
+            <LoadingScreen />
             {children}
             <HtmlLangSetter />
           </UserProvider>

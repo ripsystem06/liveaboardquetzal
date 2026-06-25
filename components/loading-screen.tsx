@@ -4,14 +4,19 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 export function LoadingScreen() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(true)
   const [fadeOut, setFadeOut] = useState(false)
 
   useEffect(() => {
     const hasVisited = sessionStorage.getItem('quetzal_visited')
-    if (hasVisited) return
 
-    setVisible(true)
+    // Already visited: hide immediately, no animation
+    if (hasVisited) {
+      setVisible(false)
+      return
+    }
+
+    // First visit: mark visited, show loading animation
     sessionStorage.setItem('quetzal_visited', 'true')
 
     // Lock scroll during loading
