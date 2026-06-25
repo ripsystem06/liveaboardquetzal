@@ -258,7 +258,7 @@ describe('Reservation API Routes', () => {
   })
 
   describe('POST /api/reservations/[id]/confirm', () => {
-    it('updates status to confirmed', async () => {
+    it('records payment receipt without changing status', async () => {
       const mockReservation = {
         id: 'res_123',
         userId: 'user_123',
@@ -279,8 +279,8 @@ describe('Reservation API Routes', () => {
 
       expect(response.status).toBe(200)
       const body = await response.json()
-      expect(body.status).toBe('confirmed')
-      expect(body.message).toBe('PayPal mock confirmation received')
+      expect(body.status).toBe('pending_approval')
+      expect(body.message).toBe('Payment confirmed. Your reservation is pending admin approval.')
     })
 
     it('returns 400 for non-pending_approval reservation', async () => {

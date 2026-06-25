@@ -5,11 +5,18 @@ import { UserProvider } from '@/contexts/user-context'
 import { PaymentSection } from './payment-section'
 import type { Cruise } from './booking-page-client'
 
+// Mock PayPalSimulator to auto-complete immediately
+vi.mock('./paypal-simulator', () => ({
+  PayPalSimulator: ({ onComplete, onCancel }: { onComplete: () => void; onCancel: () => void; total: number }) => {
+    // Immediately trigger onComplete to skip the visual simulation in tests
+    setTimeout(() => onComplete(), 0)
+    return null
+  },
+}))
+
 // Mock window.open
 const windowOpenMock = vi.fn()
-vi.stubGlobal('window', {
-  open: windowOpenMock,
-})
+window.open = windowOpenMock
 
 // Mock fetch
 const fetchMock = vi.fn()
@@ -183,16 +190,13 @@ describe('PaymentSection', () => {
         fireEvent.click(paypalButton)
       }
 
-      // Give React time to update state
-      await new Promise(resolve => setTimeout(resolve, 10))
-
-      // While processing, all buttons should be disabled
-      const allButtons = screen.getAllByRole('button')
-      allButtons.forEach(btn => {
-        expect(btn).toBeDisabled()
-      })
-
-      // Resolve the pending fetch
+      // Wait for PayPalSimulator mock to auto-complete and executePayment to start
+      await waitFor(() => {
+        const allButtons = screen.getAllByRole('button')
+        allButtons.forEach(btn => {
+          expect(btn).toBeDisabled()
+        })
+      }, { timeout: 2000 })
       resolveSlow!({
         ok: true,
         json: () => Promise.resolve({ id: 'res_123', status: 'pending_approval' }),

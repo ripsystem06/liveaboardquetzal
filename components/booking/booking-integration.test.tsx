@@ -3,6 +3,14 @@ import { renderWithProviders, screen, fireEvent, waitFor } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { BookingPageClient } from './booking-page-client'
 
+// Mock PayPalSimulator to auto-complete
+vi.mock('./paypal-simulator', () => ({
+  PayPalSimulator: ({ onComplete }: { onComplete: () => void }) => {
+    setTimeout(() => onComplete(), 0)
+    return null
+  },
+}))
+
 describe('BookingPageClient integration', () => {
   // Stub localStorage before each test to prevent UserProvider useEffect errors
   beforeEach(() => {

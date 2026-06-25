@@ -8,7 +8,8 @@ interface RouteParams {
 
 /**
  * POST /api/reservations/[id]/confirm
- * Mock PayPal confirmation — transitions reservation to confirmed status.
+ * Mock PayPal confirmation — records payment receipt but keeps reservation pending approval.
+ * The reservation stays in pending_approval until admin manually approves it.
  * Requires ownership check - user can only confirm their own reservations.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
@@ -40,16 +41,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Mock confirmation: update status to confirmed
-    const updated = await prisma.reservation.update({
-      where: { id },
-      data: { status: 'confirmed' },
-    })
-
+    // Mock confirmation: payment received, reservation stays pending_approval
+    // In production, this would verify PayPal webhook and transition to confirmed
     return Response.json({
-      id: updated.id,
-      status: updated.status,
-      message: 'PayPal mock confirmation received',
+      id: reservation.id,
+      status: 'pending_approval',
+      message: 'Payment confirmed. Your reservation is pending admin approval.',
     })
   } catch (error) {
     if (error instanceof AuthError) {

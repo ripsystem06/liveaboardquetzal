@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CreditCard, Building2, Wallet, AlertCircle } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import type { Cruise } from './booking-page-client'
+import { PayPalSimulator } from './paypal-simulator'
 
 interface PaymentSectionProps {
   cruise: Cruise
@@ -38,13 +39,12 @@ export function PaymentSection({
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer' | null>(null)
+  const [showPayPalSimulator, setShowPayPalSimulator] = useState(false)
+  const [pendingTotal, setPendingTotal] = useState(totalAmount)
 
   const isHalfCharter = guestCount >= 8
 
-  const handlePay = async (method: 'card' | 'paypal' | 'bank') => {
-    // For now, treat card as PayPal flow
-    const selectedMethod: 'paypal' | 'bank_transfer' = method === 'paypal' || method === 'card' ? 'paypal' : 'bank_transfer'
-
+  const executePayment = async (selectedMethod: 'paypal' | 'bank_transfer') => {
     setIsProcessing(true)
     setError(null)
     setPaymentMethod(selectedMethod)
@@ -113,6 +113,26 @@ export function PaymentSection({
       setIsProcessing(false)
       setPaymentMethod(null)
     }
+  }
+
+  const handlePay = (method: 'card' | 'paypal' | 'bank') => {
+    const selectedMethod: 'paypal' | 'bank_transfer' = method === 'paypal' || method === 'card' ? 'paypal' : 'bank_transfer'
+    setPendingTotal(totalAmount)
+
+    if (selectedMethod === 'paypal') {
+      setShowPayPalSimulator(true)
+    } else {
+      executePayment('bank_transfer')
+    }
+  }
+
+  const handlePayPalComplete = () => {
+    setShowPayPalSimulator(false)
+    executePayment('paypal')
+  }
+
+  const handlePayPalCancel = () => {
+    setShowPayPalSimulator(false)
   }
 
   return (
@@ -194,6 +214,14 @@ export function PaymentSection({
           <div className="size-5 animate-spin rounded-full border-2 border-accent border-t-transparent" />
           <p className="text-sm text-muted-foreground">{t('booking.payment.processing')}</p>
         </div>
+      )}
+
+      {showPayPalSimulator && (
+        <PayPalSimulator
+          total={pendingTotal}
+          onComplete={handlePayPalComplete}
+          onCancel={handlePayPalCancel}
+        />
       )}
     </div>
   )
