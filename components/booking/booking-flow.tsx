@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/contexts/language-context'
+import { useUser } from '@/contexts/user-context'
 import type { Dispatch } from 'react'
 import { Button } from '@/components/ui/button'
 import { LoginForm } from './login-form'
@@ -24,6 +25,13 @@ interface BookingFlowProps {
   dispatch: Dispatch<BookingAction>
 }
 
+function calculatePayment(tierPrice: number, guestCount: number) {
+  const freeSpaces = guestCount >= 8 ? Math.floor(guestCount / 8) : 0
+  const paidSpaces = guestCount - freeSpaces
+  const total = tierPrice * paidSpaces
+  return { freeSpaces, paidSpaces, total }
+}
+
 export function BookingFlow({
   step,
   isAuthenticated,
@@ -34,8 +42,11 @@ export function BookingFlow({
   dispatch,
 }: BookingFlowProps) {
   const { t } = useLanguage()
+  const { user } = useUser()
   const router = useRouter()
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login')
+  const [reservationId, setReservationId] = useState<string | null>(null)
+  const [lastPaymentMethod, setLastPaymentMethod] = useState<'paypal' | 'bank_transfer' | null>(null)
 
   const handleCruiseSelect = (cruise: Cruise) => {
     dispatch({ type: 'SELECT_CRUISE', cruise })
@@ -57,8 +68,54 @@ export function BookingFlow({
     dispatch({ type: 'GO_BACK' })
   }
 
-  const handlePay = (method: 'card' | 'paypal' | 'bank') => {
+  const handlePaymentComplete = (id: string, paymentMethod: 'paypal' | 'bank_transfer') => {
+    setReservationId(id)
+    setLastPaymentMethod(paymentMethod)
     dispatch({ type: 'CONFIRM_PAYMENT' })
+  }
+
+  if (bookingConfirmed && reservationId) {
+    return (
+      <div className="max-w-md mx-auto p-6 text-center">
+        <div className="flex justify-center mb-6">
+          <div className="flex size-20 items-center justify-center rounded-full bg-accent/10">
+            <Check className="size-10 text-accent" />
+          </div>
+        </div>
+        <h2 className="text-3xl font-serif font-bold text-primary mb-3 text-balance">{t('booking.confirmation.title')}</h2>
+        <p className="text-muted-foreground mb-6 text-pretty">{t('booking.confirmation.message')}</p>
+
+        {/* Reservation details */}
+        <div className="rounded-xl bg-muted/50 p-4 mb-6 text-left space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">{t('booking.confirmation.reservationId')}</span>
+            <span className="font-mono font-medium text-primary">{reservationId}</span>
+          </div>
+          {lastPaymentMethod && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{t('booking.confirmation.paymentMethod')}</span>
+              <span className="font-medium text-primary capitalize">
+                {lastPaymentMethod === 'paypal' ? 'PayPal' : 'Bank Transfer'}
+              </span>
+            </div>
+          )}
+          {lastPaymentMethod === 'bank_transfer' && (
+            <p className="text-xs text-muted-foreground pt-2">
+              {t('reservation.actions.holdExpires')}
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Button asChild className="rounded-full px-8 py-3 bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform">
+            <Link href="/">{t('booking.confirmation.backHome')}</Link>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full px-8 py-3 font-semibold active:scale-[0.96] transition-transform">
+            <Link href={`/account?reservation=${reservationId}`}>{t('booking.confirmation.viewAccount')}</Link>
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   if (bookingConfirmed) {
@@ -77,6 +134,9 @@ export function BookingFlow({
       </div>
     )
   }
+
+  const tierPrice = selectedCruise ? selectedCruise.tiers[state.selectedTier || 'basic'] : 0
+  const { freeSpaces, paidSpaces, total } = calculatePayment(tierPrice, guestCount)
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -204,13 +264,21 @@ export function BookingFlow({
         </div>
       )}
 
-      {step === 3 && selectedCruise && state.selectedTier && (
+      {step === 3 && selectedCruise && state.selectedTier && isAuthenticated && (
         <div className="space-y-6">
           <PaymentSection
             cruise={selectedCruise}
             selectedTier={state.selectedTier}
             guestCount={guestCount}
-            onPay={handlePay}
+            cruiseId={selectedCruise.id}
+            departureDate={selectedCruise.departureDate}
+            route={selectedCruise.route}
+            tierPrice={tierPrice}
+            freeSpaces={freeSpaces}
+            paidSpaces={paidSpaces}
+            totalAmount={total}
+            userId={user?.id || 'demo-user'}
+            onPaymentComplete={handlePaymentComplete}
           />
 
           <div className="flex justify-between">

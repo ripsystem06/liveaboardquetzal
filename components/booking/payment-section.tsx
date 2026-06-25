@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CreditCard, Building2, Wallet } from 'lucide-react'
+import { CreditCard, Building2, Wallet, AlertCircle } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import type { Cruise } from './booking-page-client'
 
@@ -9,35 +9,120 @@ interface PaymentSectionProps {
   cruise: Cruise
   selectedTier: 'basic' | 'standard' | 'premium'
   guestCount: number
-  onPay: (method: 'card' | 'paypal' | 'bank') => void
+  cruiseId: string
+  departureDate: string
+  route: string
+  tierPrice: number
+  freeSpaces: number
+  paidSpaces: number
+  totalAmount: number
+  userId: string
+  onPaymentComplete: (reservationId: string, paymentMethod: 'paypal' | 'bank_transfer') => void
 }
 
-function calculatePayment(tierPrice: number, guestCount: number) {
-  const freeSpaces = guestCount >= 8 ? Math.floor(guestCount / 8) : 0
-  const paidSpaces = guestCount - freeSpaces
-  const total = tierPrice * paidSpaces
-  return { freeSpaces, paidSpaces, total }
-}
-
-export function PaymentSection({ cruise, selectedTier, guestCount, onPay }: PaymentSectionProps) {
+export function PaymentSection({
+  cruise,
+  selectedTier,
+  guestCount,
+  cruiseId,
+  departureDate,
+  route,
+  tierPrice,
+  freeSpaces,
+  paidSpaces,
+  totalAmount,
+  userId,
+  onPaymentComplete,
+}: PaymentSectionProps) {
   const { t } = useLanguage()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer' | null>(null)
 
-  const tierPrice = cruise.tiers[selectedTier]
-  const { freeSpaces, paidSpaces, total } = calculatePayment(tierPrice, guestCount)
   const isHalfCharter = guestCount >= 8
 
-  const handlePay = (method: 'card' | 'paypal' | 'bank') => {
+  const handlePay = async (method: 'card' | 'paypal' | 'bank') => {
+    // For now, treat card as PayPal flow
+    const selectedMethod: 'paypal' | 'bank_transfer' = method === 'paypal' || method === 'card' ? 'paypal' : 'bank_transfer'
+
     setIsProcessing(true)
-    // Simulate processing
-    setTimeout(() => {
+    setError(null)
+    setPaymentMethod(selectedMethod)
+
+    try {
+      // Step 1: Create reservation
+      const createResponse = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          cruiseId,
+          cruiseName: cruise.name,
+          departureDate,
+          route,
+          tier: selectedTier,
+          tierPrice,
+          guestCount,
+          paymentMethod: selectedMethod,
+        }),
+      })
+
+      if (!createResponse.ok) {
+        if (createResponse.status === 409) {
+          throw new Error('DATE_BLOCKED')
+        }
+        if (createResponse.status === 401) {
+          throw new Error('AUTH_REQUIRED')
+        }
+        throw new Error('CREATE_FAILED')
+      }
+
+      const reservation = await createResponse.json()
+
+      // Step 2: For PayPal, confirm immediately
+      if (selectedMethod === 'paypal') {
+        const confirmResponse = await fetch(`/api/reservations/${reservation.id}/confirm`, {
+          method: 'POST',
+        })
+
+        if (!confirmResponse.ok) {
+          throw new Error('CONFIRM_FAILED')
+        }
+      } else {
+        // Step 2: For bank transfer, download PDF
+        window.open(`/api/reservations/${reservation.id}/pdf`, '_blank')
+      }
+
+      // Step 3: Notify parent
+      onPaymentComplete(reservation.id, selectedMethod)
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === 'DATE_BLOCKED') {
+          setError(t('booking.payment.dateBlocked'))
+        } else if (err.message === 'AUTH_REQUIRED') {
+          setError(t('booking.payment.authRequired'))
+        } else {
+          setError(t('booking.payment.error'))
+        }
+      } else {
+        setError(t('booking.payment.error'))
+      }
+    } finally {
       setIsProcessing(false)
-      onPay(method)
-    }, 500)
+      setPaymentMethod(null)
+    }
   }
 
   return (
     <div className="space-y-8">
+      {/* Error message */}
+      {error && (
+        <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-red-800">
+          <AlertCircle className="size-5 shrink-0" />
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
       {/* Summary Card */}
       <div className="rounded-2xl bg-card p-8 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)]">
         <h3 className="text-xl font-serif font-bold text-primary mb-6 text-balance">{t('booking.payment.summary')}</h3>
@@ -69,7 +154,7 @@ export function PaymentSection({ cruise, selectedTier, guestCount, onPay }: Paym
           )}
           <div className="flex justify-between items-center pt-4 border-t border-border">
             <span className="text-base font-semibold text-primary">{t('booking.payment.total')}</span>
-            <span className="font-serif text-2xl font-bold text-accent tabular-nums">${total.toLocaleString()}</span>
+            <span className="font-serif text-2xl font-bold text-accent tabular-nums">${totalAmount.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -105,9 +190,16 @@ export function PaymentSection({ cruise, selectedTier, guestCount, onPay }: Paym
       {isProcessing && (
         <div className="flex items-center justify-center gap-3 py-6">
           <div className="size-5 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-          <p className="text-sm text-muted-foreground">{t('booking.payment.confirming')}</p>
+          <p className="text-sm text-muted-foreground">{t('booking.payment.processing')}</p>
         </div>
       )}
     </div>
   )
+}
+
+function calculatePayment(tierPrice: number, guestCount: number) {
+  const freeSpaces = guestCount >= 8 ? Math.floor(guestCount / 8) : 0
+  const paidSpaces = guestCount - freeSpaces
+  const total = tierPrice * paidSpaces
+  return { freeSpaces, paidSpaces, total }
 }

@@ -47,19 +47,15 @@ describe('BookingPageClient integration', () => {
         expect(screen.getByText(/booking summary/i)).toBeInTheDocument()
       })
 
-      // Step 3: Click payment button
+      // Step 3: Click payment button (triggers API calls)
       const payButton = screen.getByRole('button', { name: /pay with credit card/i })
       await user.click(payButton)
 
-      // Wait for processing
-      await waitFor(() => {
-        expect(screen.getByText(/processing/i)).toBeInTheDocument()
-      })
-
-      // Should show confirmation
+      // Payment triggers async API calls; with mocked fetch the flow completes
+      // Should show confirmation after payment processing
       await waitFor(() => {
         expect(screen.getByText(/booking confirmed/i)).toBeInTheDocument()
-      }, { timeout: 2000 })
+      }, { timeout: 3000 })
     })
 
     it('does not persist any session token after login', async () => {

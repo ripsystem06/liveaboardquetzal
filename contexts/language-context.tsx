@@ -430,6 +430,36 @@ const translations = {
     'account.status.pending': 'Pending',
     'account.status.confirmed': 'Confirmed',
     'account.status.completed': 'Completed',
+
+    // Reservation Status
+    'reservation.status.pending': 'Pending Approval',
+    'reservation.status.confirmed': 'Confirmed',
+    'reservation.status.expired': 'Expired',
+    'reservation.status.cancelled': 'Cancelled',
+
+    // Account Panel
+    'account.reservations.title': 'My Reservations',
+    'account.reservations.empty': 'No reservations yet. Start by booking an expedition!',
+    'account.reservations.loading': 'Loading reservations...',
+    'account.reservations.error': 'Failed to load reservations',
+
+    // Reservation Actions
+    'reservation.actions.downloadPdf': 'Download PDF',
+    'reservation.actions.emailReceipt': 'Send via Email',
+    'reservation.actions.whatsappReceipt': 'Send via WhatsApp',
+    'reservation.actions.holdExpires': 'Hold expires: {date}',
+    'reservation.actions.expiredMessage': 'This reservation has expired and the date has been released.',
+
+    // Payment Section
+    'booking.payment.processing': 'Processing...',
+    'booking.payment.error': 'Payment failed. Please try again.',
+    'booking.payment.dateBlocked': 'This date is no longer available. Please select another.',
+    'booking.payment.authRequired': 'Please log in to complete your booking.',
+
+    // Confirmation
+    'booking.confirmation.reservationId': 'Reservation ID',
+    'booking.confirmation.paymentMethod': 'Payment Method',
+    'booking.confirmation.viewAccount': 'View in My Account',
   },
   es: {
     // Navigation
@@ -846,6 +876,36 @@ const translations = {
     'account.status.pending': 'Pendiente',
     'account.status.confirmed': 'Confirmado',
     'account.status.completed': 'Completado',
+
+    // Reservation Status
+    'reservation.status.pending': 'Pendiente de Aprobación',
+    'reservation.status.confirmed': 'Confirmada',
+    'reservation.status.expired': 'Expirada',
+    'reservation.status.cancelled': 'Cancelada',
+
+    // Account Panel
+    'account.reservations.title': 'Mis Reservaciones',
+    'account.reservations.empty': 'Aún no tienes reservaciones. ¡Reserva una expedición!',
+    'account.reservations.loading': 'Cargando reservaciones...',
+    'account.reservations.error': 'Error al cargar las reservaciones',
+
+    // Reservation Actions
+    'reservation.actions.downloadPdf': 'Descargar PDF',
+    'reservation.actions.emailReceipt': 'Enviar por Email',
+    'reservation.actions.whatsappReceipt': 'Enviar por WhatsApp',
+    'reservation.actions.holdExpires': 'El hold expira: {date}',
+    'reservation.actions.expiredMessage': 'Esta reservación ha expirado y la fecha fue liberada.',
+
+    // Payment Section
+    'booking.payment.processing': 'Procesando...',
+    'booking.payment.error': 'El pago falló. Intenta de nuevo.',
+    'booking.payment.dateBlocked': 'Esta fecha ya no está disponible. Selecciona otra.',
+    'booking.payment.authRequired': 'Inicia sesión para completar tu reserva.',
+
+    // Confirmation
+    'booking.confirmation.reservationId': 'ID de Reservación',
+    'booking.confirmation.paymentMethod': 'Método de Pago',
+    'booking.confirmation.viewAccount': 'Ver en Mi Cuenta',
   },
 }
 

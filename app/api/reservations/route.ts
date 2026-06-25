@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { getAuthUserId, AuthError } from '@/lib/auth'
 
 interface CreateReservationBody {
-  userId: string
   cruiseId: string
   cruiseName: string
   departureDate: string
@@ -22,11 +22,12 @@ interface CreateReservationBody {
  */
 export async function POST(request: NextRequest) {
   try {
+    const userId = await getAuthUserId()
     const body: CreateReservationBody = await request.json()
 
     // Basic validation
     const requiredFields: (keyof CreateReservationBody)[] = [
-      'userId', 'cruiseId', 'cruiseName', 'departureDate', 'route',
+      'cruiseId', 'cruiseName', 'departureDate', 'route',
       'tier', 'tierPrice', 'guestCount', 'freeSpaces', 'paidSpaces',
       'totalAmount', 'paymentMethod',
     ]
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     const reservation = await prisma.reservation.create({
       data: {
-        userId: body.userId,
+        userId,
         cruiseId: body.cruiseId,
         cruiseName: body.cruiseName,
         departureDate: body.departureDate,
@@ -90,23 +91,21 @@ export async function POST(request: NextRequest) {
 
     return Response.json(reservation, { status: 201 })
   } catch (error) {
+    if (error instanceof AuthError) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
+    }
     console.error('POST /api/reservations error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 /**
- * GET /api/reservations?userId=X
- * Lists all reservations for a user with auto-expiry check.
+ * GET /api/reservations
+ * Lists all reservations for the authenticated user with auto-expiry check.
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-
-    if (!userId) {
-      return Response.json({ error: 'Missing required query param: userId' }, { status: 400 })
-    }
+    const userId = await getAuthUserId()
 
     const reservations = await prisma.reservation.findMany({
       where: { userId },
@@ -120,6 +119,9 @@ export async function GET(request: NextRequest) {
 
     return Response.json({ reservations: processedReservations })
   } catch (error) {
+    if (error instanceof AuthError) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
+    }
     console.error('GET /api/reservations error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }

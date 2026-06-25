@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '@/contexts/user-context'
 import { useLanguage } from '@/contexts/language-context'
 import { ProfileForm } from '@/components/account/profile-form'
-import { ReservationHistory } from '@/components/account/reservation-history'
+import { ReservationList } from '@/components/account/reservation-list'
 import { User, CalendarDays } from 'lucide-react'
 
 type AccountTab = 'profile' | 'reservations'
@@ -69,7 +69,7 @@ export function AccountPageClient() {
         <main className="flex-1 min-w-0">
           <div className="rounded-2xl bg-card p-8 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)]">
             {activeTab === 'profile' && <ProfileForm user={user} />}
-            {activeTab === 'reservations' && <ReservationHistory />}
+            {activeTab === 'reservations' && <ReservationList userId={user.id} />}
           </div>
         </main>
       </div>

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generateBankTransferPDF } from '@/lib/pdf-generator'
+import { getAuthUserId, AuthError } from '@/lib/auth'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -9,9 +10,11 @@ interface RouteParams {
 /**
  * GET /api/reservations/[id]/pdf
  * Returns a PDF with bank transfer instructions for bank_transfer reservations.
+ * Requires ownership check - user can only access their own reservation PDFs.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const authUserId = await getAuthUserId()
     const { id } = await params
 
     const reservation = await prisma.reservation.findUnique({
@@ -20,6 +23,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!reservation) {
       return Response.json({ error: 'Reservation not found' }, { status: 404 })
+    }
+
+    // Ownership check
+    if (reservation.userId !== authUserId) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     if (reservation.paymentMethod !== 'bank_transfer') {
@@ -39,6 +47,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     })
   } catch (error) {
+    if (error instanceof AuthError) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
+    }
     console.error('GET /api/reservations/[id]/pdf error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }

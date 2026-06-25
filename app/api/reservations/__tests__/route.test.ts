@@ -25,6 +25,16 @@ vi.mock('@/lib/pdf-generator', () => ({
   generateBankTransferPDF: vi.fn(() => Promise.resolve(Buffer.from('%PDF-1.4 mock'))),
 }))
 
+vi.mock('@/lib/auth', () => ({
+  getAuthUserId: vi.fn(() => Promise.resolve('user_123')),
+  AuthError: class extends Error {
+    constructor(m: string) {
+      super(m)
+      this.name = 'AuthError'
+    }
+  },
+}))
+
 // Import route handlers after mocking
 const { POST, GET } = await import('@/app/api/reservations/route')
 const { GET: GET_SINGLE } = await import('@/app/api/reservations/[id]/route')
@@ -32,14 +42,18 @@ const { POST: POST_CONFIRM } = await import('@/app/api/reservations/[id]/confirm
 const { GET: GET_PDF } = await import('@/app/api/reservations/[id]/pdf/route')
 const { GET: GET_AVAILABILITY } = await import('@/app/api/reservations/check-availability/route')
 
+// Re-import auth mocks for test control
+const { getAuthUserId, AuthError } = await import('@/lib/auth')
+
 describe('Reservation API Routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Default: authenticated as user_123
+    vi.mocked(getAuthUserId).mockResolvedValue('user_123')
   })
 
   describe('POST /api/reservations', () => {
     const validBody = {
-      userId: 'user_123',
       cruiseId: 'socorro-1',
       cruiseName: 'Socorro Islands',
       departureDate: '2026-07-15',
@@ -56,6 +70,7 @@ describe('Reservation API Routes', () => {
     it('creates reservation successfully', async () => {
       const mockReservation = {
         id: 'res_new_123',
+        userId: 'user_123',
         ...validBody,
         status: 'pending_approval',
         holdExpiry: expect.any(Date),
@@ -95,7 +110,7 @@ describe('Reservation API Routes', () => {
     })
 
     it('returns 400 for missing required fields', async () => {
-      const incompleteBody = { userId: 'user_123' }
+      const incompleteBody = { cruiseId: 'socorro-1' }
 
       const request = new NextRequest('http://localhost/api/reservations', {
         method: 'POST',
@@ -116,6 +131,21 @@ describe('Reservation API Routes', () => {
 
       const response = await POST(request)
       expect(response.status).toBe(400)
+    })
+
+    it('returns 401 when no session cookie', async () => {
+      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+
+      const request = new NextRequest('http://localhost/api/reservations', {
+        method: 'POST',
+        body: JSON.stringify(validBody),
+      })
+
+      const response = await POST(request)
+      expect(response.status).toBe(401)
+
+      const body = await response.json()
+      expect(body.error).toBe('Authentication required')
     })
   })
 
@@ -145,7 +175,7 @@ describe('Reservation API Routes', () => {
 
       mockFindMany.mockResolvedValue(mockReservations)
 
-      const request = new NextRequest('http://localhost/api/reservations?userId=user_123')
+      const request = new NextRequest('http://localhost/api/reservations')
       const response = await GET(request)
 
       expect(response.status).toBe(200)
@@ -154,11 +184,13 @@ describe('Reservation API Routes', () => {
       expect(body.reservations[0].id).toBe('res_1')
     })
 
-    it('returns 400 when userId is missing', async () => {
+    it('returns 401 when no session cookie', async () => {
+      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+
       const request = new NextRequest('http://localhost/api/reservations')
       const response = await GET(request)
 
-      expect(response.status).toBe(400)
+      expect(response.status).toBe(401)
     })
   })
 
@@ -202,6 +234,27 @@ describe('Reservation API Routes', () => {
 
       expect(response.status).toBe(404)
     })
+
+    it('returns 403 when accessing another user\'s reservation', async () => {
+      mockFindUnique.mockResolvedValue({
+        id: 'res_123',
+        userId: 'other_user',
+      })
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123')
+      const response = await GET_SINGLE(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(403)
+    })
+
+    it('returns 401 when no session cookie', async () => {
+      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123')
+      const response = await GET_SINGLE(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(401)
+    })
   })
 
   describe('POST /api/reservations/[id]/confirm', () => {
@@ -233,6 +286,7 @@ describe('Reservation API Routes', () => {
     it('returns 400 for non-pending_approval reservation', async () => {
       mockFindUnique.mockResolvedValue({
         id: 'res_123',
+        userId: 'user_123',
         status: 'expired',
       })
 
@@ -257,6 +311,34 @@ describe('Reservation API Routes', () => {
       const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'nonexistent' }) })
 
       expect(response.status).toBe(404)
+    })
+
+    it('returns 403 when confirming another user\'s reservation', async () => {
+      mockFindUnique.mockResolvedValue({
+        id: 'res_123',
+        userId: 'other_user',
+        status: 'pending_approval',
+      })
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
+        method: 'POST',
+      })
+
+      const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(403)
+    })
+
+    it('returns 401 when no session cookie', async () => {
+      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
+        method: 'POST',
+      })
+
+      const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(401)
     })
   })
 
@@ -295,6 +377,7 @@ describe('Reservation API Routes', () => {
     it('returns 400 for non-bank_transfer reservation', async () => {
       mockFindUnique.mockResolvedValue({
         id: 'res_123',
+        userId: 'user_123',
         paymentMethod: 'paypal',
       })
 
@@ -311,6 +394,28 @@ describe('Reservation API Routes', () => {
       const response = await GET_PDF(request, { params: Promise.resolve({ id: 'nonexistent' }) })
 
       expect(response.status).toBe(404)
+    })
+
+    it('returns 403 when accessing another user\'s PDF', async () => {
+      mockFindUnique.mockResolvedValue({
+        id: 'res_123',
+        userId: 'other_user',
+        paymentMethod: 'bank_transfer',
+      })
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
+      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(403)
+    })
+
+    it('returns 401 when no session cookie', async () => {
+      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
+      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(401)
     })
   })
 
@@ -350,6 +455,51 @@ describe('Reservation API Routes', () => {
       const response = await GET_AVAILABILITY(request)
 
       expect(response.status).toBe(400)
+    })
+
+    it('returns available: true when existing reservation is expired', async () => {
+      mockFindFirst.mockResolvedValue(null) // Only pending_approval blocks
+
+      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
+      const response = await GET_AVAILABILITY(request)
+
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.available).toBe(true)
+    })
+
+    it('returns available: true when existing reservation is cancelled', async () => {
+      mockFindFirst.mockResolvedValue(null) // Cancelled does not block
+
+      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
+      const response = await GET_AVAILABILITY(request)
+
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.available).toBe(true)
+    })
+
+    it('returns available: true when existing reservation is confirmed', async () => {
+      mockFindFirst.mockResolvedValue(null) // Confirmed does not block
+
+      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
+      const response = await GET_AVAILABILITY(request)
+
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.available).toBe(true)
+    })
+
+    it('does not block when two different cruises have the same date', async () => {
+      // A pending reservation for a DIFFERENT cruiseId on the same date should not block
+      mockFindFirst.mockResolvedValue(null)
+
+      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=coronado-1&departureDate=2026-07-15')
+      const response = await GET_AVAILABILITY(request)
+
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.available).toBe(true)
     })
   })
 })

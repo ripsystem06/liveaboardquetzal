@@ -151,6 +151,33 @@ describe('BookingFlow', () => {
     expect(screen.getByText(/booking confirmed/i)).toBeInTheDocument()
   })
 
+  it('confirmation screen shows a link to return home', () => {
+    const state: BookingState = {
+      ...mockState,
+      step: 3,
+      loginCompleted: true,
+      selectedCruise: mockCruise,
+      selectedTier: 'standard',
+      bookingConfirmed: true,
+    }
+    renderWithProviders(
+      <BookingFlow
+        step={3}
+        isAuthenticated={true}
+        selectedCruise={mockCruise}
+        guestCount={2}
+        bookingConfirmed={true}
+        state={state}
+        dispatch={mockDispatch}
+      />
+    )
+
+    // The confirmation has a link back to home
+    const links = screen.getAllByRole('link')
+    const homeLink = links.find(link => link.getAttribute('href') === '/')
+    expect(homeLink).toBeInTheDocument()
+  })
+
   it('shows sign-in buttons on step 2 when user is unauthenticated', () => {
     const state: BookingState = { ...mockState, step: 2, loginCompleted: false }
     renderWithProviders(

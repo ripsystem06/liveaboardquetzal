@@ -29,6 +29,12 @@ export function LoginForm({ dispatch }: LoginFormProps) {
 
     const ok = await login(email, password)
     if (ok) {
+      // Set session cookie for API authentication
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: email }),
+      })
       dispatch({ type: 'LOGIN_COMPLETED' })
     } else {
       setError(t('booking.login.error'))
