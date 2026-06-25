@@ -97,7 +97,7 @@ function ReservationCard({ reservation }: { reservation: ReservationData }) {
   }
 
   const holdExpiryDate = reservation.holdExpiry
-    ? formatDate(reservation.holdExpiry.toISOString())
+    ? formatDate(String(reservation.holdExpiry))
     : null
 
   return (
