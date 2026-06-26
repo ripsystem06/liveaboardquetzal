@@ -1,12 +1,15 @@
 import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
+import { sign } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
-  const { userId } = await request.json()
-  if (!userId) return Response.json({ error: 'userId required' }, { status: 400 })
+  const user = await request.json()
+  if (!user || !user.id) return Response.json({ error: 'user required' }, { status: 400 })
 
+  // Store HMAC-signed user JSON in cookie so server-side auth can extract email
+  const cookieValue = sign(JSON.stringify(user))
   const cookieStore = await cookies()
-  cookieStore.set('quetzal_session', userId, {
+  cookieStore.set('quetzal_session', cookieValue, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

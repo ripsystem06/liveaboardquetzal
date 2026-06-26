@@ -7,6 +7,11 @@ export const prisma = globalForPrisma.prisma || new PrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
+// Enable WAL mode for better concurrency (skip in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  prisma.$executeRawUnsafe('PRAGMA journal_mode=WAL')
+}
+
 export interface ReservationData {
   id: string
   userId: string

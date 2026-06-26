@@ -1,0 +1,32 @@
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Navigation } from '@/components/navigation'
+import { Footer } from '@/components/footer'
+import { BlogDetailClient } from './blog-detail-client'
+import { prisma } from '@/lib/db'
+import { notFound } from 'next/navigation'
+
+interface BlogDetailPageProps {
+  params: Promise<{ id: string }>
+}
+
+export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
+  const { id } = await params
+  
+  const post = await prisma.blogPost.findUnique({
+    where: { id },
+  })
+
+  if (!post || post.status !== 'published') {
+    notFound()
+  }
+
+  return (
+    <main className="min-h-screen">
+      <Navigation />
+      <BlogDetailClient post={post} />
+      <Footer />
+    </main>
+  )
+}

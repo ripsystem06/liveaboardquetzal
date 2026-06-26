@@ -25,7 +25,7 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { language, setLanguage, t } = useLanguage()
-  const { isAuthenticated, logout } = useUser()
+  const { isAuthenticated, isAdmin, logout } = useUser()
   const { direction, isPastThreshold } = useScrollDirection(50)
   const isCompactDesktop = direction === 'down' && isPastThreshold
   const pathname = usePathname()
@@ -122,6 +122,14 @@ export function Navigation() {
             >
               {t('nav.blogs')}
             </Link>
+            {isAdmin && (
+              <Link 
+                href="/admin" 
+                className="text-accent hover:text-accent/80 transition-colors text-sm font-medium tracking-wide"
+              >
+                {t('nav.admin')}
+              </Link>
+            )}
             <Link 
               href="/contacto" 
               className="text-foreground hover:text-accent transition-colors text-sm font-medium tracking-wide"
@@ -210,6 +218,11 @@ export function Navigation() {
                   <Link href="/blog" className="text-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.blogs')}
                   </Link>
+                  {isAdmin && (
+                    <Link href="/admin" className="text-accent hover:text-accent/80 py-2 text-lg font-bold">
+                      {t('nav.admin')}
+                    </Link>
+                  )}
                   <Link href="/contacto" className="text-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.contact')}
                   </Link>
@@ -298,6 +311,11 @@ export function Navigation() {
             <Link href="/blog" className="block text-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.blogs')}
             </Link>
+            {isAdmin && (
+              <Link href="/admin" className="block text-accent hover:text-accent/80 py-2 font-bold" onClick={() => setIsOpen(false)}>
+                {t('nav.admin')}
+              </Link>
+            )}
             <Link href="/contacto" className="block text-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.contact')}
             </Link>

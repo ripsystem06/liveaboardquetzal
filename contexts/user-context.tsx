@@ -25,6 +25,8 @@ const MOCK_USER: User = {
 
 const VALID_EMAIL = 'demo@quetzal.com'
 const VALID_PASSWORD = '123456'
+const ADMIN_LOGIN_EMAIL = 'admin@quetzal.com'
+const ADMIN_LOGIN_PASSWORD = 'admin123'
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
@@ -55,6 +57,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
     setUser(newUser)
     sessionStorage.setItem('quetzal_user', JSON.stringify(newUser))
+    // Set server session cookie so API routes can authenticate
+    await fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newUser),
+    })
     return newUser
   }
 
@@ -62,6 +70,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (email === VALID_EMAIL && password === VALID_PASSWORD) {
       setUser(MOCK_USER)
       sessionStorage.setItem('quetzal_user', JSON.stringify(MOCK_USER))
+      // Set server session cookie so API routes can authenticate
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(MOCK_USER),
+      })
+      return true
+    }
+    if (email === ADMIN_LOGIN_EMAIL && password === ADMIN_LOGIN_PASSWORD) {
+      const adminUser: User = { ...MOCK_USER, email: ADMIN_LOGIN_EMAIL, isAdmin: true }
+      setUser(adminUser)
+      sessionStorage.setItem('quetzal_user', JSON.stringify(adminUser))
+      // Set server session cookie so API routes can authenticate
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(adminUser),
+      })
       return true
     }
     return false
@@ -70,6 +96,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null)
     sessionStorage.removeItem('quetzal_user')
+    // Clear server session cookie so API routes no longer authenticate
+    fetch('/api/auth/session', { method: 'DELETE' }).catch(() => {})
   }
 
   const updateProfile = (data: { name?: string; phone?: string }) => {

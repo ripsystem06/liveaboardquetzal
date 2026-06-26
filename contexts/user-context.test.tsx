@@ -136,6 +136,43 @@ describe('useUser', () => {
     })
   })
 
+  describe('isAdmin', () => {
+    it('sets isAdmin true when registering with admin@quetzal.com', async () => {
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      await act(async () => {
+        await result.current.register('Admin User', 'admin@quetzal.com', 'password123')
+      })
+
+      expect(result.current.user?.email).toBe('admin@quetzal.com')
+      expect(result.current.isAdmin).toBe(true)
+    })
+
+    it('sets isAdmin false when registering with non-admin email', async () => {
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      await act(async () => {
+        await result.current.register('Regular User', 'user@example.com', 'password123')
+      })
+
+      expect(result.current.user?.email).toBe('user@example.com')
+      expect(result.current.isAdmin).toBe(false)
+    })
+
+    it('sets isAdmin true when logging in with admin@quetzal.com', async () => {
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      let loginSuccess: boolean | undefined
+      await act(async () => {
+        loginSuccess = await result.current.login('admin@quetzal.com', 'admin123')
+      })
+
+      expect(loginSuccess).toBe(true)
+      expect(result.current.user?.email).toBe('admin@quetzal.com')
+      expect(result.current.isAdmin).toBe(true)
+    })
+  })
+
   describe('session restore on mount', () => {
     it('restores session from sessionStorage when valid data exists', async () => {
       // Pre-populate sessionStorage with user data
