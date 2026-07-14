@@ -6,6 +6,8 @@ import { AuthError } from '@/lib/auth'
 const mockReservationFindMany = vi.fn()
 const mockReservationFindUnique = vi.fn()
 const mockReservationUpdate = vi.fn()
+const mockReservationAggregate = vi.fn()
+const mockReservationCount = vi.fn()
 const mockCruiseFindMany = vi.fn()
 const mockCruiseFindUnique = vi.fn()
 const mockCruiseCreate = vi.fn()
@@ -26,6 +28,8 @@ vi.mock('@/lib/db', () => ({
       findUnique: mockReservationFindUnique,
       update: mockReservationUpdate,
       findFirst: mockReservationFindFirst,
+      aggregate: mockReservationAggregate,
+      count: mockReservationCount,
     },
     cruise: {
       findMany: mockCruiseFindMany,
@@ -108,8 +112,10 @@ describe('Admin API Integration Tests', () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
       vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
 
+      mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 1000 } })
+      mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(1)
       mockReservationFindMany.mockResolvedValue([
-        { id: 'r1', status: 'confirmed', totalAmount: 1000, guestCount: 2, cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15' },
+        { cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15', guestCount: 2, totalAmount: 1000 },
       ])
 
       const request = new NextRequest('http://localhost/api/admin/dashboard')

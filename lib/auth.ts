@@ -1,17 +1,28 @@
 import { cookies } from 'next/headers'
-import { createHmac, randomBytes, timingSafeEqual } from 'crypto'
+import { createHmac, randomBytes, scrypt, timingSafeEqual } from 'crypto'
+import { promisify } from 'util'
+
+const scryptAsync = promisify(scrypt)
 
 const SESSION_COOKIE = 'quetzal_session'
 
-// Generate a random 64-char hex string as default (dev fallback)
-const SECRET = process.env.SESSION_SECRET || randomBytes(32).toString('hex')
+// SESSION_SECRET is required in production; dev gets a random ephemeral fallback
+const SECRET = process.env.SESSION_SECRET
+if (!SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('SESSION_SECRET environment variable is required in production')
+  }
+  // Dev fallback: warn but continue with random secret
+  console.warn('[auth] SESSION_SECRET not set — using random ephemeral secret (sessions will expire on restart)')
+}
+const effectiveSecret = SECRET || randomBytes(32).toString('hex')
 
 /**
  * Signs a payload with HMAC-SHA256.
  * Returns base64url(payload).base64url(hmac)
  */
 export function sign(payload: string): string {
-  const hmac = createHmac('sha256', SECRET).update(payload).digest('base64url')
+  const hmac = createHmac('sha256', effectiveSecret).update(payload).digest('base64url')
   return `${Buffer.from(payload).toString('base64url')}.${hmac}`
 }
 
@@ -25,7 +36,7 @@ export function verify(token: string): string | null {
   const encoded = token.slice(0, lastDot)
   const sig = token.slice(lastDot + 1)
   if (!encoded || !sig) return null
-  const expectedSig = createHmac('sha256', SECRET).update(Buffer.from(encoded, 'base64url').toString()).digest('base64url')
+  const expectedSig = createHmac('sha256', effectiveSecret).update(Buffer.from(encoded, 'base64url').toString()).digest('base64url')
   let sigBuffer: Buffer, expectedBuffer: Buffer
   try {
     sigBuffer = Buffer.from(sig, 'base64url')
@@ -63,6 +74,36 @@ export async function getAuthUserId(): Promise<string> {
   } catch (e) {
     if (e instanceof AuthError) throw e
     throw new AuthError('Authentication required')
+  }
+}
+
+/**
+ * Hashes a password using scrypt with a random 16-byte salt.
+ * Returns "salt_hex:hash_hex" string suitable for storage.
+ */
+export async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString('hex')
+  const hash = (await scryptAsync(password, salt, 64)) as Buffer
+  return `${salt}:${hash.toString('hex')}`
+}
+
+/**
+ * Verifies a password against a stored "salt_hex:hash_hex" string.
+ * Uses timing-safe comparison to prevent timing attacks.
+ */
+export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  const colonIndex = storedHash.indexOf(':')
+  if (colonIndex === -1) return false
+  const salt = storedHash.slice(0, colonIndex)
+  const originalHash = storedHash.slice(colonIndex + 1)
+  if (!salt || !originalHash) return false
+  try {
+    const hash = (await scryptAsync(password, salt, 64)) as Buffer
+    const originalBuffer = Buffer.from(originalHash, 'hex')
+    if (hash.length !== originalBuffer.length) return false
+    return timingSafeEqual(hash, originalBuffer)
+  } catch {
+    return false
   }
 }
 

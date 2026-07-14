@@ -1,11 +1,12 @@
-import { describe, it, expect } from 'vitest'
-import { sign, verify } from '../auth'
+import { describe, it, expect, vi } from 'vitest'
+import { sign, verify, hashPassword, verifyPassword } from '../auth'
 
 // We need to set SESSION_SECRET for consistent test results
 const TEST_SECRET = 'test-secret-64-characters-long-for-hmac-sha256-verification-tests!!'
 process.env.SESSION_SECRET = TEST_SECRET
 
-// Re-import with env set
+// Re-import with env set — force a fresh module load
+vi.resetModules()
 const { sign: sign2, verify: verify2 } = await import('../auth')
 
 describe('HMAC sign/verify', () => {
@@ -71,5 +72,34 @@ describe('HMAC sign/verify', () => {
     it('returns null for empty string', () => {
       expect(verify2('')).toBeNull()
     })
+  })
+})
+
+describe('hashPassword / verifyPassword', () => {
+  it('verifyPassword returns true for matching password', async () => {
+    const hashed = await hashPassword('my-secret-password')
+    const result = await verifyPassword('my-secret-password', hashed)
+    expect(result).toBe(true)
+  })
+
+  it('verifyPassword returns false for wrong password', async () => {
+    const hashed = await hashPassword('my-secret-password')
+    const result = await verifyPassword('wrong-password', hashed)
+    expect(result).toBe(false)
+  })
+
+  it('hashPassword produces different hashes for same password (different salts)', async () => {
+    const hash1 = await hashPassword('same-password')
+    const hash2 = await hashPassword('same-password')
+    expect(hash1).not.toBe(hash2)
+    // Both should still verify correctly
+    expect(await verifyPassword('same-password', hash1)).toBe(true)
+    expect(await verifyPassword('same-password', hash2)).toBe(true)
+  })
+
+  it('verifyPassword handles empty password gracefully', async () => {
+    const hashed = await hashPassword('some-password')
+    const result = await verifyPassword('', hashed)
+    expect(result).toBe(false)
   })
 })

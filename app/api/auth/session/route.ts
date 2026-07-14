@@ -1,10 +1,88 @@
 import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
-import { sign } from '@/lib/auth'
+import { sign, hashPassword, verifyPassword } from '@/lib/auth'
+import { ADMIN_EMAIL } from '@/lib/config'
+import { prisma } from '@/lib/db'
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
-  const user = await request.json()
-  if (!user || !user.id) return Response.json({ error: 'user required' }, { status: 400 })
+  // CSRF: verify same-origin request
+  const origin = request.headers.get('origin')
+  const host = request.headers.get('host')
+  if (origin && host && !origin.endsWith(host)) {
+    return Response.json({ error: 'Invalid origin' }, { status: 403 })
+  }
+
+  // Rate limit
+  const ip = getClientIP(request)
+  const rl = checkRateLimit(ip)
+  if (!rl.allowed) {
+    return Response.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfter!) } },
+    )
+  }
+
+  const body = await request.json()
+  if (!body) return Response.json({ error: 'Body required' }, { status: 400 })
+
+  const { email, password, name } = body as { email?: string; password?: string; name?: string }
+
+  if (!email || !password) {
+    return Response.json({ error: 'Email and password required' }, { status: 400 })
+  }
+
+  let user: { id: string; name: string; email: string; phone: string; isAdmin: boolean }
+
+  // Admin login — server-side verified against ADMIN_PASSWORD_HASH env var
+  if (email === ADMIN_EMAIL) {
+    const storedHash = process.env.ADMIN_PASSWORD_HASH
+    if (!storedHash || !(await verifyPassword(password, storedHash))) {
+      return Response.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+    user = { id: 'admin', name: 'Admin', email, phone: '', isAdmin: true }
+  }
+  // Register mode — name field present, create real DB user
+  else if (name) {
+    // Check if email already exists
+    const existing = await prisma.user.findUnique({ where: { email } })
+    if (existing) {
+      return Response.json({ error: 'Email already registered' }, { status: 409 })
+    }
+
+    const passwordHash = await hashPassword(password)
+    const created = await prisma.user.create({
+      data: { email, passwordHash, name, phone: '' },
+    })
+
+    user = {
+      id: created.id,
+      name: created.name,
+      email: created.email,
+      phone: created.phone,
+      isAdmin: created.isAdmin,
+    }
+  }
+  // Login mode — no name field, authenticate against DB
+  else {
+    const dbUser = await prisma.user.findUnique({ where: { email } })
+    if (!dbUser) {
+      return Response.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+
+    const valid = await verifyPassword(password, dbUser.passwordHash)
+    if (!valid) {
+      return Response.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+
+    user = {
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      phone: dbUser.phone,
+      isAdmin: dbUser.isAdmin,
+    }
+  }
 
   // Store HMAC-signed user JSON in cookie so server-side auth can extract email
   const cookieValue = sign(JSON.stringify(user))
@@ -17,7 +95,7 @@ export async function POST(request: NextRequest) {
     maxAge: 60 * 60 * 24 * 7, // 7 days
   })
 
-  return Response.json({ ok: true })
+  return Response.json({ ok: true, user })
 }
 
 export async function DELETE() {

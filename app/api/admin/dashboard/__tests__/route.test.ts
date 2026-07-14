@@ -2,19 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
 import { AuthError } from '@/lib/auth'
 
+const mockReservationAggregate = vi.fn()
+const mockReservationCount = vi.fn()
 const mockReservationFindMany = vi.fn()
-const mockCruiseFindMany = vi.fn()
 
 vi.mock('@/lib/db', () => ({
   prisma: {
     reservation: {
+      aggregate: mockReservationAggregate,
+      count: mockReservationCount,
       findMany: mockReservationFindMany,
     },
-    cruise: {
-      findMany: mockCruiseFindMany,
-    },
   },
-  checkAndExpireHolds: vi.fn((r) => Promise.resolve(r)),
 }))
 
 vi.mock('@/lib/admin-auth', () => ({
@@ -43,13 +42,12 @@ describe('GET /api/admin/dashboard', () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
     vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
 
-    const reservations = [
-      { id: 'res1', status: 'confirmed', totalAmount: 1000, guestCount: 2, cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15' },
-      { id: 'res2', status: 'confirmed', totalAmount: 1400, guestCount: 2, cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15' },
-      { id: 'res3', status: 'pending_approval', totalAmount: 2000, guestCount: 4, cruiseId: 'c2', cruiseName: 'Coronado', departureDate: '2026-08-01' },
-    ]
-
-    mockReservationFindMany.mockResolvedValue(reservations)
+    mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 2400 } })
+    mockReservationCount.mockResolvedValueOnce(1).mockResolvedValueOnce(2)
+    mockReservationFindMany.mockResolvedValue([
+      { cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15', guestCount: 2, totalAmount: 1000 },
+      { cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15', guestCount: 2, totalAmount: 1400 },
+    ])
 
     const request = new NextRequest('http://localhost/api/admin/dashboard')
     const response = await GET(request)
@@ -70,6 +68,8 @@ describe('GET /api/admin/dashboard', () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
     vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
 
+    mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: null } })
+    mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(0)
     mockReservationFindMany.mockResolvedValue([])
 
     const request = new NextRequest('http://localhost/api/admin/dashboard')
@@ -99,12 +99,12 @@ describe('GET /api/admin/dashboard', () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
     vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
 
-    const reservations = [
-      { id: 'res1', status: 'confirmed', totalAmount: 1000, guestCount: 2, cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15' },
-      { id: 'res2', status: 'confirmed', totalAmount: 800, guestCount: 2, cruiseId: 'c2', cruiseName: 'Coronado', departureDate: '2026-08-01' },
-    ]
-
-    mockReservationFindMany.mockResolvedValue(reservations)
+    mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 1800 } })
+    mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(2)
+    mockReservationFindMany.mockResolvedValue([
+      { cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15', guestCount: 2, totalAmount: 1000 },
+      { cruiseId: 'c2', cruiseName: 'Coronado', departureDate: '2026-08-01', guestCount: 2, totalAmount: 800 },
+    ])
 
     const request = new NextRequest('http://localhost/api/admin/dashboard')
     const response = await GET(request)
@@ -119,13 +119,11 @@ describe('GET /api/admin/dashboard', () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
     vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
 
-    const reservations = [
-      { id: 'res1', status: 'confirmed', totalAmount: 1000, guestCount: 2, cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15' },
-      { id: 'res2', status: 'cancelled', totalAmount: 500, guestCount: 2, cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15' },
-      { id: 'res3', status: 'expired', totalAmount: 300, guestCount: 2, cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15' },
-    ]
-
-    mockReservationFindMany.mockResolvedValue(reservations)
+    mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 1000 } })
+    mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(1)
+    mockReservationFindMany.mockResolvedValue([
+      { cruiseId: 'c1', cruiseName: 'Socorro', departureDate: '2026-07-15', guestCount: 2, totalAmount: 1000 },
+    ])
 
     const request = new NextRequest('http://localhost/api/admin/dashboard')
     const response = await GET(request)

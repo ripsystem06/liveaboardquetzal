@@ -96,7 +96,7 @@ export function ReservationHistory() {
               </p>
             </div>
             <div className="text-right">
-              <p className="font-medium">${reservation.totalPrice.toLocaleString()}</p>
+              <p className="font-medium">${reservation.totalPrice.toLocaleString('en-US')}</p>
               {getStatusBadge(reservation.status)}
             </div>
           </div>

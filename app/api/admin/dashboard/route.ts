@@ -7,20 +7,31 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin()
 
-    const reservations = await prisma.reservation.findMany({})
+    const [revenueAgg, pendingCount, confirmedCount, confirmedReservations] = await Promise.all([
+      prisma.reservation.aggregate({
+        _sum: { totalAmount: true },
+        where: { status: 'confirmed' },
+      }),
+      prisma.reservation.count({ where: { status: 'pending_approval' } }),
+      prisma.reservation.count({ where: { status: 'confirmed' } }),
+      prisma.reservation.findMany({
+        where: { status: 'confirmed' },
+        select: {
+          cruiseId: true,
+          cruiseName: true,
+          departureDate: true,
+          guestCount: true,
+          totalAmount: true,
+        },
+      }),
+    ])
 
-    const confirmedRevenue = reservations
-      .filter(r => r.status === 'confirmed')
-      .reduce((sum, r) => sum + r.totalAmount, 0)
+    const confirmedRevenue = revenueAgg._sum.totalAmount || 0
 
-    const pendingCount = reservations.filter(r => r.status === 'pending_approval').length
-    const confirmedCount = reservations.filter(r => r.status === 'confirmed').length
-
-    // Group by cruise
+    // Group confirmed reservations by cruise for revenue breakdown
     const cruiseMap = new Map<string, { cruiseId: string; cruiseName: string; departureDate: string; count: number; totalGuests: number; revenue: number }>()
 
-    for (const r of reservations) {
-      if (r.status !== 'confirmed') continue
+    for (const r of confirmedReservations) {
       const key = `${r.cruiseId}-${r.departureDate}`
       if (!cruiseMap.has(key)) {
         cruiseMap.set(key, {

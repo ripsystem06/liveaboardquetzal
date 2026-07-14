@@ -61,7 +61,7 @@ export async function generateBankTransferPDF(reservation: ReservationPDFData): 
     `Departure: ${reservation.departureDate}`,
     `Tier: ${reservation.tier.charAt(0).toUpperCase() + reservation.tier.slice(1)}`,
     `Guests: ${reservation.guestCount}`,
-    `Total: $${reservation.totalAmount.toLocaleString()} USD`,
+    `Total: $${reservation.totalAmount.toLocaleString('en-US')} USD`,
   ]
 
   let y = 60

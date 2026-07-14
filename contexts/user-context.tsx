@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { ADMIN_EMAIL } from '@/lib/config'
 
 type User = { id: string; name: string; email: string; phone: string; isAdmin: boolean }
 
@@ -14,19 +13,6 @@ interface UserContextType {
   logout: () => void
   updateProfile: (data: { name?: string; phone?: string }) => void
 }
-
-const MOCK_USER: User = {
-  id: '1',
-  name: 'Demo User',
-  email: 'demo@quetzal.com',
-  phone: '+1 555 0100',
-  isAdmin: false,
-}
-
-const VALID_EMAIL = 'demo@quetzal.com'
-const VALID_PASSWORD = '123456'
-const ADMIN_LOGIN_EMAIL = 'admin@quetzal.com'
-const ADMIN_LOGIN_PASSWORD = 'admin123'
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
@@ -47,50 +33,41 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const register = async (name: string, email: string, password: string): Promise<User> => {
-    // Mock: generate id from email hash, empty phone
-    const newUser: User = {
-      id: `user-${btoa(email).slice(0, 8)}`,
-      name,
-      email,
-      phone: '',
-      isAdmin: email === ADMIN_EMAIL,
-    }
-    setUser(newUser)
-    sessionStorage.setItem('quetzal_user', JSON.stringify(newUser))
-    // Set server session cookie so API routes can authenticate
-    await fetch('/api/auth/session', {
+    const response = await fetch('/api/auth/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newUser),
+      body: JSON.stringify({ email, password, name }),
     })
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      if (response.status === 409) {
+        throw new Error(data.error || 'Email already registered')
+      }
+      throw new Error('Registration failed')
+    }
+
+    const data = await response.json()
+    const newUser = data.user as User
+    setUser(newUser)
+    sessionStorage.setItem('quetzal_user', JSON.stringify(newUser))
     return newUser
   }
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    if (email === VALID_EMAIL && password === VALID_PASSWORD) {
-      setUser(MOCK_USER)
-      sessionStorage.setItem('quetzal_user', JSON.stringify(MOCK_USER))
-      // Set server session cookie so API routes can authenticate
-      await fetch('/api/auth/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(MOCK_USER),
-      })
-      return true
-    }
-    if (email === ADMIN_LOGIN_EMAIL && password === ADMIN_LOGIN_PASSWORD) {
-      const adminUser: User = { ...MOCK_USER, email: ADMIN_LOGIN_EMAIL, isAdmin: true }
-      setUser(adminUser)
-      sessionStorage.setItem('quetzal_user', JSON.stringify(adminUser))
-      // Set server session cookie so API routes can authenticate
-      await fetch('/api/auth/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(adminUser),
-      })
-      return true
-    }
-    return false
+    const response = await fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+
+    if (!response.ok) return false
+
+    const data = await response.json()
+    const loggedInUser = data.user as User
+    setUser(loggedInUser)
+    sessionStorage.setItem('quetzal_user', JSON.stringify(loggedInUser))
+    return true
   }
 
   const logout = () => {

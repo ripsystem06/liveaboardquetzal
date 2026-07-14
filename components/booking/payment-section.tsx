@@ -156,7 +156,7 @@ export function PaymentSection({
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">{t('booking.confirmation.tier')}</span>
-            <span className="text-sm font-semibold text-primary capitalize">{t(`booking.tier.${selectedTier}`)} (${tierPrice.toLocaleString()} {t('booking.payment.tierPrice')})</span>
+            <span className="text-sm font-semibold text-primary capitalize">{t(`booking.tier.${selectedTier}`)} (${tierPrice.toLocaleString('en-US')} {t('booking.payment.tierPrice')})</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">{t('booking.payment.guests')}</span>
@@ -176,7 +176,7 @@ export function PaymentSection({
           )}
           <div className="flex justify-between items-center pt-4 border-t border-border">
             <span className="text-base font-semibold text-primary">{t('booking.payment.total')}</span>
-            <span className="font-serif text-2xl font-bold text-accent tabular-nums">${totalAmount.toLocaleString()}</span>
+            <span className="font-serif text-2xl font-bold text-accent tabular-nums">${totalAmount.toLocaleString('en-US')}</span>
           </div>
         </div>
       </div>
