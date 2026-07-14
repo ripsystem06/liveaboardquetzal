@@ -11,7 +11,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': '/home/rp/Proyectos/liveaboardquetzal',
+      '@': '/home/rip/Documentos/quetzal',
     },
   },
 })
