@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getAuthUserId, AuthError } from '@/lib/auth'
 import { ReservationStatus } from '@/lib/validations'
+import { sendReservationConfirmedEmail } from '@/lib/email'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -44,6 +45,31 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Mock confirmation: payment received, reservation stays pending_approval
     // In production, this would verify PayPal webhook and transition to confirmed
+
+    const user = await prisma.user.findUnique({ where: { id: reservation.userId } })
+    if (user) {
+      sendReservationConfirmedEmail({
+        id: reservation.id,
+        userId: reservation.userId,
+        userEmail: user.email,
+        cruiseId: reservation.cruiseId,
+        cruiseName: reservation.cruiseName,
+        departureDate: reservation.departureDate,
+        route: reservation.route,
+        tier: reservation.tier,
+        tierPrice: reservation.tierPrice,
+        guestCount: reservation.guestCount,
+        freeSpaces: reservation.freeSpaces,
+        paidSpaces: reservation.paidSpaces,
+        totalAmount: reservation.totalAmount,
+        paymentMethod: reservation.paymentMethod,
+        status: ReservationStatus.enum.pending_approval,
+        holdExpiry: reservation.holdExpiry,
+        createdAt: reservation.createdAt,
+        updatedAt: reservation.updatedAt,
+      }).catch(err => console.error('Failed to send reservation confirmed email:', err))
+    }
+
     return Response.json({
       id: reservation.id,
       status: ReservationStatus.enum.pending_approval,

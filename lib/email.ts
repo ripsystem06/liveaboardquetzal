@@ -1,6 +1,9 @@
+import { Resend } from 'resend'
+
 export interface ReservationEmailData {
   id: string
   userId: string
+  userEmail: string
   cruiseId: string
   cruiseName: string
   departureDate: string
@@ -18,27 +21,135 @@ export interface ReservationEmailData {
   updatedAt: Date
 }
 
-/**
- * Mock email sender for development.
- * Logs formatted email content to console.
- * In production, this would connect to a real email service (resend, sendgrid, etc.)
- */
+interface EmailClient {
+  emails: {
+    send(params: { from: string; to: string; subject: string; html: string }): Promise<unknown>
+  }
+}
+
+function getEmailClient(): EmailClient {
+  if (process.env.RESEND_API_KEY) {
+    return new Resend(process.env.RESEND_API_KEY)
+  }
+
+  return {
+    emails: {
+      async send(params) {
+        console.log('--- EMAIL MOCK ---')
+        console.log(`To: ${params.to}`)
+        console.log(`Subject: ${params.subject}`)
+        console.log(`Body:\n${params.html.replace(/<[^>]*>/g, '')}`)
+        console.log('------------------')
+      },
+    },
+  }
+}
+
+function formatCurrency(amount: number): string {
+  return `$${amount.toLocaleString('en-US')} USD`
+}
+
 export async function sendExpiryEmail(reservation: ReservationEmailData): Promise<void> {
+  const client = getEmailClient()
   const subject = `Your reservation has expired — Quetzal Liveaboard`
-  const body = `
-Reservation ID: ${reservation.id}
-Cruise: ${reservation.cruiseName}
-Departure Date: ${reservation.departureDate}
-Route: ${reservation.route}
 
-The date has been released and is now available for booking again.
+  const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #dc2626;">Reservation Expired</h1>
+  <p>Your reservation for <strong>${reservation.cruiseName}</strong> has expired.</p>
+  <hr style="border: 0; border-top: 1px solid #e5e7eb;" />
+  <h3>Reservation Details</h3>
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr><td style="padding: 4px 0; color: #6b7280;">Reservation ID</td><td>${reservation.id}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Cruise</td><td>${reservation.cruiseName}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Departure Date</td><td>${reservation.departureDate}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Route</td><td>${reservation.route}</td></tr>
+  </table>
+  <p style="margin-top: 16px;">The date has been released and is now available for booking again.</p>
+  <p>If you still wish to book, please start a new reservation at Quetzal Liveaboard.</p>
+</div>`
 
-If you still wish to book, please start a new reservation at Quetzal Liveaboard.
-  `.trim()
+  await client.emails.send({
+    from: process.env.FROM_EMAIL || 'reservations@quetzal.com',
+    to: reservation.userEmail,
+    subject,
+    html,
+  })
+}
 
-  console.log('--- EMAIL MOCK ---')
-  console.log(`To: user@example.com`)
-  console.log(`Subject: ${subject}`)
-  console.log(`Body:\n${body}`)
-  console.log('------------------')
+export async function sendReservationCreatedEmail(reservation: ReservationEmailData): Promise<void> {
+  const client = getEmailClient()
+  const subject = `Reservation created — Quetzal Liveaboard`
+
+  const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #2563eb;">Reservation Created</h1>
+  <p>Your reservation for <strong>${reservation.cruiseName}</strong> has been created and is pending admin approval.</p>
+  <hr style="border: 0; border-top: 1px solid #e5e7eb;" />
+  <h3>Reservation Details</h3>
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr><td style="padding: 4px 0; color: #6b7280;">Reservation ID</td><td>${reservation.id}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Cruise</td><td>${reservation.cruiseName}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Departure Date</td><td>${reservation.departureDate}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Route</td><td>${reservation.route}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Tier</td><td>${reservation.tier}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Guests</td><td>${reservation.guestCount}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Total</td><td><strong>${formatCurrency(reservation.totalAmount)}</strong></td></tr>
+  </table>
+  <p style="margin-top: 16px;">We will notify you once your reservation has been reviewed by our team.</p>
+</div>`
+
+  await client.emails.send({
+    from: process.env.FROM_EMAIL || 'reservations@quetzal.com',
+    to: reservation.userEmail,
+    subject,
+    html,
+  })
+}
+
+export async function sendReservationConfirmedEmail(reservation: ReservationEmailData): Promise<void> {
+  const client = getEmailClient()
+  const subject = `Reservation confirmed — Quetzal Liveaboard`
+
+  const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #16a34a;">Reservation Confirmed</h1>
+  <p>Great news! Your reservation for <strong>${reservation.cruiseName}</strong> has been confirmed.</p>
+  <hr style="border: 0; border-top: 1px solid #e5e7eb;" />
+  <h3>Reservation Details</h3>
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr><td style="padding: 4px 0; color: #6b7280;">Reservation ID</td><td>${reservation.id}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Cruise</td><td>${reservation.cruiseName}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Departure Date</td><td>${reservation.departureDate}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Route</td><td>${reservation.route}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Tier</td><td>${reservation.tier}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Guests</td><td>${reservation.guestCount}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Total</td><td><strong>${formatCurrency(reservation.totalAmount)}</strong></td></tr>
+  </table>
+  <p style="margin-top: 16px;">We look forward to having you aboard the Quetzal!</p>
+</div>`
+
+  await client.emails.send({
+    from: process.env.FROM_EMAIL || 'reservations@quetzal.com',
+    to: reservation.userEmail,
+    subject,
+    html,
+  })
+}
+
+export async function sendWelcomeEmail(email: string, name: string): Promise<void> {
+  const client = getEmailClient()
+  const subject = `Welcome to Quetzal Liveaboard`
+
+  const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #2563eb;">Welcome aboard, ${name}!</h1>
+  <p>Thank you for creating an account with Quetzal Liveaboard.</p>
+  <p>You can now browse our available cruises and make reservations for your next diving adventure.</p>
+  <hr style="border: 0; border-top: 1px solid #e5e7eb;" />
+  <p style="color: #6b7280;">If you have any questions, feel free to reach out to our team.</p>
+</div>`
+
+  await client.emails.send({
+    from: process.env.FROM_EMAIL || 'reservations@quetzal.com',
+    to: email,
+    subject,
+    html,
+  })
 }

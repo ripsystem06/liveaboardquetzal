@@ -1,13 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // All mocks must be defined inside hoisted so they're available at module-evaluation time
-const { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock } = vi.hoisted(() => {
+const { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock, mockUserFindUnique } = vi.hoisted(() => {
   const mockUpdate = vi.fn()
   const mockSendExpiryEmail = vi.fn()
   const mockAuditLogCreate = vi.fn()
+  const mockUserFindUnique = vi.fn()
   const mockPrisma = {
     reservation: {
       update: mockUpdate,
+    },
+    user: {
+      findUnique: mockUserFindUnique,
     },
     auditLog: {
       create: mockAuditLogCreate,
@@ -15,9 +19,10 @@ const { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock } = vi.hoi
   }
   class MockPrismaClient {
     reservation = mockPrisma.reservation
+    user = mockPrisma.user
     auditLog = mockPrisma.auditLog
   }
-  return { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock: MockPrismaClient }
+  return { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock: MockPrismaClient, mockUserFindUnique, mockAuditLogCreate }
 })
 
 vi.mock('./email', () => ({
@@ -73,6 +78,7 @@ describe('checkAndExpireHolds', () => {
     const reservation = baseReservation({ holdExpiry: pastExpiry })
 
     mockUpdate.mockResolvedValue({ ...reservation, status: 'expired' })
+    mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
 
     const result = await checkAndExpireHolds(reservation)
 
@@ -81,6 +87,7 @@ describe('checkAndExpireHolds', () => {
       where: { id: 'res_123' },
       data: { status: 'expired' },
     })
+    expect(mockUserFindUnique).toHaveBeenCalledWith({ where: { id: 'user_123' } })
     expect(mockSendExpiryEmail).toHaveBeenCalled()
   })
 
@@ -124,6 +131,7 @@ describe('checkAndExpireHolds', () => {
     const reservation = baseReservation({ holdExpiry: pastExpiry })
 
     mockUpdate.mockResolvedValue({ ...reservation, status: 'expired' })
+    mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
 
     await checkAndExpireHolds(reservation)
 
@@ -131,6 +139,7 @@ describe('checkAndExpireHolds', () => {
       expect.objectContaining({
         id: 'res_123',
         userId: 'user_123',
+        userEmail: 'test@example.com',
         status: 'expired',
       })
     )

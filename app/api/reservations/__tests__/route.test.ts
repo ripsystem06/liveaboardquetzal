@@ -7,6 +7,7 @@ const mockFindFirst = vi.fn()
 const mockFindUnique = vi.fn()
 const mockCreate = vi.fn()
 const mockUpdate = vi.fn()
+const mockUserFindUnique = vi.fn()
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -17,8 +18,18 @@ vi.mock('@/lib/db', () => ({
       create: mockCreate,
       update: mockUpdate,
     },
+    user: {
+      findUnique: mockUserFindUnique,
+    },
   },
   checkAndExpireHolds: vi.fn((r) => Promise.resolve(r)),
+}))
+
+vi.mock('@/lib/email', () => ({
+  sendExpiryEmail: vi.fn(() => Promise.resolve()),
+  sendReservationCreatedEmail: vi.fn(() => Promise.resolve()),
+  sendReservationConfirmedEmail: vi.fn(() => Promise.resolve()),
+  sendWelcomeEmail: vi.fn(() => Promise.resolve()),
 }))
 
 vi.mock('@/lib/pdf-generator', () => ({
@@ -80,6 +91,7 @@ describe('Reservation API Routes', () => {
 
       mockFindFirst.mockResolvedValue(null)
       mockCreate.mockResolvedValue(mockReservation)
+      mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
 
       const request = new NextRequest('http://localhost/api/reservations', {
         method: 'POST',
@@ -270,6 +282,7 @@ describe('Reservation API Routes', () => {
 
       mockFindUnique.mockResolvedValue(mockReservation)
       mockUpdate.mockResolvedValue(updatedReservation)
+      mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
 
       const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
         method: 'POST',

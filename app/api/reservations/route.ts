@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getAuthUserId, AuthError } from '@/lib/auth'
 import { CreateReservationSchema, ReservationStatus } from '@/lib/validations'
+import { sendReservationCreatedEmail } from '@/lib/email'
 
 /**
  * POST /api/reservations
@@ -61,6 +62,31 @@ export async function POST(request: NextRequest) {
         holdExpiry,
       },
     })
+
+    const user = await prisma.user.findUnique({ where: { id: reservation.userId } })
+
+    if (user) {
+      sendReservationCreatedEmail({
+        id: reservation.id,
+        userId: reservation.userId,
+        userEmail: user.email,
+        cruiseId: reservation.cruiseId,
+        cruiseName: reservation.cruiseName,
+        departureDate: reservation.departureDate,
+        route: reservation.route,
+        tier: reservation.tier,
+        tierPrice: reservation.tierPrice,
+        guestCount: reservation.guestCount,
+        freeSpaces: reservation.freeSpaces,
+        paidSpaces: reservation.paidSpaces,
+        totalAmount: reservation.totalAmount,
+        paymentMethod: reservation.paymentMethod,
+        status: reservation.status,
+        holdExpiry: reservation.holdExpiry,
+        createdAt: reservation.createdAt,
+        updatedAt: reservation.updatedAt,
+      }).catch(err => console.error('Failed to send reservation created email:', err))
+    }
 
     return Response.json(reservation, { status: 201 })
   } catch (error) {

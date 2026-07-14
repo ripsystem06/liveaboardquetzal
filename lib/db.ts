@@ -43,9 +43,11 @@ export async function checkAndExpireHolds(reservation: ReservationData): Promise
       where: { id: reservation.id },
       data: { status: 'expired' },
     })
+    const user = await prisma.user.findUnique({ where: { id: updated.userId } })
     await sendExpiryEmail({
       id: updated.id,
       userId: updated.userId,
+      userEmail: user?.email || '',
       cruiseId: updated.cruiseId,
       cruiseName: updated.cruiseName,
       departureDate: updated.departureDate,

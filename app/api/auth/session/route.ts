@@ -5,6 +5,7 @@ import { ADMIN_EMAIL } from '@/lib/config'
 import { prisma } from '@/lib/db'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 import { SessionBodySchema } from '@/lib/validations'
+import { sendWelcomeEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   // CSRF: verify same-origin request
@@ -57,6 +58,8 @@ export async function POST(request: NextRequest) {
     const created = await prisma.user.create({
       data: { email, passwordHash, name, phone: '' },
     })
+
+    sendWelcomeEmail(email, name).catch(err => console.error('Failed to send welcome email:', err))
 
     user = {
       id: created.id,
