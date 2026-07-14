@@ -21,12 +21,12 @@ describe('requireAdmin', () => {
     vi.clearAllMocks()
   })
 
-  it('returns email when user is admin@quetzal.com', async () => {
+  it('returns email and userId when user is admin@quetzal.com', async () => {
     vi.mocked(getAuthUserId).mockResolvedValue('admin@quetzal.com')
 
     const { requireAdmin } = await import('@/lib/admin-auth')
     const result = await requireAdmin()
-    expect(result).toBe('admin@quetzal.com')
+    expect(result).toEqual({ email: 'admin@quetzal.com', userId: 'admin' })
   })
 
   it('throws AuthError with "Admin access required" when user is not admin', async () => {

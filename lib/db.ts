@@ -62,6 +62,16 @@ export async function checkAndExpireHolds(reservation: ReservationData): Promise
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
     })
+    await prisma.auditLog.create({
+      data: {
+        action: 'reservation.status_changed',
+        entityType: 'reservation',
+        entityId: reservation.id,
+        actorId: null,
+        actorEmail: 'system',
+        details: JSON.stringify({ oldStatus: 'pending_approval', newStatus: 'expired', reason: 'hold period expired' }),
+      },
+    })
     return updated
   }
   return reservation

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    await requireAdmin()
+    const admin = await requireAdmin()
     const { id } = await params
     const body = await request.json()
 
@@ -53,6 +53,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    const oldStatus = reservation.status
+
     const updated = await prisma.reservation.update({
       where: { id },
       data: {
@@ -60,6 +62,19 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         ...(notes !== undefined && { notes }),
       },
     })
+
+    if (status !== undefined) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'reservation.status_changed',
+          entityType: 'reservation',
+          entityId: id,
+          actorId: admin.userId,
+          actorEmail: admin.email,
+          details: JSON.stringify({ oldStatus, newStatus: status, reason: body.reason || '' }),
+        },
+      })
+    }
 
     return Response.json(updated)
   } catch (error) {

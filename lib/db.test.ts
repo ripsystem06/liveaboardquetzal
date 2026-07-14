@@ -4,13 +4,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock } = vi.hoisted(() => {
   const mockUpdate = vi.fn()
   const mockSendExpiryEmail = vi.fn()
+  const mockAuditLogCreate = vi.fn()
   const mockPrisma = {
     reservation: {
       update: mockUpdate,
     },
+    auditLog: {
+      create: mockAuditLogCreate,
+    },
   }
   class MockPrismaClient {
     reservation = mockPrisma.reservation
+    auditLog = mockPrisma.auditLog
   }
   return { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock: MockPrismaClient }
 })
