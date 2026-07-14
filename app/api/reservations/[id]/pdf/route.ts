@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generateBankTransferPDF } from '@/lib/pdf-generator'
 import { getAuthUserId, AuthError } from '@/lib/auth'
+import { PaymentMethod } from '@/lib/validations'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    if (reservation.paymentMethod !== 'bank_transfer') {
+    if (reservation.paymentMethod !== PaymentMethod.enum.bank_transfer) {
       return Response.json(
         { error: 'PDF is only available for bank_transfer reservations' },
         { status: 400 }

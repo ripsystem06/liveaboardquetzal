@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { AuthError } from '@/lib/auth'
+import { UpdateBlogPostSchema } from '@/lib/validations'
 
 interface RouteParams { params: Promise<{ id: string }> }
 
@@ -29,7 +30,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     await requireAdmin()
     const { id } = await params
-    const body = await request.json()
+    const rawBody = await request.json()
+
+    const parsed = UpdateBlogPostSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+    const body = parsed.data
 
     const post = await prisma.blogPost.findUnique({ where: { id } })
     if (!post) {

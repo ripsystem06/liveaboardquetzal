@@ -1,20 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getAuthUserId, AuthError } from '@/lib/auth'
-
-interface CreateReservationBody {
-  cruiseId: string
-  cruiseName: string
-  departureDate: string
-  route: string
-  tier: string
-  tierPrice: number
-  guestCount: number
-  freeSpaces: number
-  paidSpaces: number
-  totalAmount: number
-  paymentMethod: string
-}
+import { CreateReservationSchema, ReservationStatus } from '@/lib/validations'
 
 /**
  * POST /api/reservations
@@ -23,37 +10,23 @@ interface CreateReservationBody {
 export async function POST(request: NextRequest) {
   try {
     const userId = await getAuthUserId()
-    const body: CreateReservationBody = await request.json()
+    const rawBody = await request.json()
 
-    // Basic validation
-    const requiredFields: (keyof CreateReservationBody)[] = [
-      'cruiseId', 'cruiseName', 'departureDate', 'route',
-      'tier', 'tierPrice', 'guestCount', 'freeSpaces', 'paidSpaces',
-      'totalAmount', 'paymentMethod',
-    ]
-    for (const field of requiredFields) {
-      if (body[field] === undefined || body[field] === null) {
-        return Response.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        )
-      }
-    }
-
-    // Validate paymentMethod
-    if (body.paymentMethod !== 'paypal' && body.paymentMethod !== 'bank_transfer') {
+    const parsed = CreateReservationSchema.safeParse(rawBody)
+    if (!parsed.success) {
       return Response.json(
-        { error: 'Invalid paymentMethod. Must be "paypal" or "bank_transfer"' },
+        { error: 'Validation failed', details: parsed.error.flatten() },
         { status: 400 }
       )
     }
+    const body = parsed.data
 
     // Date blocking check: prevent duplicate reservations for same cruise+date
     const conflicting = await prisma.reservation.findFirst({
       where: {
         cruiseId: body.cruiseId,
         departureDate: body.departureDate,
-        status: 'pending_approval',
+        status: ReservationStatus.enum.pending_approval,
       },
     })
 
@@ -84,7 +57,7 @@ export async function POST(request: NextRequest) {
         paidSpaces: body.paidSpaces,
         totalAmount: body.totalAmount,
         paymentMethod: body.paymentMethod,
-        status: 'pending_approval',
+        status: ReservationStatus.enum.pending_approval,
         holdExpiry,
       },
     })

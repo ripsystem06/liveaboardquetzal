@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { AuthError } from '@/lib/auth'
+import { CreateCruiseSchema } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,37 +26,28 @@ export async function POST(request: NextRequest) {
   try {
     await requireAdmin()
 
-    const body = await request.json()
-    const { name, departureDate, route, boat, basicPrice, standardPrice, premiumPrice, dives, isActive } = body
+    const rawBody = await request.json()
 
-    if (!name || !departureDate || !route || basicPrice === undefined || standardPrice === undefined || premiumPrice === undefined) {
-      return Response.json({ error: 'Missing required fields: name, departureDate, route, basicPrice, standardPrice, premiumPrice' }, { status: 400 })
+    const parsed = CreateCruiseSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
-
-    // Validate price fields are actual positive integers
-    const basicPriceNum = Number(basicPrice)
-    const standardPriceNum = Number(standardPrice)
-    const premiumPriceNum = Number(premiumPrice)
-    const divesNum = Number(dives ?? 5)
-
-    if (!Number.isInteger(basicPriceNum) || basicPriceNum <= 0 ||
-        !Number.isInteger(standardPriceNum) || standardPriceNum <= 0 ||
-        !Number.isInteger(premiumPriceNum) || premiumPriceNum <= 0 ||
-        !Number.isInteger(divesNum) || divesNum < 0) {
-      return Response.json({ error: 'Price fields must be positive integers' }, { status: 400 })
-    }
+    const body = parsed.data
 
     const cruise = await prisma.cruise.create({
       data: {
-        name,
-        departureDate,
-        route,
-        boat: boat || 'Quetzal',
-        basicPrice: basicPriceNum,
-        standardPrice: standardPriceNum,
-        premiumPrice: premiumPriceNum,
-        dives: divesNum,
-        isActive: isActive ?? true,
+        name: body.name,
+        departureDate: body.departureDate,
+        route: body.route,
+        boat: body.boat,
+        basicPrice: body.basicPrice,
+        standardPrice: body.standardPrice,
+        premiumPrice: body.premiumPrice,
+        dives: body.dives,
+        isActive: body.isActive,
       },
     })
 

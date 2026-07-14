@@ -4,6 +4,7 @@ import { sign, hashPassword, verifyPassword } from '@/lib/auth'
 import { ADMIN_EMAIL } from '@/lib/config'
 import { prisma } from '@/lib/db'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
+import { SessionBodySchema } from '@/lib/validations'
 
 export async function POST(request: NextRequest) {
   // CSRF: verify same-origin request
@@ -23,14 +24,16 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const body = await request.json()
-  if (!body) return Response.json({ error: 'Body required' }, { status: 400 })
+  const rawBody = await request.json()
 
-  const { email, password, name } = body as { email?: string; password?: string; name?: string }
-
-  if (!email || !password) {
-    return Response.json({ error: 'Email and password required' }, { status: 400 })
+  const parsed = SessionBodySchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return Response.json(
+      { error: 'Validation failed', details: parsed.error.flatten() },
+      { status: 400 }
+    )
   }
+  const { email, password, name } = parsed.data
 
   let user: { id: string; name: string; email: string; phone: string; isAdmin: boolean }
 

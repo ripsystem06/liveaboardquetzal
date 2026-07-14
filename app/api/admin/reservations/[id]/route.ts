@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { AuthError } from '@/lib/auth'
+import { ReservationStatusUpdateSchema } from '@/lib/validations'
 
 interface RouteParams { params: Promise<{ id: string }> }
 
@@ -29,14 +30,22 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const admin = await requireAdmin()
     const { id } = await params
-    const body = await request.json()
+    const rawBody = await request.json()
+    const reason = (rawBody as Record<string, unknown>).reason as string || ''
+
+    const parsed = ReservationStatusUpdateSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+    const { status, notes } = parsed.data
 
     const reservation = await prisma.reservation.findUnique({ where: { id } })
     if (!reservation) {
       return Response.json({ error: 'Reservation not found' }, { status: 404 })
     }
-
-    const { status, notes } = body
 
     // Validate status transitions
     if (status !== undefined) {
@@ -71,7 +80,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           entityId: id,
           actorId: admin.userId,
           actorEmail: admin.email,
-          details: JSON.stringify({ oldStatus, newStatus: status, reason: body.reason || '' }),
+          details: JSON.stringify({ oldStatus, newStatus: status, reason }),
         },
       })
     }

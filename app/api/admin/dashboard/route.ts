@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { AuthError } from '@/lib/auth'
+import { ReservationStatus } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,12 +11,12 @@ export async function GET(request: NextRequest) {
     const [revenueAgg, pendingCount, confirmedCount, confirmedReservations] = await Promise.all([
       prisma.reservation.aggregate({
         _sum: { totalAmount: true },
-        where: { status: 'confirmed' },
+        where: { status: ReservationStatus.enum.confirmed },
       }),
-      prisma.reservation.count({ where: { status: 'pending_approval' } }),
-      prisma.reservation.count({ where: { status: 'confirmed' } }),
+      prisma.reservation.count({ where: { status: ReservationStatus.enum.pending_approval } }),
+      prisma.reservation.count({ where: { status: ReservationStatus.enum.confirmed } }),
       prisma.reservation.findMany({
-        where: { status: 'confirmed' },
+        where: { status: ReservationStatus.enum.confirmed },
         select: {
           cruiseId: true,
           cruiseName: true,

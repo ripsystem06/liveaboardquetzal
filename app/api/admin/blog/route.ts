@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { AuthError } from '@/lib/auth'
+import { CreateBlogPostSchema } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,17 +28,16 @@ export async function POST(request: NextRequest) {
   try {
     await requireAdmin()
 
-    const body = await request.json()
-    const { title, content, imageUrl, status } = body
+    const rawBody = await request.json()
 
-    if (!title || !content) {
-      return Response.json({ error: 'Missing required fields: title, content' }, { status: 400 })
+    const parsed = CreateBlogPostSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
-
-    // Validate status is either 'draft' or 'published'
-    if (status !== undefined && status !== 'draft' && status !== 'published') {
-      return Response.json({ error: "status must be either 'draft' or 'published'" }, { status: 400 })
-    }
+    const body = parsed.data
 
     // Enforce FIFO: if 5+ published posts, delete oldest before inserting
     // Use transaction to prevent race conditions
@@ -58,10 +58,10 @@ export async function POST(request: NextRequest) {
 
       return tx.blogPost.create({
         data: {
-          title,
-          content,
-          imageUrl: imageUrl || '',
-          status: status || 'draft',
+          title: body.title,
+          content: body.content,
+          imageUrl: body.imageUrl,
+          status: body.status,
         },
       })
     })

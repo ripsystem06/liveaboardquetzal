@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getAuthUserId, AuthError } from '@/lib/auth'
+import { ReservationStatus } from '@/lib/validations'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Only pending_approval reservations can be confirmed
-    if (reservation.status !== 'pending_approval') {
+    if (reservation.status !== ReservationStatus.enum.pending_approval) {
       return Response.json(
         {
           error: 'INVALID_TRANSITION',
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // In production, this would verify PayPal webhook and transition to confirmed
     return Response.json({
       id: reservation.id,
-      status: 'pending_approval',
+      status: ReservationStatus.enum.pending_approval,
       message: 'Payment confirmed. Your reservation is pending admin approval.',
     })
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
+import { AvailabilityQuerySchema, ReservationStatus } from '@/lib/validations'
 
 /**
  * GET /api/reservations/check-availability?cruiseId=X&departureDate=Y
@@ -11,18 +12,20 @@ export async function GET(request: NextRequest) {
     const cruiseId = searchParams.get('cruiseId')
     const departureDate = searchParams.get('departureDate')
 
-    if (!cruiseId) {
-      return Response.json({ error: 'Missing required query param: cruiseId' }, { status: 400 })
+    const parsed = AvailabilityQuerySchema.safeParse({ cruiseId, departureDate })
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
-    if (!departureDate) {
-      return Response.json({ error: 'Missing required query param: departureDate' }, { status: 400 })
-    }
+    const { cruiseId: validCruiseId, departureDate: validDepartureDate } = parsed.data
 
     const conflicting = await prisma.reservation.findFirst({
       where: {
-        cruiseId,
-        departureDate,
-        status: 'pending_approval',
+        cruiseId: validCruiseId,
+        departureDate: validDepartureDate,
+        status: ReservationStatus.enum.pending_approval,
       },
     })
 
