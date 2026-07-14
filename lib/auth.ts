@@ -67,10 +67,10 @@ export async function getAuthUserId(): Promise<string> {
       throw new AuthError('Authentication required')
     }
     const user = JSON.parse(payload)
-    if (!user || !user.email) {
+    if (!user || !user.id) {
       throw new AuthError('Authentication required')
     }
-    return user.email
+    return user.id
   } catch (e) {
     if (e instanceof AuthError) throw e
     throw new AuthError('Authentication required')

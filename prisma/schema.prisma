@@ -10,6 +10,7 @@ datasource db {
 model Reservation {
   id            String   @id @default(cuid())
   userId        String
+  user          User     @relation(fields: [userId], references: [id])
   cruiseId      String
   cruiseName    String
   departureDate String
@@ -59,12 +60,13 @@ model BlogPost {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String        @id @default(cuid())
+  email        String        @unique
   passwordHash String
   name         String
-  phone        String   @default("")
-  isAdmin      Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  phone        String        @default("")
+  isAdmin      Boolean       @default(false)
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
