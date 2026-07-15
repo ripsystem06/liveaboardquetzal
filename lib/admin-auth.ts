@@ -6,9 +6,9 @@ import { ADMIN_EMAIL } from './config'
  * Throws AuthError(401) if not authenticated, AuthError(403) if not admin.
  */
 export async function requireAdmin(): Promise<{ email: string; userId: string }> {
-  const email = await getAuthUserId()
-  if (email !== ADMIN_EMAIL) {
+  const userId = await getAuthUserId()
+  if (userId !== 'admin') {
     throw new AuthError('Admin access required')
   }
-  return { email, userId: 'admin' }
+  return { email: ADMIN_EMAIL, userId }
 }
