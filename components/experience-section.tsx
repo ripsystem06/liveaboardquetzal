@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Fish, Waves, Compass, ArrowRight } from 'lucide-react'
@@ -33,21 +33,28 @@ const experiences = [
 export function ExperienceSection() {
   const { t } = useLanguage()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [isLooping, setIsLooping] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+    let timeoutId: ReturnType<typeof setTimeout>
 
     video.play().catch(() => {})
 
     const loop = () => {
-      video.currentTime = 0
-      video.play().catch(() => {})
+      setIsLooping(true)
+      timeoutId = setTimeout(() => {
+        video.currentTime = 0
+        video.play().catch(() => {})
+        setIsLooping(false)
+      }, 400)
     }
 
     video.addEventListener('ended', loop)
     return () => {
       video.removeEventListener('ended', loop)
+      clearTimeout(timeoutId)
     }
   }, [])
 
@@ -79,7 +86,7 @@ export function ExperienceSection() {
                   autoPlay
                   muted
                   playsInline
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${isLooping ? 'opacity-0' : 'opacity-100'}`}
                 >
                   <source src={exp.video} type="video/mp4" />
                 </video>
