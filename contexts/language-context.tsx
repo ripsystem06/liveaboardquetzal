@@ -562,6 +562,20 @@ const translations = {
     'admin.blog.formImageUrl': 'Image URL',
     'admin.blog.formStatus': 'Status',
     'admin.blog.fifoWarning': 'When publishing, if there are already 5 posts, the oldest will be automatically deleted.',
+
+    // Calendar
+    'calendar.title': 'Expedition Calendar',
+    'calendar.subtitle': 'Explore our upcoming departures and find your next adventure',
+    'calendar.available': 'Expedition Available',
+    'calendar.noDates': 'No expeditions scheduled at this time. Check back soon or contact us for upcoming dates.',
+    'calendar.loading': 'Loading calendar...',
+    'calendar.error': 'Could not load expeditions. Please try again.',
+    'calendar.retry': 'Retry',
+    'calendar.bookNow': 'Book Now',
+    'calendar.dives': 'dives',
+    'calendar.from': 'From',
+    'calendar.departs': 'Departs',
+    'calendar.returns': 'Returns',
   },
   es: {
     // Navigation
@@ -1110,6 +1124,20 @@ const translations = {
     'admin.blog.formImageUrl': 'URL de Imagen',
     'admin.blog.formStatus': 'Estado',
     'admin.blog.fifoWarning': 'Al publicar, si ya hay 5 publicaciones, la más antigua será eliminada automáticamente.',
+
+    // Calendar
+    'calendar.title': 'Calendario de Expediciones',
+    'calendar.subtitle': 'Explora nuestras próximas salidas y encuentra tu próxima aventura',
+    'calendar.available': 'Expedición Disponible',
+    'calendar.noDates': 'No hay expediciones programadas en este momento. Vuelve pronto o contáctanos para próximas fechas.',
+    'calendar.loading': 'Cargando calendario...',
+    'calendar.error': 'No se pudieron cargar las expediciones. Intenta de nuevo.',
+    'calendar.retry': 'Reintentar',
+    'calendar.bookNow': 'Reservar Ahora',
+    'calendar.dives': 'inmersiones',
+    'calendar.from': 'Desde',
+    'calendar.departs': 'Sale',
+    'calendar.returns': 'Regresa',
   },
 }
 
