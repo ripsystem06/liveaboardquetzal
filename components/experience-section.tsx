@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/language-context'
 
 const experiences = [
   {
-    video: '/images/videoactividades/divers-descending.mov',
+    video: '/images/videoactividades/divers-descending.mp4',
     icon: Fish,
     titleKey: 'experience.item1',
     href: '/contacto?subject=booking',
@@ -82,7 +82,7 @@ export function ExperienceSection() {
                   playsInline
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 >
-                  <source src={exp.video} type="video/quicktime" />
+                  <source src={exp.video} type="video/mp4" />
                 </video>
               ) : (
                 <Image
