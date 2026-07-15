@@ -40,15 +40,14 @@ export function ExperienceSection() {
 
     video.play().catch(() => {})
 
-    const handleTime = () => {
-      if (video.currentTime >= 8) {
-        video.currentTime = 0
-      }
+    const loop = () => {
+      video.currentTime = 0
+      video.play().catch(() => {})
     }
 
-    video.addEventListener('timeupdate', handleTime)
+    video.addEventListener('ended', loop)
     return () => {
-      video.removeEventListener('timeupdate', handleTime)
+      video.removeEventListener('ended', loop)
     }
   }, [])
 
