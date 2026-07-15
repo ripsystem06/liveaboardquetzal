@@ -48,3 +48,9 @@ pnpm-workspace.yaml
 
 # Database files
 *.db
+
+# Video source files (processed versions in public/)
+/video-originals/
+
+# CodeGraph index
+.codegraph/
