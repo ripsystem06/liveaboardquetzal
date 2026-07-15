@@ -576,6 +576,7 @@ const translations = {
     'calendar.from': 'From',
     'calendar.departs': 'Departs',
     'calendar.returns': 'Returns',
+    'calendar.days': 'days',
   },
   es: {
     // Navigation
@@ -1138,6 +1139,7 @@ const translations = {
     'calendar.from': 'Desde',
     'calendar.departs': 'Sale',
     'calendar.returns': 'Regresa',
+    'calendar.days': 'días',
   },
 }
 

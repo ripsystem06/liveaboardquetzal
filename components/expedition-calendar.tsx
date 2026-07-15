@@ -1,20 +1,17 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { DayPicker, getDefaultClassNames } from 'react-day-picker'
+import { useState, useEffect, useMemo } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import {
-  ChevronLeft,
-  ChevronRight,
   CalendarDays,
   MapPin,
-  DollarSign,
   Waves,
   Loader2,
-  X,
+  ArrowRight,
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 interface Expedition {
   id: string
@@ -27,35 +24,39 @@ interface Expedition {
   priceFrom: number
 }
 
-interface CalendarData {
-  expeditions: Expedition[]
-  byDate: Record<string, Expedition[]>
+const ROUTE_IMAGES: Record<string, string> = {
+  'Socorro Islands': '/images/panoramicas/Manta el Boiler 1.webp',
+  'Sea of Cortez': '/images/panoramicas/Delfin Kike.webp',
+  'Magdalena Bay': '/images/panoramicas/loreto-magdalena-bay.webp',
 }
 
+const DEFAULT_IMAGE = '/images/panoramicas/ROca Partida .webp'
+
 const MONTHS_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+const MONTHS_ES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+]
+const MONTHS_SHORT_EN = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
-const MONTHS_ES = [
+const MONTHS_SHORT_ES = [
   'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
   'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
 ]
 
-function formatDateRange(start: string, end: string, language: string): string {
-  const months = language === 'es' ? MONTHS_ES : MONTHS_EN
-  const parseDate = (d: string) => {
-    const [y, m, day] = d.split('-').map(Number)
-    return { day, month: months[m - 1], year: y }
-  }
-  const s = parseDate(start)
-  const e = parseDate(end)
-  if (!end || start === end) {
-    return `${s.month} ${s.day}, ${s.year}`
-  }
-  if (s.month === e.month && s.year === e.year) {
-    return `${s.month} ${s.day}–${e.day}, ${s.year}`
-  }
-  return `${s.month} ${s.day} – ${e.month} ${e.day}, ${s.year}`
+function getRouteImage(route: string): string {
+  return ROUTE_IMAGES[route] || DEFAULT_IMAGE
+}
+
+function getDaysBetween(start: string, end: string): number {
+  const s = new Date(start + 'T00:00:00')
+  const e = new Date(end + 'T00:00:00')
+  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1
 }
 
 function formatPrice(price: number): string {
@@ -66,75 +67,125 @@ function formatPrice(price: number): string {
   }).format(price)
 }
 
-function PopoverCard({
-  expedition,
-  onClose,
-  language,
-  t,
-}: {
+function parseDate(d: string): { day: number; month: number; year: number } {
+  const [y, m, day] = d.split('-').map(Number)
+  return { day, month: m, year: y }
+}
+
+function ExpeditionCard({ expedition, language, t }: {
   expedition: Expedition
-  onClose: () => void
   language: string
   t: (key: string) => string
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        onClose()
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [onClose])
+  const monthsShort = language === 'es' ? MONTHS_SHORT_ES : MONTHS_SHORT_EN
+  const departure = parseDate(expedition.departureDate)
+  const returnDate = parseDate(expedition.returnDate)
+  const days = getDaysBetween(expedition.departureDate, expedition.returnDate)
+  const hasReturn = expedition.returnDate && expedition.returnDate !== expedition.departureDate
 
   return (
-    <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2">
-      <div
-        ref={ref}
-        className="w-72 rounded-xl border border-border bg-card p-5 shadow-xl animate-in fade-in-0 zoom-in-95"
-      >
-        <button
-          onClick={onClose}
-          className="absolute right-3 top-3 rounded-full p-0.5 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Close"
-        >
-          <X className="size-4" />
-        </button>
+    <Link
+      href="/reservar"
+      className="group relative flex flex-col md:flex-row overflow-hidden rounded-2xl border border-border bg-card hover:shadow-xl hover:border-accent/30 transition-all duration-300"
+    >
+      {/* Image */}
+      <div className="relative h-48 md:h-auto md:w-[40%] md:min-h-[280px] shrink-0 overflow-hidden">
+        <Image
+          src={getRouteImage(expedition.route)}
+          alt={expedition.name}
+          fill
+          sizes="(max-width: 768px) 100vw, 40vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent md:bg-gradient-to-r md:from-transparent md:via-primary/30 md:to-card" />
+      </div>
 
-        <h3 className="font-serif text-lg font-bold text-foreground pr-6 leading-tight">
-          {expedition.name}
-        </h3>
-
-        <div className="mt-3 space-y-2 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="size-3.5 shrink-0 text-accent" />
-            <span>{expedition.route}</span>
+      {/* Content */}
+      <div className="relative flex flex-col justify-between p-6 md:p-8 flex-1">
+        {/* Date Block */}
+        <div className="flex items-start gap-4 mb-6">
+          <div className="inline-flex rounded-xl overflow-hidden shadow-md shrink-0">
+            <div className="bg-primary px-5 py-3 text-center text-white">
+              <span className="block font-sans text-[10px] uppercase tracking-[0.15em] leading-tight">
+                {monthsShort[departure.month - 1]}
+              </span>
+              <span className="block font-serif text-3xl font-bold leading-none mt-0.5">
+                {departure.day}
+              </span>
+            </div>
+            {hasReturn && (
+              <div className="bg-primary/80 px-4 py-3 text-center text-white/90 flex flex-col items-center justify-center">
+                <span className="block w-3 border-t border-white/30 mb-1" />
+                <span className="font-sans text-sm font-medium">{returnDate.day}</span>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <CalendarDays className="size-3.5 shrink-0 text-accent" />
-            <span>{formatDateRange(expedition.departureDate, expedition.returnDate, language)}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Waves className="size-3.5 shrink-0 text-accent" />
-            <span>{expedition.dives} {t('calendar.dives')}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-foreground font-semibold pt-1 border-t border-border">
-            <DollarSign className="size-3.5 shrink-0 text-accent" />
-            <span>{t('calendar.from')} {formatPrice(expedition.priceFrom)}</span>
+          {/* Route & Name */}
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-accent mb-1">
+              <MapPin className="size-3.5 shrink-0" />
+              <span className="font-sans text-xs font-semibold uppercase tracking-wider truncate">
+                {expedition.route}
+              </span>
+            </div>
+            <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground leading-tight line-clamp-2">
+              {expedition.name}
+            </h3>
           </div>
         </div>
 
-        <a
-          href="/reservar"
-          className="mt-4 block w-full rounded-full bg-accent px-4 py-2.5 text-center text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors active:scale-[0.97]"
-        >
-          {t('calendar.bookNow')}
-        </a>
+        {/* Details */}
+        <div className="flex flex-wrap gap-x-6 gap-y-2 mb-6">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <CalendarDays className="size-4 shrink-0" />
+            <span className="font-sans text-sm">{days} {t('calendar.days')}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Waves className="size-4 shrink-0" />
+            <span className="font-sans text-sm">{expedition.dives} {t('calendar.dives')}</span>
+          </div>
+        </div>
+
+        {/* Price + CTA */}
+        <div className="flex items-center justify-between pt-5 border-t border-border">
+          <div>
+            <span className="font-sans text-xs text-muted-foreground">{t('calendar.from')}</span>
+            <span className="font-serif text-2xl font-bold text-accent ml-1">
+              {formatPrice(expedition.priceFrom)}
+            </span>
+          </div>
+          <Button size="sm" className="rounded-full gap-1.5 group/btn">
+            {t('calendar.bookNow')}
+            <ArrowRight className="size-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+          </Button>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+function SkeletonCard() {
+  return (
+    <div className="flex flex-col md:flex-row overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="h-48 md:h-auto md:w-[40%] md:min-h-[280px] bg-muted animate-pulse shrink-0" />
+      <div className="flex-1 p-6 md:p-8 space-y-4">
+        <div className="flex items-start gap-4">
+          <div className="w-[72px] h-[72px] rounded-xl bg-muted animate-pulse shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-20 bg-muted rounded animate-pulse" />
+            <div className="h-5 w-full bg-muted rounded animate-pulse" />
+            <div className="h-5 w-3/4 bg-muted rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="flex gap-6">
+          <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="pt-5 border-t border-border flex justify-between">
+          <div className="h-8 w-24 bg-muted rounded animate-pulse" />
+          <div className="h-9 w-28 rounded-full bg-muted animate-pulse" />
+        </div>
       </div>
     </div>
   )
@@ -142,22 +193,9 @@ function PopoverCard({
 
 export function ExpeditionCalendar() {
   const { t, language } = useLanguage()
-  const [data, setData] = useState<CalendarData | null>(null)
+  const [expeditions, setExpeditions] = useState<Expedition[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedExpedition, setSelectedExpedition] = useState<Expedition | null>(null)
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [mobileIndex, setMobileIndex] = useState(0)
-
-  const months = useMemo(() => {
-    const now = new Date()
-    const result: Date[] = []
-    for (let i = 0; i < 4; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
-      result.push(d)
-    }
-    return result
-  }, [])
 
   useEffect(() => {
     fetch('/api/cruises/calendar')
@@ -166,7 +204,7 @@ export function ExpeditionCalendar() {
         return res.json()
       })
       .then((json) => {
-        setData(json)
+        setExpeditions(json.expeditions || [])
         setLoading(false)
       })
       .catch((err) => {
@@ -175,46 +213,35 @@ export function ExpeditionCalendar() {
       })
   }, [])
 
-  const expeditionDates = useMemo(() => {
-    if (!data) return []
-    return data.expeditions.map((e) => new Date(e.departureDate + 'T00:00:00'))
-  }, [data])
-
-  const dateToExpeditions = useMemo(() => {
-    if (!data) return new Map<string, Expedition[]>()
+  const grouped = useMemo(() => {
+    const months = language === 'es' ? MONTHS_ES : MONTHS_EN
     const map = new Map<string, Expedition[]>()
-    for (const exp of data.expeditions) {
-      const key = exp.departureDate
+    for (const exp of expeditions) {
+      const d = parseDate(exp.departureDate)
+      const key = `${months[d.month - 1]} ${d.year}`
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(exp)
     }
-    return map
-  }, [data])
-
-  const visibleMonths = months
-  const defaultClassNames = getDefaultClassNames()
-
-  const handleDayClick = (day: Date) => {
-    const key = day.toISOString().split('T')[0]
-    const exps = dateToExpeditions.get(key)
-    if (exps && exps.length > 0) {
-      setSelectedExpedition(exps[0])
-    } else {
-      setSelectedExpedition(null)
-    }
-  }
+    return Array.from(map.entries())
+  }, [expeditions, language])
 
   if (loading) {
     return (
-      <section className="py-24 md:py-32 bg-muted/30">
+      <section className="py-24 md:py-32 bg-background">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="h-4 w-32 bg-accent/20 rounded mx-auto mb-3 animate-pulse" />
-            <div className="h-8 w-64 bg-muted rounded mx-auto animate-pulse" />
+          <div className="text-center mb-12 md:mb-16">
+            <div className="h-6 w-48 bg-muted rounded mx-auto animate-pulse" />
           </div>
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="size-8 animate-spin text-muted-foreground" />
-            <span className="ml-3 text-muted-foreground font-sans">{t('calendar.loading')}</span>
+          <div className="max-w-5xl mx-auto space-y-16">
+            {[1, 2].map((m) => (
+              <div key={m}>
+                <div className="h-5 w-36 bg-muted rounded mx-auto mb-8 animate-pulse" />
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                  <span className="ml-3 text-muted-foreground font-sans">{t('calendar.loading')}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -223,7 +250,7 @@ export function ExpeditionCalendar() {
 
   if (error) {
     return (
-      <section className="py-24 md:py-32 bg-muted/30">
+      <section className="py-24 md:py-32 bg-background">
         <div className="container mx-auto px-4 lg:px-8 text-center">
           <div className="max-w-md mx-auto">
             <p className="text-destructive font-sans text-lg mb-4">{t('calendar.error')}</p>
@@ -238,7 +265,7 @@ export function ExpeditionCalendar() {
                     return res.json()
                   })
                   .then((json) => {
-                    setData(json)
+                    setExpeditions(json.expeditions || [])
                     setLoading(false)
                   })
                   .catch((err) => {
@@ -255,16 +282,16 @@ export function ExpeditionCalendar() {
     )
   }
 
-  const hasExpeditions = data && data.expeditions.length > 0
+  const hasExpeditions = expeditions.length > 0
 
   return (
-    <section className="py-24 md:py-32 bg-muted/30 relative overflow-hidden">
+    <section className="py-24 md:py-32 bg-background relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-accent/3 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 lg:px-8 relative">
-        <div className="text-center mb-12 md:mb-16">
+        <div className="text-center mb-16 md:mb-20">
           <h2 className="font-serif text-2xl md:text-3xl font-normal text-primary tracking-tight">
             {t('calendar.subtitle')}
           </h2>
@@ -278,244 +305,32 @@ export function ExpeditionCalendar() {
             </p>
           </div>
         ) : (
-          <>
-            {/* Desktop: 2-3 months side by side */}
-            <div className="hidden md:flex md:justify-center md:gap-4 lg:gap-6">
-              {visibleMonths.slice(0, 3).map((m) => (
-                <div key={m.toISOString()} className="relative rounded-xl bg-background p-4 shadow-sm border border-border">
-                  <DayPicker
-                    month={m}
-                    mode="single"
-                    selected={undefined}
-                    onDayClick={handleDayClick}
-                    showOutsideDays={false}
-                    modifiers={{ expedition: expeditionDates }}
-                    modifiersClassNames={{
-                      expedition: 'bg-accent/20 text-accent-foreground font-semibold rounded-md',
-                    }}
-                    classNames={{
-                      root: cn('w-fit', defaultClassNames.root),
-                      months: cn('flex flex-col', defaultClassNames.months),
-                      month: cn('flex flex-col gap-2 w-full', defaultClassNames.month),
-                      month_caption: cn(
-                        'flex items-center justify-center h-10 font-serif text-foreground font-semibold text-base',
-                        defaultClassNames.month_caption,
-                      ),
-                      nav: cn('hidden', defaultClassNames.nav),
-                      table: 'w-full border-collapse',
-                      weekdays: cn('flex', defaultClassNames.weekdays),
-                      weekday: cn(
-                        'text-muted-foreground rounded-md flex-1 font-sans font-normal text-[0.75rem] select-none text-center uppercase tracking-wider',
-                        defaultClassNames.weekday,
-                      ),
-                      week: cn('flex w-full mt-1', defaultClassNames.week),
-                      day: cn(
-                        'relative w-full p-0 text-center group/day aspect-square select-none',
-                        defaultClassNames.day,
-                      ),
-                      today: cn(
-                        'ring-2 ring-accent/50 rounded-md',
-                        defaultClassNames.today,
-                      ),
-                      outside: cn(
-                        'text-muted-foreground opacity-0',
-                        defaultClassNames.outside,
-                      ),
-                      disabled: cn(
-                        'text-muted-foreground opacity-50',
-                        defaultClassNames.disabled,
-                      ),
-                      hidden: cn('invisible', defaultClassNames.hidden),
-                    }}
-                    components={{
-                      DayButton: ({ day, modifiers, ...props }) => {
-                        const key = day.date.toISOString().split('T')[0]
-                        const exps = dateToExpeditions.get(key)
-                        const hasExp = !!(exps && exps.length > 0)
-                        return (
-                          <div className="relative size-full">
-                            <button
-                              {...props}
-                              onClick={(e) => {
-                                handleDayClick(day.date)
-                                if (props.onClick) props.onClick(e)
-                              }}
-                              className={cn(
-                                'flex size-full items-center justify-center rounded-md font-sans text-sm transition-colors',
-                                modifiers.today && 'ring-2 ring-accent/50',
-                                hasExp && 'bg-accent/20 text-accent-foreground font-semibold',
-                                !hasExp && !modifiers.today && 'hover:bg-muted',
-                                modifiers.outside && 'invisible',
-                                props.className,
-                              )}
-                            >
-                              {day.date.getDate()}
-                              {hasExp && (
-                                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 size-1 rounded-full bg-accent" />
-                              )}
-                              {exps && exps.length > 0 && day.date.toISOString().split('T')[0] === key && (
-                                <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2">
-                                  {selectedExpedition &&
-                                   selectedExpedition.departureDate === key ? (
-                                    <PopoverCard
-                                      expedition={selectedExpedition}
-                                      onClose={() => setSelectedExpedition(null)}
-                                      language={language}
-                                      t={t}
-                                    />
-                                  ) : null}
-                                </div>
-                              )}
-                            </button>
-                          </div>
-                        )
-                      },
-                      Chevron: () => <></>,
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile: 1 month at a time with horizontal nav */}
-            <div className="md:hidden">
-              <div className="relative rounded-xl bg-background p-4 shadow-sm border border-border max-w-sm mx-auto">
-                <div className="flex items-center justify-between mb-2">
-                  <button
-                    onClick={() => setMobileIndex(Math.max(0, mobileIndex - 1))}
-                    disabled={mobileIndex === 0}
-                    className="size-8 flex items-center justify-center rounded-full border border-border hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors disabled:opacity-30"
-                    aria-label={language === 'es' ? 'Mes anterior' : 'Previous month'}
-                  >
-                    <ChevronLeft className="size-4" />
-                  </button>
-                  <span className="font-serif text-foreground font-semibold text-base">
-                    {months[mobileIndex].toLocaleDateString(
-                      language === 'es' ? 'es-MX' : 'en-US',
-                      { month: 'long', year: 'numeric' }
-                    )}
-                  </span>
-                  <button
-                    onClick={() => setMobileIndex(Math.min(months.length - 1, mobileIndex + 1))}
-                    disabled={mobileIndex >= months.length - 1}
-                    className="size-8 flex items-center justify-center rounded-full border border-border hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors disabled:opacity-30"
-                    aria-label={language === 'es' ? 'Mes siguiente' : 'Next month'}
-                  >
-                    <ChevronRight className="size-4" />
-                  </button>
+          <div className="max-w-5xl mx-auto space-y-20">
+            {grouped.map(([monthLabel, exps]) => (
+              <div key={monthLabel}>
+                {/* Month Header */}
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="h-px flex-1 bg-border" />
+                  <h3 className="font-serif text-xl md:text-2xl font-normal text-primary tracking-wide whitespace-nowrap">
+                    {monthLabel}
+                  </h3>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
 
-                <DayPicker
-                  month={months[mobileIndex]}
-                  mode="single"
-                  selected={undefined}
-                  onDayClick={handleDayClick}
-                  showOutsideDays={false}
-                  modifiers={{ expedition: expeditionDates }}
-                  modifiersClassNames={{
-                    expedition: 'bg-accent/20 text-accent-foreground font-semibold rounded-md',
-                  }}
-                  classNames={{
-                    root: cn('w-fit mx-auto', defaultClassNames.root),
-                    months: cn('flex flex-col', defaultClassNames.months),
-                    month: cn('flex flex-col gap-2 w-full', defaultClassNames.month),
-                    month_caption: cn('hidden'),
-                    nav: cn('hidden'),
-                    table: 'w-full border-collapse',
-                    weekdays: cn('flex', defaultClassNames.weekdays),
-                    weekday: cn(
-                      'text-muted-foreground rounded-md flex-1 font-sans font-normal text-[0.75rem] select-none text-center uppercase tracking-wider',
-                      defaultClassNames.weekday,
-                    ),
-                    week: cn('flex w-full mt-1', defaultClassNames.week),
-                    day: cn(
-                      'relative size-full p-0 text-center group/day aspect-square select-none',
-                      defaultClassNames.day,
-                    ),
-                    today: cn(
-                      'ring-2 ring-accent/50 rounded-md',
-                      defaultClassNames.today,
-                    ),
-                    outside: cn(
-                      'text-muted-foreground opacity-0',
-                      defaultClassNames.outside,
-                    ),
-                    disabled: cn(
-                      'text-muted-foreground opacity-50',
-                      defaultClassNames.disabled,
-                    ),
-                    hidden: cn('invisible', defaultClassNames.hidden),
-                  }}
-                  components={{
-                    DayButton: ({ day, modifiers, ...props }) => {
-                      const key = day.date.toISOString().split('T')[0]
-                      const exps = dateToExpeditions.get(key)
-                      const hasExp = !!(exps && exps.length > 0)
-                      return (
-                        <div className="relative size-full">
-                          <button
-                            {...props}
-                            onClick={(e) => {
-                              handleDayClick(day.date)
-                              if (props.onClick) props.onClick(e)
-                            }}
-                            className={cn(
-                              'flex size-full items-center justify-center rounded-md font-sans text-sm transition-colors',
-                              modifiers.today && 'ring-2 ring-accent/50',
-                              hasExp && 'bg-accent/20 text-accent-foreground font-semibold',
-                              !hasExp && !modifiers.today && 'hover:bg-muted',
-                              modifiers.outside && 'invisible',
-                              props.className,
-                            )}
-                          >
-                            {day.date.getDate()}
-                            {hasExp && (
-                              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 size-1 rounded-full bg-accent" />
-                            )}
-                          </button>
-                        </div>
-                      )
-                    },
-                    Chevron: () => <></>,
-                  }}
-                />
-
-                {selectedExpedition && (
-                  <PopoverCard
-                    expedition={selectedExpedition}
-                    onClose={() => setSelectedExpedition(null)}
-                    language={language}
-                    t={t}
-                  />
-                )}
+                {/* Cards Grid */}
+                <div className="grid grid-cols-1 gap-6">
+                  {exps.map((exp) => (
+                    <ExpeditionCard
+                      key={exp.id}
+                      expedition={exp}
+                      language={language}
+                      t={t}
+                    />
+                  ))}
+                </div>
               </div>
-
-              {/* Mobile month dots */}
-              <div className="flex items-center justify-center gap-2 mt-4">
-                {months.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setMobileIndex(i)}
-                    className={cn(
-                      'rounded-full transition-all duration-300',
-                      i === mobileIndex
-                        ? 'w-6 h-2 bg-accent'
-                        : 'w-2 h-2 bg-border hover:bg-accent/40'
-                    )}
-                    aria-label={`Month ${i + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center justify-center gap-2 mt-8">
-              <span className="size-2.5 rounded-full bg-accent/40 inline-block" />
-              <span className="font-sans text-sm text-muted-foreground">
-                {t('calendar.available')}
-              </span>
-            </div>
-          </>
+            ))}
+          </div>
         )}
       </div>
     </section>
