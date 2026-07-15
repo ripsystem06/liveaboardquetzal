@@ -114,7 +114,7 @@ export function Navigation() {
               href="/testimonios" 
               className="text-foreground hover:text-accent transition-colors text-sm font-medium tracking-wide"
             >
-              {t('nav.testimonials')}
+              {t('nav.calendar')}
             </Link>
             <Link 
               href="/blog" 
@@ -213,7 +213,7 @@ export function Navigation() {
                     </Link>
                   </div>
                   <Link href="/testimonios" className="text-foreground hover:text-accent py-2 text-lg font-bold">
-                    {t('nav.testimonials')}
+                    {t('nav.calendar')}
                   </Link>
                   <Link href="/blog" className="text-foreground hover:text-accent py-2 text-lg font-bold">
                     {t('nav.blogs')}
@@ -306,7 +306,7 @@ export function Navigation() {
               </Link>
             </div>
             <Link href="/testimonios" className="block text-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
-              {t('nav.testimonials')}
+              {t('nav.calendar')}
             </Link>
             <Link href="/blog" className="block text-foreground hover:text-accent py-2 font-bold" onClick={() => setIsOpen(false)}>
               {t('nav.blogs')}
