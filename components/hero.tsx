@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/language-context'
 
 const videos = [
-  { src: '/images/videoactividades/manta-divers.mov', type: 'video/quicktime' },
+  { src: '/images/videoactividades/manta-divers.mp4', type: 'video/mp4' },
   { src: '/images/videoactividades/sharks-divers.mp4', type: 'video/mp4' },
   { src: '/images/videoactividades/reef-sharks.mp4', type: 'video/mp4' },
 ]
