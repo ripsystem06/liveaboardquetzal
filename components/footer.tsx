@@ -98,12 +98,18 @@ export function Footer() {
           <p className="font-sans text-sm text-primary-foreground/60">
             &copy; {new Date().getFullYear()} Quetzal Liveaboard. {t('footer.rights')}
           </p>
-          <div className="flex gap-6 font-sans text-sm">
+          <div className="flex gap-6 font-sans text-sm flex-wrap justify-center md:justify-end">
             <Link href="/privacidad" className="text-primary-foreground/60 hover:text-accent transition-colors">
               {t('footer.privacy')}
             </Link>
             <Link href="/terminos" className="text-primary-foreground/60 hover:text-accent transition-colors">
               {t('footer.terms')}
+            </Link>
+            <Link href="/politica-cancelacion" className="text-primary-foreground/60 hover:text-accent transition-colors">
+              {t('footer.cancellation')}
+            </Link>
+            <Link href="/riesgos-buceo" className="text-primary-foreground/60 hover:text-accent transition-colors">
+              {t('footer.divingRisks')}
             </Link>
           </div>
         </div>

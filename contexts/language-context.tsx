@@ -124,6 +124,8 @@ const translations = {
     'footer.rights': 'All rights reserved.',
     'footer.privacy': 'Privacy Policy',
     'footer.terms': 'Terms of Service',
+    'footer.cancellation': 'Cancellation Policy',
+    'footer.divingRisks': 'Diving Risks',
 
     // Our Boat Page
     'boat.hero': 'Meet the Quetzal',
@@ -670,6 +672,8 @@ const translations = {
     'footer.rights': 'Todos los derechos reservados.',
     'footer.privacy': 'Política de Privacidad',
     'footer.terms': 'Términos de Servicio',
+    'footer.cancellation': 'Política de Cancelación',
+    'footer.divingRisks': 'Riesgos de Buceo',
 
     // Our Boat Page
     'boat.hero': 'Conoce el Quetzal',
