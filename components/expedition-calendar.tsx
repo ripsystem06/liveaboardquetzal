@@ -265,9 +265,9 @@ export function ExpeditionCalendar() {
 
       <div className="container mx-auto px-4 lg:px-8 relative">
         <div className="text-center mb-12 md:mb-16">
-          <p className="font-sans text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <h2 className="font-serif text-2xl md:text-3xl font-normal text-primary tracking-tight">
             {t('calendar.subtitle')}
-          </p>
+          </h2>
         </div>
 
         {!hasExpeditions ? (
