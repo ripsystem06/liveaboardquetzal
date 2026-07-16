@@ -85,7 +85,7 @@ function ExpeditionCard({ expedition, language, t }: {
 
   return (
     <Link
-      href="/reservar"
+      href="/booking"
       className="group relative flex flex-col md:flex-row overflow-hidden rounded-2xl border border-border bg-card hover:shadow-xl hover:border-accent/30 transition-all duration-300"
     >
       {/* Image */}
