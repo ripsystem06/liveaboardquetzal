@@ -18,6 +18,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'vjs.zencdn.net',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
     ],
   },
 }

@@ -1,5 +1,18 @@
 import '@testing-library/jest-dom'
 
+// Mock IntersectionObserver (not available in jsdom)
+class MockIntersectionObserver {
+  readonly root: Element | null = null
+  readonly rootMargin: string = ''
+  readonly thresholds: ReadonlyArray<number> = []
+  constructor(private callback: IntersectionObserverCallback) {}
+  observe() { this.callback([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver) }
+  unobserve() {}
+  disconnect() {}
+  takeRecords(): IntersectionObserverEntry[] { return [] }
+}
+window.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver
+
 // In-memory mock user DB for tests
 const mockUsers = new Map<string, { id: string; name: string; email: string; phone: string; isAdmin: boolean; passwordHash: string }>()
 
