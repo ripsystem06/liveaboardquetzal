@@ -54,6 +54,14 @@ export function verify(token: string): string | null {
   }
 }
 
+export interface SessionUser {
+  id: string
+  name: string
+  email: string
+  phone: string
+  isAdmin: boolean
+}
+
 export async function getAuthUserId(): Promise<string> {
   const cookieStore = await cookies()
   const sessionValue = cookieStore.get(SESSION_COOKIE)?.value
@@ -71,6 +79,28 @@ export async function getAuthUserId(): Promise<string> {
       throw new AuthError('Authentication required')
     }
     return user.id
+  } catch (e) {
+    if (e instanceof AuthError) throw e
+    throw new AuthError('Authentication required')
+  }
+}
+
+export async function getSessionUser(): Promise<SessionUser> {
+  const cookieStore = await cookies()
+  const sessionValue = cookieStore.get(SESSION_COOKIE)?.value
+  if (!sessionValue) {
+    throw new AuthError('Authentication required')
+  }
+  try {
+    const payload = verify(sessionValue)
+    if (payload === null) {
+      throw new AuthError('Authentication required')
+    }
+    const user = JSON.parse(payload)
+    if (!user || !user.id) {
+      throw new AuthError('Authentication required')
+    }
+    return user as SessionUser
   } catch (e) {
     if (e instanceof AuthError) throw e
     throw new AuthError('Authentication required')

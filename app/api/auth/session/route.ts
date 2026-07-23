@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
 import { sign, hashPassword, verifyPassword } from '@/lib/auth'
-import { ADMIN_EMAIL } from '@/lib/config'
 import { prisma } from '@/lib/db'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 import { SessionBodySchema } from '@/lib/validations'
@@ -38,16 +37,8 @@ export async function POST(request: NextRequest) {
 
   let user: { id: string; name: string; email: string; phone: string; isAdmin: boolean }
 
-  // Admin login — server-side verified against ADMIN_PASSWORD_HASH env var
-  if (email === ADMIN_EMAIL) {
-    const storedHash = process.env.ADMIN_PASSWORD_HASH
-    if (!storedHash || !(await verifyPassword(password, storedHash))) {
-      return Response.json({ error: 'Invalid credentials' }, { status: 401 })
-    }
-    user = { id: 'admin', name: 'Admin', email, phone: '', isAdmin: true }
-  }
   // Register mode — name field present, create real DB user
-  else if (name) {
+  if (name) {
     // Check if email already exists
     const existing = await prisma.user.findUnique({ where: { email } })
     if (existing) {
