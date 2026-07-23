@@ -1,7 +1,8 @@
 'use client'
 
-import { X, ShipWheel, Anchor, CalendarArrowDown, Fish, Clock } from 'lucide-react'
+import { ShipWheel, Anchor, CalendarArrowDown, Fish, Clock } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import type { Cruise } from './booking-page-client'
 
 interface TripDetailsModalProps {
@@ -22,24 +23,15 @@ export function TripDetailsModal({ cruise, embarkDate, onClose }: TripDetailsMod
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div>
-            <h3 className="text-lg font-serif font-bold text-primary">{cruise.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{t('booking.cruise.tripDetails')}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
-          >
-            <X size={18} className="text-muted-foreground" />
-          </button>
-        </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-lg text-primary">{cruise.name}</DialogTitle>
+          <DialogDescription>{t('booking.cruise.tripDetails')}</DialogDescription>
+        </DialogHeader>
 
         {/* Body */}
-        <div className="px-6 py-6 space-y-6">
+        <div className="space-y-6 pt-2">
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-xl bg-muted/40 p-4">
@@ -122,15 +114,15 @@ export function TripDetailsModal({ cruise, embarkDate, onClose }: TripDetailsMod
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-2xl">
+        <div className="-mx-6 -mb-6 px-6 py-4 border-t border-border bg-muted/20 rounded-b-lg">
           <button
             onClick={onClose}
             className="w-full rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground hover:bg-secondary/90 transition-colors"
           >
-            Close
+            {t('admin.common.close') || 'Close'}
           </button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

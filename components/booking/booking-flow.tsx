@@ -11,8 +11,8 @@ import { RegisterForm } from './register-form'
 import { CruiseCard } from './cruise-card'
 import { GuestSelector } from './guest-selector'
 import { PaymentSection } from './payment-section'
-import { MOCK_CRUISES, type BookingState, type BookingAction, type Cruise } from './booking-page-client'
-import { Check } from 'lucide-react'
+import { type BookingState, type BookingAction, type Cruise } from './booking-page-client'
+import { Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface BookingFlowProps {
@@ -21,6 +21,9 @@ interface BookingFlowProps {
   selectedCruise: Cruise | null
   guestCount: number
   bookingConfirmed: boolean
+  availableCruises: Cruise[]
+  cruisesLoading: boolean
+  cruisesError: string | null
   state: BookingState
   dispatch: Dispatch<BookingAction>
 }
@@ -38,6 +41,9 @@ export function BookingFlow({
   selectedCruise,
   guestCount,
   bookingConfirmed,
+  availableCruises,
+  cruisesLoading,
+  cruisesError,
   state,
   dispatch,
 }: BookingFlowProps) {
@@ -213,54 +219,84 @@ export function BookingFlow({
             <h2 className="text-2xl font-serif text-primary">{t('booking.cruise.title')}</h2>
           </div>
 
-          <div className="flex flex-col gap-4 rounded-2xl bg-muted/20 p-4 sm:p-6">
-            {MOCK_CRUISES.map((cruise) => (
-              <CruiseCard
-                key={cruise.id}
-                cruise={cruise}
-                onSelect={handleCruiseSelect}
-                onSelectTier={handleTierSelect}
-                isSelected={selectedCruise?.id === cruise.id}
-                isLoginRequired={!isAuthenticated}
-                selectedTier={selectedCruise?.id === cruise.id ? state.selectedTier : null}
-              />
-            ))}
-          </div>
-
-          {selectedCruise && !state.selectedTier && (
-            <p className="text-sm text-muted-foreground text-center">{t('booking.tier.selectHint')}</p>
+          {cruisesLoading && (
+            <div className="flex items-center justify-center gap-3 py-16">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">{t('calendar.loading')}</p>
+            </div>
           )}
 
-          <div className="border-t border-border pt-6">
-            <GuestSelector value={guestCount} onChange={handleGuestChange} />
-          </div>
-
-          {/* Full Charter CTA */}
-          <div className="rounded-2xl border-2 border-dashed border-accent/40 bg-accent/5 px-6 py-5">
-            <div className="flex flex-col gap-2">
-              <h3 className="text-lg font-semibold text-primary">{t('booking.fullCharter.label')}</h3>
-              <p className="text-sm text-muted-foreground">{t('booking.fullCharter.description')}</p>
+          {cruisesError && !cruisesLoading && (
+            <div className="flex flex-col items-center justify-center gap-4 py-16">
+              <p className="text-sm text-destructive">{cruisesError}</p>
               <Button
-                onClick={() => router.push('/contacto')}
-                className="rounded-full px-6 py-3 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-fit"
+                variant="outline"
+                onClick={() => window.location.reload()}
+                className="rounded-full"
               >
-                {t('booking.fullCharter.cta')}
+                Retry
               </Button>
             </div>
-          </div>
+          )}
 
-          <div className="flex justify-between">
-            <Button variant="ghost" onClick={handleBack}>
-              {t('booking.flow.back')}
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={!selectedCruise || !state.selectedTier}
-              className="bg-secondary hover:bg-secondary/90"
-            >
-              {t('booking.flow.next')}
-            </Button>
-          </div>
+          {!cruisesLoading && !cruisesError && availableCruises.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-4 py-16">
+              <p className="text-sm text-muted-foreground">No expeditions available at this time</p>
+            </div>
+          )}
+
+          {!cruisesLoading && availableCruises.length > 0 && (
+            <>
+              <div className="flex flex-col gap-4 rounded-2xl bg-muted/20 p-4 sm:p-6">
+                {availableCruises.map((cruise) => (
+                  <CruiseCard
+                    key={cruise.id}
+                    cruise={cruise}
+                    onSelect={handleCruiseSelect}
+                    onSelectTier={handleTierSelect}
+                    isSelected={selectedCruise?.id === cruise.id}
+                    isLoginRequired={!isAuthenticated}
+                    selectedTier={selectedCruise?.id === cruise.id ? state.selectedTier : null}
+                  />
+                ))}
+              </div>
+
+              {selectedCruise && !state.selectedTier && (
+                <p className="text-sm text-muted-foreground text-center">{t('booking.tier.selectHint')}</p>
+              )}
+
+              <div className="border-t border-border pt-6">
+                <GuestSelector value={guestCount} onChange={handleGuestChange} />
+              </div>
+
+              {/* Full Charter CTA */}
+              <div className="rounded-2xl border-2 border-dashed border-accent/40 bg-accent/5 px-6 py-5">
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-lg font-semibold text-primary">{t('booking.fullCharter.label')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('booking.fullCharter.description')}</p>
+                  <Button
+                    onClick={() => router.push('/contacto')}
+                    className="rounded-full px-6 py-3 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-fit"
+                  >
+                    {t('booking.fullCharter.cta')}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <Button variant="ghost" onClick={handleBack}>
+                  {t('booking.flow.back')}
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  disabled={!selectedCruise || !state.selectedTier}
+                  className="bg-secondary hover:bg-secondary/90"
+                >
+                  {t('booking.flow.next')}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       )}
 

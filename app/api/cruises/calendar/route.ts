@@ -8,7 +8,7 @@ export async function GET() {
       where: {
         isActive: true,
         departureDate: {
-          gt: today,
+          gte: today,
         },
       },
       select: {
@@ -18,7 +18,10 @@ export async function GET() {
         returnDate: true,
         route: true,
         basicPrice: true,
+        standardPrice: true,
+        premiumPrice: true,
         dives: true,
+        boat: true,
       },
       orderBy: { departureDate: 'asc' },
     })

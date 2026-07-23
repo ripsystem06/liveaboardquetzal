@@ -21,12 +21,6 @@ export interface Cruise {
   boat?: string
 }
 
-export const MOCK_CRUISES: Cruise[] = [
-  { id: 'socorro-1', name: 'Socorro Islands', departureDate: '2026-03-15', returnDate: '2026-03-24', route: 'Revillagigedo Archipelago', tiers: { basic: 2500, standard: 3000, premium: 3500 }, dives: 5, boat: 'Quetzal' },
-  { id: 'cortez-1', name: 'Sea of Cortez', departureDate: '2026-07-09', returnDate: '2026-07-18', route: 'Bahía de La Paz', tiers: { basic: 1800, standard: 2350, premium: 2900 }, dives: 5, boat: 'Quetzal' },
-  { id: 'magbay-1', name: 'Mag Bay + Socorro', departureDate: '2026-10-16', returnDate: '2026-10-25', route: 'Bahía Magdalena → Socorro', tiers: { basic: 4200, standard: 5199, premium: 6200 }, dives: 5, boat: 'Quetzal' },
-]
-
 export interface BookingState {
   step: 1 | 2 | 3
   selectedCruise: Cruise | null
@@ -34,6 +28,9 @@ export interface BookingState {
   guestCount: number
   bookingConfirmed: boolean
   loginCompleted: boolean
+  availableCruises: Cruise[]
+  cruisesLoading: boolean
+  cruisesError: string | null
 }
 
 export const initialBookingState: BookingState = {
@@ -43,6 +40,9 @@ export const initialBookingState: BookingState = {
   guestCount: 1,
   bookingConfirmed: false,
   loginCompleted: false,
+  availableCruises: [],
+  cruisesLoading: true,
+  cruisesError: null,
 }
 
 export type BookingAction =
@@ -54,6 +54,8 @@ export type BookingAction =
   | { type: 'CONFIRM_PAYMENT' }
   | { type: 'LOGIN_COMPLETED' }
   | { type: 'RESET_TO_LOGIN' }
+  | { type: 'SET_CRUISES'; cruises: Cruise[] }
+  | { type: 'SET_CRUISES_ERROR'; error: string }
 
 export function bookingReducer(state: BookingState, action: BookingAction): BookingState {
   switch (action.type) {
@@ -88,6 +90,10 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
       return { ...state, loginCompleted: true, step: 2 }
     case 'RESET_TO_LOGIN':
       return { ...initialBookingState, step: 1 }
+    case 'SET_CRUISES':
+      return { ...state, availableCruises: action.cruises, cruisesLoading: false, cruisesError: null }
+    case 'SET_CRUISES_ERROR':
+      return { ...state, cruisesError: action.error, cruisesLoading: false }
     default:
       return state
   }
@@ -107,6 +113,34 @@ export function BookingPageClient() {
     }
   }, [isAuthenticated, state.step])
 
+  useEffect(() => {
+    async function fetchCruises() {
+      try {
+        const res = await fetch('/api/cruises/calendar')
+        if (!res.ok) throw new Error('Failed to fetch cruises')
+        const data = await res.json()
+        const cruises: Cruise[] = (data.expeditions || []).map((exp: Record<string, unknown>) => ({
+          id: exp.id as string,
+          name: exp.name as string,
+          departureDate: exp.departureDate as string,
+          returnDate: exp.returnDate as string,
+          route: exp.route as string,
+          tiers: {
+            basic: (exp.basicPrice as number) || 0,
+            standard: (exp.standardPrice as number) || 0,
+            premium: (exp.premiumPrice as number) || 0,
+          },
+          dives: (exp.dives as number) || 0,
+          boat: exp.boat as string | undefined,
+        }))
+        dispatch({ type: 'SET_CRUISES', cruises })
+      } catch (err) {
+        dispatch({ type: 'SET_CRUISES_ERROR', error: err instanceof Error ? err.message : 'Failed to load cruises' })
+      }
+    }
+    fetchCruises()
+  }, [])
+
   return (
     <div className="min-h-screen bg-[#f3f1ec]">
       <BookingFlow
@@ -115,6 +149,9 @@ export function BookingPageClient() {
         selectedCruise={state.selectedCruise}
         guestCount={state.guestCount}
         bookingConfirmed={state.bookingConfirmed}
+        availableCruises={state.availableCruises}
+        cruisesLoading={state.cruisesLoading}
+        cruisesError={state.cruisesError}
         state={state}
         dispatch={dispatch}
       />
