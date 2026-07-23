@@ -17,13 +17,13 @@ export function LegalPage({ data }: LegalPageProps) {
       <div className="container mx-auto px-4 lg:px-8 max-w-3xl">
         {/* Quetzal Logo — centered */}
         <div className="flex justify-center mb-12">
-          <Link href="/" aria-label="Quetzal Liveaboard — Home">
+          <Link href="/" aria-label="Quetzal Liveaboard — Home" className="inline-block">
             <Image
               src="/logosquetzal/logosinfrase.svg"
               alt="Quetzal Liveaboard"
-              width={120}
-              height={48}
-              className="h-12 w-auto"
+              width={140}
+              height={56}
+              className="h-14 w-auto"
               priority
             />
           </Link>
