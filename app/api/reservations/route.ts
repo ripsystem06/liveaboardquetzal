@@ -3,40 +3,39 @@ import { prisma } from '@/lib/db'
 import { getAuthUserId, AuthError } from '@/lib/auth'
 import { CreateReservationSchema, ReservationStatus } from '@/lib/validations'
 import { sendReservationCreatedEmail } from '@/lib/email'
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 
 /**
  * POST /api/reservations
  * Creates a new reservation with pending_approval status and calculated holdExpiry.
+ * Uses a database transaction to prevent double-booking race conditions.
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 20 requests per minute per IP
+    const ip = getClientIP(request)
+    const rl = checkRateLimit(ip, 20, 60_000)
+    if (!rl.allowed) {
+      return Response.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfter!) } },
+      )
+    }
+
     const userId = await getAuthUserId()
     const rawBody = await request.json()
 
     const parsed = CreateReservationSchema.safeParse(rawBody)
     if (!parsed.success) {
       return Response.json(
-        { error: 'Validation failed', details: parsed.error.flatten() },
+        {
+          error: 'Validation failed',
+          ...(process.env.NODE_ENV !== 'production' ? { details: parsed.error.flatten() } : {}),
+        },
         { status: 400 }
       )
     }
     const body = parsed.data
-
-    // Date blocking check: prevent duplicate reservations for same cruise+date
-    const conflicting = await prisma.reservation.findFirst({
-      where: {
-        cruiseId: body.cruiseId,
-        departureDate: body.departureDate,
-        status: ReservationStatus.enum.pending_approval,
-      },
-    })
-
-    if (conflicting) {
-      return Response.json(
-        { error: 'DATE_BLOCKED', message: 'Cruise date is currently held by another reservation' },
-        { status: 409 }
-      )
-    }
 
     // Calculate holdExpiry based on day of week
     const now = new Date()
@@ -44,23 +43,39 @@ export async function POST(request: NextRequest) {
     const holdHours = (dayOfWeek === 0 || dayOfWeek === 6) ? 72 : 48
     const holdExpiry = new Date(now.getTime() + holdHours * 60 * 60 * 1000)
 
-    const reservation = await prisma.reservation.create({
-      data: {
-        userId,
-        cruiseId: body.cruiseId,
-        cruiseName: body.cruiseName,
-        departureDate: body.departureDate,
-        route: body.route,
-        tier: body.tier,
-        tierPrice: body.tierPrice,
-        guestCount: body.guestCount,
-        freeSpaces: body.freeSpaces,
-        paidSpaces: body.paidSpaces,
-        totalAmount: body.totalAmount,
-        paymentMethod: body.paymentMethod,
-        status: ReservationStatus.enum.pending_approval,
-        holdExpiry,
-      },
+    // Wrap in transaction to prevent double-booking
+    const reservation = await prisma.$transaction(async (tx) => {
+      // Date blocking check: prevent duplicate reservations for same cruise+date
+      const conflicting = await tx.reservation.findFirst({
+        where: {
+          cruiseId: body.cruiseId,
+          departureDate: body.departureDate,
+          status: ReservationStatus.enum.pending_approval,
+        },
+      })
+
+      if (conflicting) {
+        throw { code: 'DATE_BLOCKED' }
+      }
+
+      return tx.reservation.create({
+        data: {
+          userId,
+          cruiseId: body.cruiseId,
+          cruiseName: body.cruiseName,
+          departureDate: body.departureDate,
+          route: body.route,
+          tier: body.tier,
+          tierPrice: body.tierPrice,
+          guestCount: body.guestCount,
+          freeSpaces: body.freeSpaces,
+          paidSpaces: body.paidSpaces,
+          totalAmount: body.totalAmount,
+          paymentMethod: body.paymentMethod,
+          status: ReservationStatus.enum.pending_approval,
+          holdExpiry,
+        },
+      })
     })
 
     const user = await prisma.user.findUnique({ where: { id: reservation.userId } })
@@ -90,6 +105,12 @@ export async function POST(request: NextRequest) {
 
     return Response.json(reservation, { status: 201 })
   } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && (error as Record<string, unknown>).code === 'DATE_BLOCKED') {
+      return Response.json(
+        { error: 'DATE_BLOCKED', message: 'Cruise date is currently held by another reservation' },
+        { status: 409 }
+      )
+    }
     if (error instanceof AuthError) {
       return Response.json({ error: 'Authentication required' }, { status: 401 })
     }

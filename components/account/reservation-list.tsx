@@ -125,7 +125,7 @@ function ReservationCard({ reservation }: { reservation: ReservationData }) {
           <span>{reservation.guestCount} {t('booking.payment.guests').toLowerCase()}</span>
         </div>
         <div className="text-muted-foreground capitalize">
-          {t(`booking.tier.${reservation.tier}`)} — ${(reservation.totalAmount / 100).toLocaleString()} USD
+          {t(`booking.tier.${reservation.tier}`)} — ${reservation.totalAmount.toLocaleString()} USD
         </div>
       </div>
 

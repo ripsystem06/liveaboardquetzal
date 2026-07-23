@@ -27,12 +27,15 @@ export async function POST(request: NextRequest) {
   const rawBody = await request.json()
 
   const parsed = SessionBodySchema.safeParse(rawBody)
-  if (!parsed.success) {
-    return Response.json(
-      { error: 'Validation failed', details: parsed.error.flatten() },
-      { status: 400 }
-    )
-  }
+    if (!parsed.success) {
+      return Response.json(
+        {
+          error: 'Validation failed',
+          ...(process.env.NODE_ENV !== 'production' ? { details: parsed.error.flatten() } : {}),
+        },
+        { status: 400 }
+      )
+    }
   const { email, password, name } = parsed.data
 
   let user: { id: string; name: string; email: string; phone: string; isAdmin: boolean }
@@ -51,6 +54,16 @@ export async function POST(request: NextRequest) {
     })
 
     sendWelcomeEmail(email, name).catch(err => console.error('Failed to send welcome email:', err))
+
+    // Fire-and-forget audit log
+    prisma.auditLog.create({
+      data: {
+        action: 'user.registered',
+        entityType: 'user',
+        entityId: created.id,
+        actorEmail: email,
+      },
+    }).catch(err => console.error('Audit log failed:', err))
 
     user = {
       id: created.id,

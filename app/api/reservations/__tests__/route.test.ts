@@ -21,6 +21,15 @@ vi.mock('@/lib/db', () => ({
     user: {
       findUnique: mockUserFindUnique,
     },
+    $transaction: vi.fn(async (cb: (tx: unknown) => Promise<unknown>) => {
+      const tx = {
+        reservation: {
+          findFirst: mockFindFirst,
+          create: mockCreate,
+        },
+      }
+      return cb(tx)
+    }),
   },
   checkAndExpireHolds: vi.fn((r) => Promise.resolve(r)),
 }))

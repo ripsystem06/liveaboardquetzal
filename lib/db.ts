@@ -3,14 +3,26 @@ import { sendExpiryEmail } from './email'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
-export const prisma = globalForPrisma.prisma || new PrismaClient()
+function getPrismaClient(): PrismaClient {
+  const dbUrl = process.env.DATABASE_URL
+  if (!dbUrl) {
+    return new PrismaClient()
+  }
+
+  const url = new URL(dbUrl)
+  url.searchParams.set('connection_limit', '3')
+  url.searchParams.set('pool_timeout', '10')
+
+  return new PrismaClient({
+    datasources: {
+      db: { url: url.toString() },
+    },
+  })
+}
+
+export const prisma = globalForPrisma.prisma || getPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-
-// Enable WAL mode for better concurrency (skip in test environment)
-if (process.env.NODE_ENV !== 'test') {
-  prisma.$executeRawUnsafe('PRAGMA journal_mode=WAL')
-}
 
 export interface ReservationData {
   id: string

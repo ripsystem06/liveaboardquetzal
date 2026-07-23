@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
-import { AuthError } from '@/lib/auth'
+import { AuthError, ForbiddenError } from '@/lib/auth'
 
 // ===== Mock Prisma =====
 const mockReservationFindMany = vi.fn()
@@ -20,7 +20,7 @@ const mockBlogPostFindFirst = vi.fn()
 const mockBlogPostDelete = vi.fn()
 const mockBlogPostCreate = vi.fn()
 const mockReservationFindFirst = vi.fn()
-const mockAuditLogCreate = vi.fn()
+const mockAuditLogCreate = vi.fn().mockResolvedValue(undefined)
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -88,15 +88,25 @@ vi.mock('@/lib/admin-auth', () => ({
   AuthError,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  getAuthUserId: vi.fn(),
-  AuthError: class extends Error {
+vi.mock('@/lib/auth', () => {
+  const AuthError = class extends Error {
     constructor(m: string) {
       super(m)
       this.name = 'AuthError'
     }
-  },
-}))
+  }
+  const ForbiddenError = class extends AuthError {
+    constructor(m: string) {
+      super(m)
+      this.name = 'ForbiddenError'
+    }
+  }
+  return {
+    getAuthUserId: vi.fn(),
+    AuthError,
+    ForbiddenError,
+  }
+})
 
 // ===== Import route handlers =====
 const { GET: DASHBOARD_GET } = await import('@/app/api/admin/dashboard/route')
@@ -117,7 +127,7 @@ describe('Admin API Integration Tests', () => {
   describe('GET /api/admin/dashboard', () => {
     it('returns 200 with valid admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 1000 } })
       mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(1)
@@ -135,7 +145,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 403 for non-admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockRejectedValue(new AuthError('Admin access required'))
+      vi.mocked(requireAdmin).mockRejectedValue(new ForbiddenError('Admin access required'))
 
       const request = new NextRequest('http://localhost/api/admin/dashboard')
       const response = await DASHBOARD_GET(request)
@@ -152,7 +162,7 @@ describe('Admin API Integration Tests', () => {
   describe('GET /api/admin/reservations', () => {
     it('returns 200 with valid admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindMany.mockResolvedValue([
         { id: 'r1', status: 'confirmed', guestCount: 2 },
@@ -168,7 +178,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 403 for non-admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockRejectedValue(new AuthError('Admin access required'))
+      vi.mocked(requireAdmin).mockRejectedValue(new ForbiddenError('Admin access required'))
 
       const request = new NextRequest('http://localhost/api/admin/reservations')
       const response = await RESERVATIONS_GET(request)
@@ -178,7 +188,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns filtered reservations by status', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindMany.mockResolvedValue([
         { id: 'r1', status: 'pending_approval', guestCount: 2 },
@@ -200,7 +210,7 @@ describe('Admin API Integration Tests', () => {
   describe('GET /api/admin/reservations/[id]', () => {
     it('returns 200 with valid admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindUnique.mockResolvedValue({
         id: 'r1',
@@ -220,7 +230,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 404 when reservation not found', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindUnique.mockResolvedValue(null)
 
@@ -232,7 +242,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 403 for non-admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockRejectedValue(new AuthError('Admin access required'))
+      vi.mocked(requireAdmin).mockRejectedValue(new ForbiddenError('Admin access required'))
 
       const request = new NextRequest('http://localhost/api/admin/reservations/r1')
       const response = await RESERVATION_GET(request, { params: Promise.resolve({ id: 'r1' }) })
@@ -247,7 +257,7 @@ describe('Admin API Integration Tests', () => {
   describe('PATCH /api/admin/reservations/[id]', () => {
     it('approves pending_approval reservation (200)', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindUnique.mockResolvedValue({
         id: 'r1',
@@ -273,7 +283,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 400 for invalid status transition', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindUnique.mockResolvedValue({
         id: 'r1',
@@ -292,7 +302,7 @@ describe('Admin API Integration Tests', () => {
 
     it('suspends confirmed reservation (200)', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindUnique.mockResolvedValue({
         id: 'r1',
@@ -318,7 +328,7 @@ describe('Admin API Integration Tests', () => {
 
     it('updates notes field (200)', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockReservationFindUnique.mockResolvedValue({
         id: 'r1',
@@ -350,7 +360,7 @@ describe('Admin API Integration Tests', () => {
   describe('GET /api/admin/cruises', () => {
     it('returns 200 with valid admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockCruiseFindMany.mockResolvedValue([
         { id: 'c1', name: 'Socorro', departureDate: '2026-07-15', basicPrice: 2000 },
@@ -366,7 +376,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 403 for non-admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockRejectedValue(new AuthError('Admin access required'))
+      vi.mocked(requireAdmin).mockRejectedValue(new ForbiddenError('Admin access required'))
 
       const request = new NextRequest('http://localhost/api/admin/cruises')
       const response = await CRUISES_GET(request)
@@ -381,13 +391,14 @@ describe('Admin API Integration Tests', () => {
   describe('POST /api/admin/cruises', () => {
     it('creates cruise with valid data (201)', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockCruiseCreate.mockResolvedValue({
         id: 'c_new',
         name: 'New Cruise',
-        departureDate: '2026-08-01',
-        route: 'Socorro',
+          departureDate: '2026-08-01',
+          returnDate: '2026-08-10',
+          route: 'Socorro',
         boat: 'Quetzal',
         basicPrice: 2000,
         standardPrice: 2500,
@@ -401,6 +412,7 @@ describe('Admin API Integration Tests', () => {
         body: JSON.stringify({
           name: 'New Cruise',
           departureDate: '2026-08-01',
+          returnDate: '2026-08-10',
           route: 'Socorro',
           basicPrice: 2000,
           standardPrice: 2500,
@@ -416,7 +428,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 400 for missing required fields', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       const request = new NextRequest('http://localhost/api/admin/cruises', {
         method: 'POST',
@@ -431,7 +443,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 400 for invalid price fields', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       const request = new NextRequest('http://localhost/api/admin/cruises', {
         method: 'POST',
@@ -456,7 +468,7 @@ describe('Admin API Integration Tests', () => {
   describe('GET /api/admin/cruises/[id]', () => {
     it('returns 200 with valid admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockCruiseFindUnique.mockResolvedValue({
         id: 'c1',
@@ -474,7 +486,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 404 when cruise not found', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockCruiseFindUnique.mockResolvedValue(null)
 
@@ -491,7 +503,7 @@ describe('Admin API Integration Tests', () => {
   describe('PATCH /api/admin/cruises/[id]', () => {
     it('updates cruise with valid data (200)', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockCruiseFindUnique.mockResolvedValue({
         id: 'c1',
@@ -517,7 +529,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 404 when cruise not found', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockCruiseFindUnique.mockResolvedValue(null)
 
@@ -537,7 +549,7 @@ describe('Admin API Integration Tests', () => {
   describe('DELETE /api/admin/cruises/[id] — 409 on confirmed reservations', () => {
     it('returns 200 when cruise has no reservations', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       // $transaction callback: findUnique returns cruise, findFirst returns null
       mockCruiseFindUnique.mockResolvedValue({
@@ -557,7 +569,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 409 when cruise has confirmed reservations', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       // $transaction: findUnique returns cruise, findFirst returns a confirmed reservation
       mockCruiseFindUnique.mockResolvedValue({
@@ -581,7 +593,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 404 when cruise not found', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockCruiseFindUnique.mockResolvedValue(null)
 
@@ -600,7 +612,7 @@ describe('Admin API Integration Tests', () => {
   describe('GET /api/admin/blog', () => {
     it('returns 200 with valid admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockBlogPostFindMany.mockResolvedValue([
         { id: 'p1', title: 'Post 1', content: 'Content', status: 'published' },
@@ -617,7 +629,7 @@ describe('Admin API Integration Tests', () => {
 
     it('returns 403 for non-admin session', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockRejectedValue(new AuthError('Admin access required'))
+      vi.mocked(requireAdmin).mockRejectedValue(new ForbiddenError('Admin access required'))
 
       const request = new NextRequest('http://localhost/api/admin/blog')
       const response = await BLOG_GET(request)
@@ -632,7 +644,7 @@ describe('Admin API Integration Tests', () => {
   describe('POST /api/admin/blog — FIFO behavior', () => {
     it('returns 201 when fewer than 5 posts exist', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockBlogPostCount.mockResolvedValue(3)
       mockBlogPostCreate.mockResolvedValue({
@@ -653,7 +665,7 @@ describe('Admin API Integration Tests', () => {
 
     it('deletes oldest when 5 posts already exist', async () => {
       const { requireAdmin } = await import('@/lib/admin-auth')
-      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin' })
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
       mockBlogPostCount.mockResolvedValue(5)
       mockBlogPostFindFirst.mockResolvedValue({

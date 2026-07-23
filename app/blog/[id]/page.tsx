@@ -14,11 +14,11 @@ interface BlogDetailPageProps {
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { id } = await params
   
-  const post = await prisma.blogPost.findUnique({
-    where: { id },
+  const post = await prisma.blogPost.findFirst({
+    where: { id, status: 'published' },
   })
 
-  if (!post || post.status !== 'published') {
+  if (!post) {
     notFound()
   }
 

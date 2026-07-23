@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
-import { AuthError } from '@/lib/auth'
+import { AuthError, ForbiddenError } from '@/lib/auth'
 import { ReservationStatus } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
@@ -54,8 +54,11 @@ export async function GET(request: NextRequest) {
 
     return Response.json({ confirmedRevenue, pendingCount, confirmedCount, revenueByCruise })
   } catch (error) {
-    if (error instanceof AuthError) {
+    if (error instanceof ForbiddenError) {
       return Response.json({ error: error.message }, { status: 403 })
+    }
+    if (error instanceof AuthError) {
+      return Response.json({ error: error.message }, { status: 401 })
     }
     console.error('GET /api/admin/dashboard error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })

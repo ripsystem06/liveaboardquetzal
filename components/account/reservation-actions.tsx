@@ -27,7 +27,7 @@ export function ReservationActions({ reservation }: ReservationActionsProps) {
   }
 
   const whatsappText = encodeURIComponent(
-    `Reservation ID: ${reservation.id}\nCruise: ${reservation.cruiseName}\nTotal: $${(reservation.totalAmount / 100).toLocaleString()} USD`
+    `Reservation ID: ${reservation.id}\nCruise: ${reservation.cruiseName}\nTotal: $${reservation.totalAmount.toLocaleString()} USD`
   )
 
   return (
@@ -44,7 +44,7 @@ export function ReservationActions({ reservation }: ReservationActionsProps) {
 
       <a
         href={`mailto:?subject=Reservation ${reservation.id}&body=${encodeURIComponent(
-          `Reservation ID: ${reservation.id}\nCruise: ${reservation.cruiseName}\nDate: ${reservation.departureDate}\nTotal: $${(reservation.totalAmount / 100).toLocaleString()} USD`
+          `Reservation ID: ${reservation.id}\nCruise: ${reservation.cruiseName}\nDate: ${reservation.departureDate}\nTotal: $${reservation.totalAmount.toLocaleString()} USD`
         )}`}
         className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
       >

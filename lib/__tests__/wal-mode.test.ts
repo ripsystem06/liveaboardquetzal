@@ -1,26 +1,79 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// This test requires a real database connection and NODE_ENV !== 'test'
-// so it must be in a separate file that doesn't get mocked
-describe('WAL mode', () => {
-  it('is enabled via PRAGMA journal_mode=WAL in lib/db.ts', async () => {
-    // This test verifies the code path exists
-    // WAL is set via $executeRawUnsafe('PRAGMA journal_mode=WAL')
-    // when NODE_ENV !== 'test' in lib/db.ts
-    const { PrismaClient } = await import('@prisma/client')
-    const prisma = new PrismaClient()
-    
-    // Only runs when not in test environment
-    if (process.env.NODE_ENV !== 'test') {
-      const result = await prisma.$queryRawUnsafe<{ journal_mode: string }[]>(
-        'PRAGMA journal_mode'
-      )
-      expect(result[0].journal_mode).toBe('wal')
-    } else {
-      // In test env, WAL mode is skipped - verify the code path exists
-      expect(process.env.NODE_ENV).toBe('test')
-    }
-    
-    await prisma.$disconnect()
+// Mock PrismaClient before any imports to intercept constructor calls
+const mockExecuteRawUnsafe = vi.fn()
+const mockPrismaClientConstructor = vi.fn()
+
+vi.mock('@prisma/client', () => ({
+  PrismaClient: vi.fn().mockImplementation(function (this: Record<string, unknown>, opts?: Record<string, unknown>) {
+    mockPrismaClientConstructor(opts)
+    this.$executeRawUnsafe = mockExecuteRawUnsafe
+    return this
+  }),
+}))
+
+describe('DB initialization for PostgreSQL', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.resetModules()
+    // Reset globalForPrisma so each test gets fresh initialization
+    delete (globalThis as Record<string, unknown>).prisma
+  })
+
+  it('does NOT execute any SQLite PRAGMA during cold start (DB-REQ-001)', async () => {
+    const originalNodeEnv = process.env.NODE_ENV
+    const originalDbUrl = process.env.DATABASE_URL
+    process.env.NODE_ENV = 'development'
+    process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/db'
+
+    await import('@/lib/db')
+
+    const pragmaCalls = mockExecuteRawUnsafe.mock.calls.filter(
+      (call: unknown[]) => typeof call[0] === 'string' && call[0].includes('PRAGMA')
+    )
+    expect(pragmaCalls).toHaveLength(0)
+
+    process.env.NODE_ENV = originalNodeEnv
+    process.env.DATABASE_URL = originalDbUrl
+  })
+
+  it('configures PrismaClient datasource URL with connection_limit=3 and pool_timeout=10 (DB-REQ-003)', async () => {
+    const originalDbUrl = process.env.DATABASE_URL
+    process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/db?pgbouncer=true'
+
+    await import('@/lib/db')
+
+    expect(mockPrismaClientConstructor).toHaveBeenCalled()
+    const opts = mockPrismaClientConstructor.mock.calls[0]?.[0] as Record<string, unknown> | undefined
+
+    // Must include datasource config with pooling params
+    expect(opts).toBeDefined()
+    const datasources = opts!.datasources as Record<string, { url: string }> | undefined
+    expect(datasources).toBeDefined()
+    const dbUrl = datasources!.db?.url
+    expect(dbUrl).toBeDefined()
+    expect(dbUrl).toContain('connection_limit=3')
+    expect(dbUrl).toContain('pool_timeout=10')
+
+    process.env.DATABASE_URL = originalDbUrl
+  })
+
+  it('preserves existing query params when appending pooling config to URL with ?pgbouncer=true', async () => {
+    const originalDbUrl = process.env.DATABASE_URL
+    process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/db?pgbouncer=true&schema=public'
+
+    await import('@/lib/db')
+
+    expect(mockPrismaClientConstructor).toHaveBeenCalled()
+    const opts = mockPrismaClientConstructor.mock.calls[0]?.[0] as Record<string, unknown> | undefined
+    expect(opts).toBeDefined()
+    const datasources = opts!.datasources as Record<string, { url: string }> | undefined
+    const dbUrl = datasources!.db?.url
+    expect(dbUrl).toContain('pgbouncer=true')
+    expect(dbUrl).toContain('schema=public')
+    expect(dbUrl).toContain('connection_limit=3')
+    expect(dbUrl).toContain('pool_timeout=10')
+
+    process.env.DATABASE_URL = originalDbUrl
   })
 })

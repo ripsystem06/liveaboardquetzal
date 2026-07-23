@@ -31,6 +31,7 @@ export const CreateReservationSchema = z.object({
 export const CreateCruiseSchema = z.object({
   name: z.string().min(1),
   departureDate: z.string().min(1),
+  returnDate: z.string().min(1),
   route: z.string().min(1),
   boat: z.string().optional().default('Quetzal'),
   basicPrice: z.number().int().positive(),

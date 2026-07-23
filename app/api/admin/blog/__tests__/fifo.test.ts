@@ -30,6 +30,9 @@ vi.mock('@/lib/db', () => ({
       findMany: mockFindMany,
     },
     $transaction: mockTransaction,
+    auditLog: {
+      create: vi.fn().mockReturnValue(Promise.resolve({})),
+    },
   },
 }))
 
@@ -37,14 +40,12 @@ vi.mock('@/lib/admin-auth', () => ({
   requireAdmin: vi.fn(() => Promise.resolve('admin@quetzal.com')),
 }))
 
-vi.mock('@/lib/auth', () => ({
-  AuthError: class extends Error {
-    constructor(m: string) {
-      super(m)
-      this.name = 'AuthError'
-    }
-  },
-}))
+vi.mock('@/lib/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/auth')>()
+  return {
+    ...actual,
+  }
+})
 
 const { GET, POST } = await import('@/app/api/admin/blog/route')
 

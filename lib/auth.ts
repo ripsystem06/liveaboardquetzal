@@ -143,3 +143,10 @@ export class AuthError extends Error {
     this.name = 'AuthError'
   }
 }
+
+export class ForbiddenError extends AuthError {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ForbiddenError'
+  }
+}

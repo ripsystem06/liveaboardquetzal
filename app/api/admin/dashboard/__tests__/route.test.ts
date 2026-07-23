@@ -21,15 +21,12 @@ vi.mock('@/lib/admin-auth', () => ({
   AuthError,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  getAuthUserId: vi.fn(),
-  AuthError: class extends Error {
-    constructor(m: string) {
-      super(m)
-      this.name = 'AuthError'
-    }
-  },
-}))
+vi.mock('@/lib/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/auth')>()
+  return {
+    ...actual,
+  }
+})
 
 const { GET } = await import('@/app/api/admin/dashboard/route')
 
@@ -40,7 +37,7 @@ describe('GET /api/admin/dashboard', () => {
 
   it('returns dashboard aggregates with confirmed revenue and pending count', async () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
-    vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
+    vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
     mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 2400 } })
     mockReservationCount.mockResolvedValueOnce(1).mockResolvedValueOnce(2)
@@ -66,7 +63,7 @@ describe('GET /api/admin/dashboard', () => {
 
   it('returns zero stats when no reservations exist', async () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
-    vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
+    vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
     mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: null } })
     mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(0)
@@ -85,7 +82,8 @@ describe('GET /api/admin/dashboard', () => {
 
   it('returns 403 when user is not admin', async () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
-    vi.mocked(requireAdmin).mockRejectedValue(new AuthError('Admin access required'))
+    const { ForbiddenError } = await import('@/lib/auth')
+    vi.mocked(requireAdmin).mockRejectedValue(new ForbiddenError('Admin access required'))
 
     const request = new NextRequest('http://localhost/api/admin/dashboard')
     const response = await GET(request)
@@ -97,7 +95,7 @@ describe('GET /api/admin/dashboard', () => {
 
   it('groups revenue by cruise correctly with multiple cruises', async () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
-    vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
+    vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
     mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 1800 } })
     mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(2)
@@ -117,7 +115,7 @@ describe('GET /api/admin/dashboard', () => {
 
   it('does not count cancelled or expired reservations in revenue', async () => {
     const { requireAdmin } = await import('@/lib/admin-auth')
-    vi.mocked(requireAdmin).mockResolvedValue('admin@quetzal.com')
+    vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
 
     mockReservationAggregate.mockResolvedValue({ _sum: { totalAmount: 1000 } })
     mockReservationCount.mockResolvedValueOnce(0).mockResolvedValueOnce(1)
