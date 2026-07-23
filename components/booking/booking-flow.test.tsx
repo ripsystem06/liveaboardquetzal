@@ -8,8 +8,11 @@ const mockCruise: Cruise = {
   id: 'socorro-1',
   name: 'Socorro Islands',
   departureDate: '2026-03-15',
+  returnDate: '2026-03-24',
   route: 'Revillagigedo Archipelago',
   tiers: { basic: 2500, standard: 3000, premium: 3500 },
+  dives: 5,
+  boat: 'Quetzal',
 }
 
 describe('BookingFlow', () => {
@@ -20,6 +23,9 @@ describe('BookingFlow', () => {
     guestCount: 1,
     bookingConfirmed: false,
     loginCompleted: false,
+    availableCruises: [],
+    cruisesLoading: false,
+    cruisesError: null,
   }
 
   const mockDispatch = vi.fn()
@@ -36,6 +42,9 @@ describe('BookingFlow', () => {
         selectedCruise={null}
         guestCount={1}
         bookingConfirmed={false}
+        availableCruises={[]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={mockState}
         dispatch={mockDispatch}
       />
@@ -54,6 +63,9 @@ describe('BookingFlow', () => {
         selectedCruise={null}
         guestCount={1}
         bookingConfirmed={false}
+        availableCruises={[]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={mockState}
         dispatch={mockDispatch}
       />
@@ -71,6 +83,9 @@ describe('BookingFlow', () => {
         selectedCruise={null}
         guestCount={1}
         bookingConfirmed={false}
+        availableCruises={[mockCruise]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={state}
         dispatch={mockDispatch}
       />
@@ -88,6 +103,9 @@ describe('BookingFlow', () => {
         selectedCruise={null}
         guestCount={1}
         bookingConfirmed={false}
+        availableCruises={[mockCruise]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={state}
         dispatch={mockDispatch}
       />
@@ -105,6 +123,9 @@ describe('BookingFlow', () => {
         selectedCruise={mockCruise}
         guestCount={2}
         bookingConfirmed={false}
+        availableCruises={[]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={state}
         dispatch={mockDispatch}
       />
@@ -124,6 +145,9 @@ describe('BookingFlow', () => {
         selectedCruise={null}
         guestCount={1}
         bookingConfirmed={false}
+        availableCruises={[mockCruise]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={state}
         dispatch={mockDispatch}
       />
@@ -180,6 +204,7 @@ describe('BookingFlow', () => {
 
   it('shows sign-in buttons on step 2 when user is unauthenticated', () => {
     const state: BookingState = { ...mockState, step: 2, loginCompleted: false }
+    const threeCruises = [mockCruise, { ...mockCruise, id: 'c1' }, { ...mockCruise, id: 'c2' }]
     renderWithProviders(
       <BookingFlow
         step={2}
@@ -187,6 +212,9 @@ describe('BookingFlow', () => {
         selectedCruise={null}
         guestCount={1}
         bookingConfirmed={false}
+        availableCruises={threeCruises}
+        cruisesLoading={false}
+        cruisesError={null}
         state={state}
         dispatch={mockDispatch}
       />

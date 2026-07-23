@@ -11,12 +11,80 @@ vi.mock('./paypal-simulator', () => ({
   },
 }))
 
+// Mock fetch for cruise data
+const mockCruises = [
+  {
+    id: 'socorro-1',
+    name: 'Socorro Islands — Giant Mantas',
+    departureDate: '2026-08-15',
+    returnDate: '2026-08-24',
+    route: 'Socorro Islands',
+    basicPrice: 3300,
+    standardPrice: 3900,
+    premiumPrice: 4600,
+    dives: 18,
+    boat: 'Quetzal',
+  },
+]
+
 describe('BookingPageClient integration', () => {
-  // Stub localStorage before each test to prevent UserProvider useEffect errors
   beforeEach(() => {
-    const storageGetItem = vi.fn(() => null)
-    const storageSetItem = vi.fn()
-    vi.stubGlobal('localStorage', { getItem: storageGetItem, setItem: storageSetItem })
+    // Stub sessionStorage for UserProvider
+    const sessionGetItem = vi.fn(() => null)
+    const sessionSetItem = vi.fn()
+    const sessionRemoveItem = vi.fn()
+    vi.stubGlobal('sessionStorage', {
+      getItem: sessionGetItem,
+      setItem: sessionSetItem,
+      removeItem: sessionRemoveItem,
+    })
+    // Stub window.open (called by payment PDF)
+    vi.stubGlobal('open', vi.fn())
+
+    // Mock fetch to return cruise data
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+      const isPost = init?.method === 'POST'
+
+      if (url.includes('/api/cruises/calendar')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ expeditions: mockCruises }),
+        })
+      }
+      // Auth session endpoint — return demo user
+      if (url.includes('/api/auth/session') && isPost) {
+        const bodyStr = typeof init?.body === 'string' ? init.body : '{}'
+        const body = JSON.parse(bodyStr)
+        if (body.email === 'demo@quetzal.com' && body.password === '123456') {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              ok: true,
+              user: { id: 'demo-1', name: 'Demo User', email: 'demo@quetzal.com', phone: '', isAdmin: false },
+            }),
+          })
+        }
+        return Promise.resolve({ ok: false, json: () => Promise.resolve({ error: 'Invalid' }) })
+      }
+      // Reservation confirm endpoint
+      if (url.includes('/api/reservations/') && url.includes('/confirm') && isPost) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ id: 'res-1', status: 'confirmed' }),
+        })
+      }
+      // Reservation creation endpoint
+      if (url.includes('/api/reservations') && isPost) {
+        return Promise.resolve({
+          ok: true,
+          status: 201,
+          json: () => Promise.resolve({ id: 'res-1', status: 'pending_approval' }),
+        })
+      }
+      return Promise.resolve({ ok: false, json: () => Promise.resolve({}) })
+    }))
   })
 
   describe('Full 3-step flow', () => {

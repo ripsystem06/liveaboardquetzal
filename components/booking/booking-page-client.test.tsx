@@ -11,6 +11,7 @@ describe('bookingReducer', () => {
     route: 'Revillagigedo Archipelago',
     tiers: { basic: 2500, standard: 3000, premium: 3500 },
     dives: 5,
+    boat: 'Quetzal',
   }
 
   describe('SELECT_CRUISE', () => {
@@ -118,39 +119,5 @@ describe('bookingReducer', () => {
       const result = bookingReducer(initialBookingState, action)
       expect(result.bookingConfirmed).toBe(true)
     })
-  })
-})
-
-describe('MOCK_CRUISES', () => {
-  it('contains 3 cruises', async () => {
-    const { MOCK_CRUISES } = await import('./booking-page-client')
-    expect(MOCK_CRUISES).toHaveLength(3)
-  })
-
-  it('has correct Socorro Islands cruise data', async () => {
-    const { MOCK_CRUISES } = await import('./booking-page-client')
-    const socorro = MOCK_CRUISES.find((c) => c.id === 'socorro-1')
-    expect(socorro).toBeDefined()
-    expect(socorro?.tiers.basic).toBe(2500)
-    expect(socorro?.tiers.standard).toBe(3000)
-    expect(socorro?.tiers.premium).toBe(3500)
-  })
-
-  it('has correct Sea of Cortez cruise data', async () => {
-    const { MOCK_CRUISES } = await import('./booking-page-client')
-    const cortez = MOCK_CRUISES.find((c) => c.id === 'cortez-1')
-    expect(cortez).toBeDefined()
-    expect(cortez?.tiers.basic).toBe(1800)
-    expect(cortez?.tiers.standard).toBe(2350)
-    expect(cortez?.tiers.premium).toBe(2900)
-  })
-
-  it('has correct Mag Bay + Socorro cruise data', async () => {
-    const { MOCK_CRUISES } = await import('./booking-page-client')
-    const magbay = MOCK_CRUISES.find((c) => c.id === 'magbay-1')
-    expect(magbay).toBeDefined()
-    expect(magbay?.tiers.basic).toBe(4200)
-    expect(magbay?.tiers.standard).toBe(5199)
-    expect(magbay?.tiers.premium).toBe(6200)
   })
 })
