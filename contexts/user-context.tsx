@@ -8,6 +8,7 @@ interface UserContextType {
   user: User | null
   isAuthenticated: boolean
   isAdmin: boolean
+  sessionReady: boolean
   login: (email: string, password: string) => Promise<boolean>
   register: (name: string, email: string, password: string) => Promise<User>
   logout: () => void
@@ -18,6 +19,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [sessionReady, setSessionReady] = useState(false)
 
   // Restore session from sessionStorage on mount (survives refresh, dies on tab close)
   useEffect(() => {
@@ -29,6 +31,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
     } catch {
       // Corrupted data — ignore, user stays logged out
+    } finally {
+      setSessionReady(true)
     }
   }, [])
 
@@ -90,6 +94,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         user,
         isAuthenticated: user !== null,
         isAdmin: user?.isAdmin ?? false,
+        sessionReady,
         login,
         register,
         logout,

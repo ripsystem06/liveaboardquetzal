@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useUser } from '@/contexts/user-context'
 
 export default function AdventurePage() {
   const router = useRouter()
+  const { login } = useUser()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -18,19 +20,11 @@ export default function AdventurePage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        sessionStorage.setItem('quetzal_user', JSON.stringify(data.user))
+      const ok = await login(email, password)
+      if (ok) {
         router.push('/admin')
       } else {
-        const data = await res.json()
-        setError(data.error || 'Invalid credentials')
+        setError('Invalid credentials')
       }
     } catch {
       setError('Invalid credentials')
