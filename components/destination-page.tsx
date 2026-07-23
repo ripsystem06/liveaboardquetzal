@@ -73,7 +73,7 @@ function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 // ── Shared: Scroll-snap section wrapper ─────────────────────────────────────
 function SnapSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <section className={`h-screen w-full snap-start flex items-center justify-center overflow-y-auto relative px-4 py-12 md:py-16 ${className}`}>
+    <section className={`min-h-screen md:h-screen w-full snap-start flex items-center justify-center overflow-y-auto relative px-4 py-12 md:py-16 ${className}`}>
       {children}
     </section>
   )
@@ -88,10 +88,10 @@ function HeroSection({ prefix }: { prefix: DestinationPrefix }) {
       <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/50 to-primary/80" />
       <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center">
         <FadeIn delay={200}>
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal text-white leading-[0.9] tracking-tight max-w-5xl mx-auto">
+          <h1 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-9xl font-normal text-white leading-[0.9] tracking-tight max-w-5xl mx-auto">
             {t(`${prefix}.title`)}
           </h1>
-          <p className="font-sans text-xl md:text-3xl text-white/70 mt-8 max-w-2xl mx-auto italic font-light">
+          <p className="font-sans text-lg md:text-3xl text-white/70 mt-8 max-w-2xl mx-auto italic font-light">
             {t(`${prefix}.subtitle`)}
           </p>
         </FadeIn>
@@ -110,9 +110,9 @@ function DescriptionSection({ prefix }: { prefix: DestinationPrefix }) {
     <SnapSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 max-w-4xl text-center">
         <FadeIn>
-          <p className="font-serif text-2xl md:text-4xl text-foreground/80 leading-relaxed text-justify">{desc1}</p>
+          <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground/80 leading-relaxed text-justify">{desc1}</p>
           {desc2 !== `${prefix}.description2` && (
-            <p className="font-serif text-2xl md:text-4xl text-foreground/80 leading-relaxed text-justify mt-8">{desc2}</p>
+            <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground/80 leading-relaxed text-justify mt-8">{desc2}</p>
           )}
         </FadeIn>
       </div>
@@ -131,19 +131,19 @@ function HighlightsSection({ prefix }: { prefix: DestinationPrefix }) {
     <SnapSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12">
         <FadeIn>
-          <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{heading}</h2>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{heading}</h2>
         </FadeIn>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
           {keys.map((hKey, i) => {
             const Icon = HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]
             return (
               <FadeIn key={hKey} delay={i * 100}>
-                <div className="group relative bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-7 md:p-9 transition-all duration-500 hover:shadow-xl hover:border-accent/30 hover:-translate-y-1">
+                <div className="group relative bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-xl hover:border-accent/30 hover:-translate-y-1">
                   <div className="mb-5 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 text-accent">
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-serif text-xl md:text-2xl font-normal text-foreground mb-2">{t(`${prefix}.${hKey}`)}</h3>
-                  <p className="font-sans text-base text-muted-foreground leading-relaxed">{t(`${prefix}.${hKey}d`)}</p>
+                  <h3 className="font-serif text-lg md:text-xl font-normal text-foreground mb-2">{t(`${prefix}.${hKey}`)}</h3>
+                  <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{t(`${prefix}.${hKey}d`)}</p>
                 </div>
               </FadeIn>
             )
@@ -169,9 +169,9 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
       <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm" />
       <div className="relative z-10 container mx-auto px-6 lg:px-12">
         <FadeIn>
-          <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[0.95] text-center mb-6 drop-shadow-lg">{title}</h2>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[0.95] text-center mb-6 drop-shadow-lg">{title}</h2>
         </FadeIn>
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-w-6xl mx-auto">
           {allSites.map(({ zoneKey, siteKey }, i) => {
             const name = t(`${prefix}.diveSites.${zoneKey}.${siteKey}.name`)
             if (name === `${prefix}.diveSites.${zoneKey}.${siteKey}.name`) return null
@@ -217,9 +217,9 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
     <SnapSection className="bg-muted/20">
       <div className="container mx-auto px-6 lg:px-12">
         <FadeIn>
-          <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-10">{t('dest.calendar')}</h2>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-10">{t('dest.calendar')}</h2>
         </FadeIn>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto">
           {existing.map((m, i) => {
             const fauna = t(`${prefix}.calendar.${m}`)
             return (
@@ -246,8 +246,8 @@ function GalleryIntro({ prefix }: { prefix: DestinationPrefix }) {
     <SnapSection className="bg-primary">
       <div className="container mx-auto px-6 lg:px-12 text-center">
         <FadeIn delay={300}>
-          <p className="font-sans text-sm md:text-base text-accent uppercase tracking-[0.3em] mb-6">{t(`${prefix}.subtitle`)}</p>
-          <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal text-white leading-[0.95] tracking-tight max-w-4xl mx-auto">
+          <p className="font-sans text-xs sm:text-sm md:text-base text-accent uppercase tracking-[0.3em] mb-6">{t(`${prefix}.subtitle`)}</p>
+          <h2 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-normal text-white leading-[0.95] tracking-tight max-w-4xl mx-auto">
             {t('gallery.promise')}
           </h2>
           <div className="mt-10 w-20 h-px bg-accent/40 mx-auto" />
@@ -278,7 +278,7 @@ function GalleryImages({ prefix }: { prefix: DestinationPrefix }) {
           <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16">
             <FadeIn delay={200}>
-              <p className="font-serif text-xl md:text-3xl text-white font-normal leading-snug max-w-2xl drop-shadow-lg">{img.alt}</p>
+              <p className="font-serif text-lg md:text-3xl text-white font-normal leading-snug max-w-2xl drop-shadow-lg">{img.alt}</p>
               <div className="flex items-center gap-3 mt-4">
                 <div className="h-px w-12 bg-white/30" />
                 <p className="font-sans text-sm text-white/50">{i + 1} / {images.length}</p>
@@ -322,8 +322,8 @@ function CTASection({ prefix }: { prefix: DestinationPrefix }) {
     <SnapSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 text-center">
         <FadeIn delay={200}>
-          <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal text-foreground tracking-tight leading-[0.95] mb-8">{t('dest.bookNow')}</h2>
-          <p className="font-sans text-xl md:text-2xl text-muted-foreground mb-10 max-w-xl mx-auto font-light">{t(`${prefix}.subtitle`)}</p>
+          <h2 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-normal text-foreground tracking-tight leading-[0.95] mb-8">{t('dest.bookNow')}</h2>
+          <p className="font-sans text-lg md:text-2xl text-muted-foreground mb-10 max-w-xl mx-auto font-light">{t(`${prefix}.subtitle`)}</p>
           <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold text-lg px-10 py-7 rounded-2xl">
             <Link href="/contacto">{t('destination.cta')}<ArrowRight className="ml-2 h-5 w-5" /></Link>
           </Button>
