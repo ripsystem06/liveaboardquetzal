@@ -159,17 +159,17 @@ function HighlightsSection({ prefix }: { prefix: DestinationPrefix }) {
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{heading}</h2>
         </FadeIn>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 max-w-6xl mx-auto">
           {keys.map((hKey, i) => {
             const Icon = HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]
             return (
               <FadeIn key={hKey} delay={i * 100}>
-                <div className="group relative bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-xl hover:border-accent/30 hover:-translate-y-1">
-                  <div className="mb-5 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 text-accent">
-                    <Icon className="w-6 h-6" />
+                <div className="group relative bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-4 md:p-5 transition-all duration-500 hover:shadow-xl hover:border-accent/30 hover:-translate-y-1">
+                  <div className="mb-4 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
+                    <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-serif text-lg md:text-xl font-normal text-foreground mb-2">{t(`${prefix}.${hKey}`)}</h3>
-                  <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{t(`${prefix}.${hKey}d`)}</p>
+                  <h3 className="font-serif text-base md:text-lg font-normal text-foreground mb-1.5">{t(`${prefix}.${hKey}`)}</h3>
+                  <p className="font-sans text-xs md:text-sm text-muted-foreground leading-relaxed">{t(`${prefix}.${hKey}d`)}</p>
                 </div>
               </FadeIn>
             )
