@@ -19,6 +19,13 @@ const heroImageMap: Record<DestinationPrefix, string> = {
   magbay: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?w=1200&q=80',
 }
 
+// ── Description section images ──────────────────────────────────────────────
+const descImageMap: Record<DestinationPrefix, string> = {
+  socorro: '/images/panoramicas/Manta el Boiler 1.webp',
+  cortez: '/images/panoramicas/burritos galapagos 1.webp',
+  magbay: '/images/panoramicas/loreto-magdalena-bay.webp',
+}
+
 // ── Zone definitions ────────────────────────────────────────────────────────
 interface ZoneInfo { zoneKey: string; siteKeys: string[] }
 
@@ -107,26 +114,29 @@ function DescriptionSection({ prefix }: { prefix: DestinationPrefix }) {
   if (desc1 === `${prefix}.description1`) return null
   const desc2 = t(`${prefix}.description2`)
   return (
-    <PageSection className="relative overflow-hidden">
-      {/* Background image */}
-      <Image
-        src={heroImageMap[prefix]}
-        alt=""
-        fill
-        className="object-cover"
-        unoptimized
-        sizes="100vw"
-      />
-      {/* Gradient: transparent at right, fades to dark at left */}
-      <div className="absolute inset-0 bg-gradient-to-l from-transparent via-background/30 to-background/90" />
-
-      <div className="relative z-10 container mx-auto px-6 lg:px-12">
-        <div className="max-w-2xl">
-          <FadeIn>
-            <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground leading-relaxed drop-shadow-sm">{desc1}</p>
-            {desc2 !== `${prefix}.description2` && (
-              <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground leading-relaxed drop-shadow-sm mt-8">{desc2}</p>
-            )}
+    <PageSection className="bg-background">
+      <div className="container mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+          {/* Text — left */}
+          <div>
+            <FadeIn>
+              <p className="font-serif text-base md:text-lg lg:text-xl text-foreground/80 leading-relaxed">{desc1}</p>
+              {desc2 !== `${prefix}.description2` && (
+                <p className="font-serif text-base md:text-lg lg:text-xl text-foreground/80 leading-relaxed mt-6">{desc2}</p>
+              )}
+            </FadeIn>
+          </div>
+          {/* Image — right */}
+          <FadeIn delay={150}>
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
+              <Image
+                src={descImageMap[prefix]}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
           </FadeIn>
         </div>
       </div>
