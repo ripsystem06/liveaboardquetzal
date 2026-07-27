@@ -37,6 +37,9 @@ vi.mock('lucide-react', () => ({
   Shell: () => React.createElement('span', { 'data-testid': 'icon-shell' }),
   Sparkles: () => React.createElement('span', { 'data-testid': 'icon-sparkles' }),
   Anchor: () => React.createElement('span', { 'data-testid': 'icon-anchor' }),
+  Sunrise: () => React.createElement('span', { 'data-testid': 'icon-sunrise' }),
+  Sun: () => React.createElement('span', { 'data-testid': 'icon-sun' }),
+  Moon: () => React.createElement('span', { 'data-testid': 'icon-moon' }),
 }))
 
 // ── Mock useLanguage ───────────────────────────────────────────────────────
