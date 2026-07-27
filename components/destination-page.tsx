@@ -161,7 +161,7 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
   if (title === `${prefix}.diveSites.title`) return null
   const zones = ZONES[prefix]
   const zoneNames = ZONE_DISPLAY[prefix] ?? {}
-  const allSites = zones.flatMap(zone => zone.siteKeys.map(sk => ({ zoneKey: zone.zoneKey, siteKey: sk })))
+
   return (
     <SnapSection>
       {/* Background image — same as hero */}
@@ -171,29 +171,57 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[0.95] text-center mb-6 drop-shadow-lg">{title}</h2>
         </FadeIn>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-w-6xl mx-auto">
-          {allSites.map(({ zoneKey, siteKey }, i) => {
-            const name = t(`${prefix}.diveSites.${zoneKey}.${siteKey}.name`)
-            if (name === `${prefix}.diveSites.${zoneKey}.${siteKey}.name`) return null
-            const faunaText = t(`${prefix}.diveSites.${zoneKey}.${siteKey}.fauna`)
-            const faunaItems = faunaText !== `${prefix}.diveSites.${zoneKey}.${siteKey}.fauna` ? faunaText.split(', ').slice(0, 2) : []
+
+        {/* Zone groups with narrative intros */}
+        <div className="space-y-10 max-w-6xl mx-auto">
+          {zones.map(zone => {
+            // Zone intro narrative (Socorro only — reads {prefix}.areas.{zoneKey})
+            const areaIntroKey = `${prefix}.areas.${zone.zoneKey}`
+            const areaIntro = t(areaIntroKey)
+            const hasAreaIntro = areaIntro !== areaIntroKey
+
+            const sites = zone.siteKeys.map(siteKey => {
+              const name = t(`${prefix}.diveSites.${zone.zoneKey}.${siteKey}.name`)
+              if (name === `${prefix}.diveSites.${zone.zoneKey}.${siteKey}.name`) return null
+              const faunaText = t(`${prefix}.diveSites.${zone.zoneKey}.${siteKey}.fauna`)
+              const faunaItems = faunaText !== `${prefix}.diveSites.${zone.zoneKey}.${siteKey}.fauna` ? faunaText.split(', ').slice(0, 2) : []
+              const desc = t(`${prefix}.diveSites.${zone.zoneKey}.${siteKey}.description`)
+              return { siteKey, name, desc, faunaItems }
+            }).filter((s): s is NonNullable<typeof s> => s !== null)
+
+            if (sites.length === 0) return null
+
             return (
-              <FadeIn key={`${zoneKey}-${siteKey}`} delay={i * 60}>
-                <div className="group/card relative bg-white/10 backdrop-blur-md rounded-xl border border-white/10 p-4 transition-all duration-500 hover:shadow-lg hover:bg-white/15 hover:-translate-y-1">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-blue-600 text-white border border-blue-500 mb-1.5">
-                    {zoneNames[zoneKey] ?? zoneKey}
-                  </span>
-                  <h4 className="font-serif text-base font-normal text-white mb-1">{name}</h4>
-                  <p className="font-sans text-xs text-white/70 leading-relaxed mb-1.5 line-clamp-2">{t(`${prefix}.diveSites.${zoneKey}.${siteKey}.description`)}</p>
-                  {faunaItems.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {faunaItems.map(item => (
-                        <span key={item} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-sans font-medium bg-blue-600/30 text-blue-100 border border-blue-500/30">{item.trim()}</span>
-                      ))}
-                    </div>
-                  )}
+              <div key={zone.zoneKey}>
+                {/* Zone narrative intro */}
+                {hasAreaIntro && (
+                  <FadeIn delay={100}>
+                    <p className="font-sans text-sm md:text-base text-white/70 leading-relaxed mb-5 max-w-3xl text-center mx-auto italic">{areaIntro}</p>
+                  </FadeIn>
+                )}
+
+                {/* Site cards grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {sites.map(({ siteKey, name, desc, faunaItems }, i) => (
+                    <FadeIn key={`${zone.zoneKey}-${siteKey}`} delay={i * 60}>
+                      <div className="group/card relative bg-white/10 backdrop-blur-md rounded-xl border border-white/10 p-4 transition-all duration-500 hover:shadow-lg hover:bg-white/15 hover:-translate-y-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-blue-600 text-white border border-blue-500 mb-1.5">
+                          {zoneNames[zone.zoneKey] ?? zone.zoneKey}
+                        </span>
+                        <h4 className="font-serif text-base font-normal text-white mb-1">{name}</h4>
+                        <p className="font-sans text-xs text-white/70 leading-relaxed mb-1.5 line-clamp-2">{desc}</p>
+                        {faunaItems.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {faunaItems.map(item => (
+                              <span key={item} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-sans font-medium bg-blue-600/30 text-blue-100 border border-blue-500/30">{item.trim()}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </FadeIn>
+                  ))}
                 </div>
-              </FadeIn>
+              </div>
             )
           })}
         </div>
@@ -315,17 +343,218 @@ function ConservationSection({ prefix }: { prefix: DestinationPrefix }) {
   )
 }
 
+// ── Day at Sea ───────────────────────────────────────────────────────────────
+function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
+  const { t } = useLanguage()
+
+  // MagBay uses dayInLagoon keys instead of dayAtSea
+  const isLagoon = prefix === 'magbay'
+  const baseKey = isLagoon ? `${prefix}.dayInLagoon` : `${prefix}.dayAtSea`
+  const heading = t(`${baseKey}.heading`)
+  if (heading === `${baseKey}.heading`) return null
+
+  const intro = t(`${baseKey}.intro`)
+  const phase1Key = isLagoon ? `${baseKey}.lagoonPhase` : `${baseKey}.morning`
+  const phase2Key = isLagoon ? `${baseKey}.archipelagoPhase` : `${baseKey}.afternoon`
+  const phase3 = isLagoon ? null : t(`${baseKey}.evening`)
+  const note = t(`${baseKey}.note`)
+
+  const phase1 = t(phase1Key)
+  const phase2 = t(phase2Key)
+
+  const TimeIcon = ({ children }: { children: React.ReactNode }) => (
+    <div className="absolute left-0 top-0 w-10 h-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center -translate-x-1/2">
+      {children}
+    </div>
+  )
+
+  return (
+    <SnapSection className="bg-background">
+      <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
+        <FadeIn>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-4">{heading}</h2>
+          {intro !== `${baseKey}.intro` && (
+            <p className="font-sans text-base md:text-lg text-muted-foreground text-center mb-12 max-w-2xl mx-auto leading-relaxed">{intro}</p>
+          )}
+        </FadeIn>
+
+        {/* Timeline layout */}
+        <div className="relative pl-16 md:pl-20 space-y-12 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-border/60">
+          {/* Phase 1 — Morning / Lagoon */}
+          <FadeIn delay={100}>
+            <div className="relative">
+              <TimeIcon>
+                <span className="text-accent text-xs font-bold">1</span>
+              </TimeIcon>
+              <div className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-lg hover:border-accent/20">
+                <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mb-3">
+                  {isLagoon ? t(`${baseKey}.lagoonPhase`) !== `${baseKey}.lagoonPhase` ? t('magbay.dayInLagoon.lagoonHeading') || 'Phase 1' : 'Phase 1' : t('dest.morning') || 'Morning'}
+                </h4>
+                <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{phase1}</p>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Phase 2 — Afternoon / Archipelago */}
+          <FadeIn delay={200}>
+            <div className="relative">
+              <TimeIcon>
+                <span className="text-accent text-xs font-bold">2</span>
+              </TimeIcon>
+              <div className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-lg hover:border-accent/20">
+                <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mb-3">
+                  {isLagoon ? t('magbay.dayInLagoon.archipelagoHeading') || 'Phase 2' : t('dest.afternoon') || 'Afternoon'}
+                </h4>
+                <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{phase2}</p>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Phase 3 — Evening (non-lagoon only) */}
+          {!isLagoon && phase3 !== `${baseKey}.evening` && (
+            <FadeIn delay={300}>
+              <div className="relative">
+                <TimeIcon>
+                  <span className="text-accent text-xs font-bold">3</span>
+                </TimeIcon>
+                <div className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-lg hover:border-accent/20">
+                  <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mb-3">{t('dest.evening') || 'Evening'}</h4>
+                  <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{phase3}</p>
+                </div>
+              </div>
+            </FadeIn>
+          )}
+        </div>
+
+        {/* Flexibility note */}
+        {note !== `${baseKey}.note` && (
+          <FadeIn delay={400}>
+            <div className="mt-10 flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/10 max-w-xl mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-accent mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              <p className="font-sans text-xs md:text-sm text-muted-foreground leading-relaxed">{note}</p>
+            </div>
+          </FadeIn>
+        )}
+      </div>
+    </SnapSection>
+  )
+}
+
+// ── Water Temperature ───────────────────────────────────────────────────────
+function WaterTempSection({ prefix }: { prefix: DestinationPrefix }) {
+  const { t } = useLanguage()
+
+  const title = t(`${prefix}.waterTemp.title`)
+  if (title === `${prefix}.waterTemp.title`) return null
+
+  const WATER_TEMP_MONTHS = ['nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may'] as const
+  const monthNames = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May']
+  const monthLabels = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May']
+
+  // Get temperature data for each month
+  const months = WATER_TEMP_MONTHS
+    .map((m, i) => {
+      const temp = t(`${prefix}.waterTemp.${m}`)
+      if (temp === `${prefix}.waterTemp.${m}`) return null
+      return { key: m, label: monthLabels[i], temp }
+    })
+    .filter((m): m is NonNullable<typeof m> => m !== null)
+
+  if (months.length === 0) return null
+
+  // Parse min/max temp from string like "26–29°C (79–84°F)"
+  const parseTempRange = (tempStr: string): { min: number; max: number } | null => {
+    const match = tempStr.match(/(\d+)[–-](\d+)/)
+    if (!match) return null
+    return { min: parseInt(match[1]), max: parseInt(match[2]) }
+  }
+
+  // Calculate bar heights relative to min/max of all months
+  const allTemps = months.map(m => parseTempRange(m.temp)).filter(Boolean) as { min: number; max: number }[]
+  const globalMin = Math.min(...allTemps.map(t => t.min))
+  const globalMax = Math.max(...allTemps.map(t => t.max))
+  const range = globalMax - globalMin || 1
+
+  return (
+    <SnapSection className="bg-background">
+      <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
+        <FadeIn>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{title}</h2>
+        </FadeIn>
+
+        <div className="space-y-4">
+          {months.map((month, i) => {
+            const temps = parseTempRange(month.temp)
+            const barLeft = temps ? ((temps.min - globalMin) / range) * 100 : 0
+            const barWidth = temps ? ((temps.max - temps.min) / range) * 100 : 60
+
+            return (
+              <FadeIn key={month.key} delay={i * 60}>
+                <div className="group flex items-center gap-4 p-3 rounded-xl transition-all duration-300 hover:bg-card/40">
+                  <span className="w-12 text-right font-serif text-sm md:text-base text-foreground/60 group-hover:text-foreground transition-colors">{month.label}</span>
+                  <div className="flex-1 h-8 relative rounded-full bg-muted/30 overflow-hidden">
+                    <div
+                      className="absolute top-0 h-full rounded-full bg-gradient-to-r from-blue-500/40 via-cyan-400/50 to-teal-400/40 group-hover:from-blue-500/60 group-hover:via-cyan-400/60 group-hover:to-teal-400/60 transition-all duration-500"
+                      style={{ left: `${barLeft}%`, width: `${Math.max(barWidth, 8)}%` }}
+                    />
+                  </div>
+                  <span className="w-32 font-sans text-xs md:text-sm text-muted-foreground group-hover:text-foreground transition-colors">{month.temp}</span>
+                </div>
+              </FadeIn>
+            )
+          })}
+        </div>
+
+        {/* Wetsuit recommendation */}
+        <FadeIn delay={500}>
+          <div className="mt-10 p-4 rounded-xl bg-accent/5 border border-accent/10 max-w-md mx-auto text-center">
+            <p className="font-sans text-xs md:text-sm text-muted-foreground leading-relaxed">
+              {t('dest.wetsuitHint') || 'We recommend a 5mm wetsuit for Nov–Apr and a 3mm for May.'}
+            </p>
+          </div>
+        </FadeIn>
+      </div>
+    </SnapSection>
+  )
+}
+
 // ── CTA ─────────────────────────────────────────────────────────────────────
 function CTASection({ prefix }: { prefix: DestinationPrefix }) {
   const { t } = useLanguage()
+
+  // Per-destination CTA keys — fall back to shared keys when absent
+  const ctaHeadingKey = `${prefix}.cta`
+  const ctaButtonKey = `${prefix}.ctaButton`
+  const socialProofKey = `${prefix}.socialProof`
+
+  const ctaHeadingRaw = t(ctaHeadingKey)
+  const ctaHeading = ctaHeadingRaw !== ctaHeadingKey ? ctaHeadingRaw : t('dest.bookNow')
+
+  const ctaButtonRaw = t(ctaButtonKey)
+  const ctaButton = ctaButtonRaw !== ctaButtonKey ? ctaButtonRaw : t('destination.cta')
+
+  const socialProofRaw = t(socialProofKey)
+  const socialProof = socialProofRaw !== socialProofKey ? socialProofRaw : null
+
   return (
     <SnapSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 text-center">
         <FadeIn delay={200}>
-          <h2 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-normal text-foreground tracking-tight leading-[0.95] mb-8">{t('dest.bookNow')}</h2>
-          <p className="font-sans text-lg md:text-2xl text-muted-foreground mb-10 max-w-xl mx-auto font-light">{t(`${prefix}.subtitle`)}</p>
+          <h2 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-normal text-foreground tracking-tight leading-[0.95] mb-4">{ctaHeading}</h2>
+          {socialProof && (
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <div className="flex -space-x-1">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="w-7 h-7 rounded-full bg-accent/20 border-2 border-background flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-accent"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" /></svg>
+                  </div>
+                ))}
+              </div>
+              <span className="font-sans text-sm text-muted-foreground">{socialProof}</span>
+            </div>
+          )}
           <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold text-lg px-10 py-7 rounded-2xl">
-            <Link href="/contacto">{t('destination.cta')}<ArrowRight className="ml-2 h-5 w-5" /></Link>
+            <Link href="/contacto">{ctaButton}<ArrowRight className="ml-2 h-5 w-5" /></Link>
           </Button>
         </FadeIn>
       </div>
@@ -364,7 +593,9 @@ export function DestinationPage({ prefix }: DestinationPageProps) {
       <HeroSection prefix={prefix} />
       <DescriptionSection prefix={prefix} />
       <HighlightsSection prefix={prefix} />
+      <DayAtSeaSection prefix={prefix} />
       <DiveSitesSection prefix={prefix} />
+      <WaterTempSection prefix={prefix} />
       <CalendarSection prefix={prefix} />
       <GalleryIntro prefix={prefix} />
       <GalleryImages prefix={prefix} />
