@@ -355,7 +355,7 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
   existing.forEach(m => {
     const raw = t(`${prefix}.calendar.${m}`)
     raw.split(',').forEach(s => {
-      const name = s.replace(/\(peak\)/i, '').trim()
+      const name = s.replace(/\(peak\)/i, '').replace(/\(pico\)/i, '').trim()
       if (!name) return
       if (!speciesMonths.has(name)) speciesMonths.set(name, [])
       speciesMonths.get(name)!.push(m)
@@ -369,8 +369,9 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
   const species = Array.from(speciesMonths.entries())
     .sort((a, b) => b[1].length - a[1].length)
 
-  // Icons/emojis for common species
+  // Icons/emojis for common species (EN + ES)
   const speciesIcons: Record<string, string> = {
+    // English
     'humpback whales': '🐋',
     'giant mantas': '🦈',
     'hammerhead sharks': '🔨',
@@ -393,6 +394,37 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
     'wahoo': '🐟',
     'dorado': '🐟',
     'sardine run': '🐟',
+    // Spanish
+    'ballenas jorobadas': '🐋',
+    'ballena jorobada': '🐋',
+    'mantas gigantes': '🦈',
+    'manta gigante': '🦈',
+    'tiburones martillo': '🔨',
+    'tiburón martillo': '🔨',
+    'delfines nariz de botella': '🐬',
+    'delfines': '🐬',
+    'delfín': '🐬',
+    'tiburones ballena': '🦈',
+    'tiburón ballena': '🦈',
+    'falsas orcas': '🐋',
+    'falsa orca': '🐋',
+    'bolas de carnada gigantes': '🐟',
+    'tiburones sedosos': '🦈',
+    'tiburones galápagos': '🦈',
+    'tiburones tigre': '🐅',
+    'mantarrayas mobula': '🦅',
+    'lobos marinos': '🦭',
+    'lobo marino': '🦭',
+    'ballenas grises': '🐋',
+    'ballena gris': '🐋',
+    'ballenas azules': '🐋',
+    'cachalotes': '🐋',
+    'orcas': '🐋',
+    'marlín': '🐟',
+    'atún': '🐟',
+    'pez vela': '🐟',
+    'dorado': '🐟',
+    'sardinas': '🐟',
   }
 
   const getIcon = (name: string): string => {
@@ -443,7 +475,8 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
                   <div className="flex gap-1 mb-2">
                     {monthOrder.map(m => {
                       const isActive = months.includes(m)
-                      const isPeak = t(`${prefix}.calendar.${m}`).toLowerCase().includes(`${name} (peak)`)
+                      const rawMonth = t(`${prefix}.calendar.${m}`).toLowerCase()
+                      const isPeak = rawMonth.includes(`${name} (peak)`) || rawMonth.includes(`${name} (pico)`)
                       return (
                         <div
                           key={m}
