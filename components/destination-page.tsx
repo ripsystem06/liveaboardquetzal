@@ -339,7 +339,7 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
   )
 }
 
-// ── Fauna Pulse ─────────────────────────────────────────────────────────────
+// ── Fauna Calendar ──────────────────────────────────────────────────────────
 function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
   const { t, language } = useLanguage()
   const existing = MONTHS.filter(m => t(`${prefix}.calendar.${m}`) !== `${prefix}.calendar.${m}`)
@@ -347,10 +347,10 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
 
   const monthNames = MONTHS.map(m => {
     const date = new Date(2024, MONTHS.indexOf(m), 1)
-    return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { month: 'short' })
+    return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { month: 'long' })
   })
 
-  // Parse each month's species list
+  // Parse each month's species
   const monthData = existing.map(m => {
     const raw = t(`${prefix}.calendar.${m}`)
     const species = raw.split(',').map(s => s.trim()).filter(Boolean)
@@ -361,7 +361,7 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
 
   return (
     <PageSection className="bg-muted/20">
-      <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
+      <div className="container mx-auto px-6 lg:px-12">
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-4">
             {t('dest.calendar')}
@@ -371,42 +371,51 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
           </p>
         </FadeIn>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-w-6xl mx-auto">
           {monthData.map((month, i) => {
-            const barPct = (month.count / maxCount) * 100
+            const intensityPct = (month.count / maxCount) * 100
             return (
-              <FadeIn key={month.key} delay={i * 50}>
-                <div className="group flex items-center gap-3 md:gap-4">
-                  {/* Month label */}
-                  <span className="w-10 md:w-12 text-right font-label-caps text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground group-hover:text-foreground transition-colors">
-                    {month.label}
-                  </span>
-
-                  {/* Bar */}
-                  <div className="flex-1 h-8 md:h-9 relative rounded-full bg-muted/40 overflow-hidden">
+              <FadeIn key={month.key} delay={i * 40}>
+                <div className="group relative bg-card/60 backdrop-blur-sm rounded-2xl border border-border/20 p-5 transition-all duration-500 hover:shadow-lg hover:border-accent/20 hover:-translate-y-1">
+                  {/* Intensity bar — subtle top accent */}
+                  <div className="absolute top-0 left-3 right-3 h-1 rounded-full bg-muted/50 overflow-hidden">
                     <div
-                      className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-accent/30 via-accent/50 to-accent transition-all duration-700 ease-out"
-                      style={{ width: `${barPct}%` }}
+                      className="h-full rounded-full bg-gradient-to-r from-accent/40 to-accent transition-all duration-700"
+                      style={{ width: `${intensityPct}%` }}
                     />
-                    {/* Species pills overlaid on bar */}
-                    <div className="absolute inset-0 flex items-center px-3">
-                      <div className="flex gap-1.5 overflow-hidden">
-                        {month.species.slice(0, 4).map((s, si) => (
-                          <span key={si} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-sans font-medium bg-background/80 text-foreground/80 whitespace-nowrap">
-                            {s.replace(/\(peak\)/i, '').trim()}
-                          </span>
-                        ))}
-                        {month.species.length > 4 && (
-                          <span className="text-[10px] text-muted-foreground self-center">+{month.species.length - 4}</span>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
-                  {/* Count */}
-                  <span className="w-6 text-center font-label-caps text-[10px] font-bold text-muted-foreground group-hover:text-accent transition-colors">
-                    {month.count}
-                  </span>
+                  {/* Month name */}
+                  <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mt-2 mb-3">
+                    {month.label}
+                  </h4>
+
+                  {/* Species tags */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {month.species.map((s, si) => (
+                      <span
+                        key={si}
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-sans font-medium bg-accent/5 text-muted-foreground border border-accent/10 group-hover:bg-accent/10 group-hover:text-foreground group-hover:border-accent/20 transition-colors"
+                      >
+                        {s.replace(/\(peak\)/i, '').trim()}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Species count */}
+                  <div className="mt-3 flex items-center gap-1.5">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: maxCount }).map((_, di) => (
+                        <div
+                          key={di}
+                          className={`w-1.5 h-1.5 rounded-full transition-colors ${di < month.count ? 'bg-accent/60' : 'bg-muted/30'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-sans text-muted-foreground">
+                      {month.count} {language === 'es' ? 'especies' : 'species'}
+                    </span>
+                  </div>
                 </div>
               </FadeIn>
             )
