@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, ArrowUp, Compass, Fish, Shell, Sparkles, Star, Waves } from 'lucide-react'
+import { ArrowRight, ArrowUp, Compass, Fish, Moon, Shell, Sparkles, Star, Sun, Sunrise, Waves } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/language-context'
 
@@ -376,7 +376,6 @@ function ConservationSection({ prefix }: { prefix: DestinationPrefix }) {
 function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
   const { t } = useLanguage()
 
-  // MagBay uses dayInLagoon keys instead of dayAtSea
   const isLagoon = prefix === 'magbay'
   const baseKey = isLagoon ? `${prefix}.dayInLagoon` : `${prefix}.dayAtSea`
   const heading = t(`${baseKey}.heading`)
@@ -391,75 +390,134 @@ function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
   const phase1 = t(phase1Key)
   const phase2 = t(phase2Key)
 
-  const TimeIcon = ({ children }: { children: React.ReactNode }) => (
-    <div className="absolute left-0 top-0 w-10 h-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center -translate-x-1/2">
-      {children}
-    </div>
-  )
+  interface PhaseData {
+    number: string
+    icon: React.ComponentType<{ className?: string }>
+    label: string
+    content: string
+    color: string       // tailwind color prefix e.g. 'amber'
+    align: string       // 'left' | 'right'
+  }
+
+  const phases: PhaseData[] = [
+    {
+      number: '01',
+      icon: Sunrise,
+      label: isLagoon
+        ? (t(`${baseKey}.lagoonPhase`) !== `${baseKey}.lagoonPhase` ? t('magbay.dayInLagoon.lagoonHeading') || 'Phase 1' : 'Phase 1')
+        : (t('dest.morning') !== 'dest.morning' ? t('dest.morning') : 'Morning'),
+      content: phase1,
+      color: 'amber',
+      align: 'left',
+    },
+    {
+      number: '02',
+      icon: Sun,
+      label: isLagoon
+        ? (t('magbay.dayInLagoon.archipelagoHeading') || 'Phase 2')
+        : (t('dest.afternoon') !== 'dest.afternoon' ? t('dest.afternoon') : 'Afternoon'),
+      content: phase2,
+      color: 'sky',
+      align: 'right',
+    },
+  ]
+
+  // Non-lagoon destinations get the evening phase
+  if (!isLagoon && phase3 !== `${baseKey}.evening`) {
+    phases.push({
+      number: '03',
+      icon: Moon,
+      label: t('dest.evening') !== 'dest.evening' ? t('dest.evening') : 'Evening',
+      content: phase3,
+      color: 'indigo',
+      align: 'left',
+    })
+  }
+
+  const colorMap: Record<string, { bg: string; border: string; text: string; soft: string }> = {
+    amber:  { bg: 'bg-amber-500/5',   border: 'border-amber-500/20',  text: 'text-amber-400',   soft: 'from-amber-500/5 to-transparent' },
+    sky:    { bg: 'bg-sky-500/5',     border: 'border-sky-500/20',    text: 'text-sky-400',     soft: 'from-sky-500/5 to-transparent' },
+    indigo: { bg: 'bg-indigo-500/5',  border: 'border-indigo-500/20', text: 'text-indigo-400',  soft: 'from-indigo-500/5 to-transparent' },
+  }
 
   return (
     <PageSection className="bg-background">
-      <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
+      <div className="container mx-auto px-6 lg:px-12 max-w-5xl">
+        {/* Heading */}
         <FadeIn>
-          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-4">{heading}</h2>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-4">
+            {heading}
+          </h2>
           {intro !== `${baseKey}.intro` && (
-            <p className="font-sans text-base md:text-lg text-muted-foreground text-center mb-12 max-w-2xl mx-auto leading-relaxed">{intro}</p>
+            <p className="font-sans text-base md:text-lg text-muted-foreground text-center mb-16 md:mb-20 max-w-2xl mx-auto leading-relaxed">
+              {intro}
+            </p>
           )}
         </FadeIn>
 
-        {/* Timeline layout */}
-        <div className="relative pl-16 md:pl-20 space-y-12 before:absolute before:left-16 md:before:left-20 before:top-2 before:bottom-2 before:w-px before:bg-border/60">
-          {/* Phase 1 — Morning / Lagoon */}
-          <FadeIn delay={100}>
-            <div className="relative">
-              <TimeIcon>
-                <span className="text-accent text-xs font-bold">1</span>
-              </TimeIcon>
-              <div className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-lg hover:border-accent/20">
-                <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mb-3">
-                  {isLagoon ? t(`${baseKey}.lagoonPhase`) !== `${baseKey}.lagoonPhase` ? t('magbay.dayInLagoon.lagoonHeading') || 'Phase 1' : 'Phase 1' : t('dest.morning') || 'Morning'}
-                </h4>
-                <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{phase1}</p>
-              </div>
-            </div>
-          </FadeIn>
+        {/* Phases */}
+        <div className="space-y-16 md:space-y-24">
+          {phases.map((phase, i) => {
+            const c = colorMap[phase.color]
+            const Icon = phase.icon
+            const isRight = phase.align === 'right'
 
-          {/* Phase 2 — Afternoon / Archipelago */}
-          <FadeIn delay={200}>
-            <div className="relative">
-              <TimeIcon>
-                <span className="text-accent text-xs font-bold">2</span>
-              </TimeIcon>
-              <div className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-lg hover:border-accent/20">
-                <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mb-3">
-                  {isLagoon ? t('magbay.dayInLagoon.archipelagoHeading') || 'Phase 2' : t('dest.afternoon') || 'Afternoon'}
-                </h4>
-                <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{phase2}</p>
-              </div>
-            </div>
-          </FadeIn>
+            return (
+              <FadeIn key={phase.number} delay={i * 150}>
+                <div className={`relative max-w-2xl ${isRight ? 'ml-auto' : 'mr-auto'}`}>
+                  {/* Number — large graphic element */}
+                  <span className={`absolute -top-6 -left-2 font-serif text-7xl md:text-8xl font-bold ${c.text} opacity-15 select-none pointer-events-none`}>
+                    {phase.number}
+                  </span>
 
-          {/* Phase 3 — Evening (non-lagoon only) */}
-          {!isLagoon && phase3 !== `${baseKey}.evening` && (
-            <FadeIn delay={300}>
-              <div className="relative">
-                <TimeIcon>
-                  <span className="text-accent text-xs font-bold">3</span>
-                </TimeIcon>
-                <div className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-7 transition-all duration-500 hover:shadow-lg hover:border-accent/20">
-                  <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mb-3">{t('dest.evening') || 'Evening'}</h4>
-                  <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{phase3}</p>
+                  {/* Card */}
+                  <div className={`relative rounded-2xl border ${c.border} ${c.bg} backdrop-blur-sm p-6 md:p-8 overflow-hidden`}>
+                    {/* Subtle gradient overlay */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${c.soft}`} />
+
+                    <div className="relative">
+                      {/* Icon + Label header */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`flex items-center justify-center w-9 h-9 rounded-xl ${c.bg} border ${c.border}`}>
+                          <Icon className={`w-4 h-4 ${c.text}`} />
+                        </div>
+                        <h4 className="font-serif text-xl md:text-2xl font-normal text-foreground">
+                          {phase.label}
+                        </h4>
+                      </div>
+
+                      {/* Content with visual rhythm */}
+                      <div className="space-y-3">
+                        {phase.content.split('. ').map((sentence, si) => {
+                          const trimmed = sentence.trim()
+                          if (!trimmed) return null
+                          const display = trimmed.endsWith('.') ? trimmed : `${trimmed}.`
+                          return (
+                            <div key={si} className="flex gap-3">
+                              <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${c.bg} border ${c.border}`} />
+                              <p className="font-sans text-sm md:text-base text-foreground/80 leading-relaxed">
+                                {display}
+                              </p>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </FadeIn>
-          )}
+              </FadeIn>
+            )
+          })}
         </div>
 
         {/* Flexibility note */}
         {note !== `${baseKey}.note` && (
           <FadeIn delay={400}>
-            <div className="mt-10 flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/10 max-w-xl mx-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-accent mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <div className="mt-16 flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/10 max-w-xl mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-accent mt-0.5 flex-shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
               <p className="font-sans text-xs md:text-sm text-muted-foreground leading-relaxed">{note}</p>
             </div>
           </FadeIn>
