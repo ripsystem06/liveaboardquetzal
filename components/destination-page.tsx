@@ -92,7 +92,10 @@ function HeroSection({ prefix }: { prefix: DestinationPrefix }) {
   return (
     <section className="min-h-screen md:h-screen w-full flex items-center justify-center relative">
       <Image src={heroImageMap[prefix]} alt={t(`${prefix}.title`)} fill className="object-cover" priority unoptimized sizes="100vw" />
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/50 to-primary/80" />
+      {/* Elegant layered overlay — soft vignette */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 from-0% via-transparent via-35% via-transparent via-65% to-primary/60 to-100%" />
+      {/* Subtle radial vignette at edges */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,0,0,0.15)_100%)]" />
       {/* Bottom fade — smooth transition to next section */}
       <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-background to-transparent" />
       <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center">
@@ -159,17 +162,17 @@ function HighlightsSection({ prefix }: { prefix: DestinationPrefix }) {
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{heading}</h2>
         </FadeIn>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 max-w-7xl mx-auto">
           {keys.map((hKey, i) => {
             const Icon = HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]
             return (
               <FadeIn key={hKey} delay={i * 100}>
-                <div className="group relative bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-4 md:p-5 transition-all duration-500 hover:shadow-xl hover:border-accent/30 hover:-translate-y-1">
-                  <div className="mb-4 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-accent/10 text-accent">
+                <div className="group relative bg-card/40 backdrop-blur-sm rounded-2xl border border-border/20 p-5 md:p-6 transition-all duration-500 hover:shadow-xl hover:border-accent/30 hover:-translate-y-1">
+                  <div className="mb-4 inline-flex items-center justify-center w-11 h-11 rounded-xl bg-accent/10 text-accent">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-serif text-base md:text-lg font-normal text-foreground mb-1.5">{t(`${prefix}.${hKey}`)}</h3>
-                  <p className="font-sans text-xs md:text-sm text-muted-foreground leading-relaxed">{t(`${prefix}.${hKey}d`)}</p>
+                  <h3 className="font-serif text-base md:text-lg font-normal text-foreground mb-2">{t(`${prefix}.${hKey}`)}</h3>
+                  <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed">{t(`${prefix}.${hKey}d`)}</p>
                 </div>
               </FadeIn>
             )
