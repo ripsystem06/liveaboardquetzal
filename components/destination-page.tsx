@@ -70,10 +70,10 @@ function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   )
 }
 
-// ── Shared: Scroll-snap section wrapper ─────────────────────────────────────
-function SnapSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+// ── Shared: Natural-flow section wrapper ─────────────────────────────────────
+function PageSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <section className={`min-h-screen md:h-screen w-full snap-start flex items-center justify-center overflow-y-auto relative px-4 py-12 md:py-16 ${className}`}>
+    <section className={`w-full py-16 md:py-24 relative ${className}`}>
       {children}
     </section>
   )
@@ -83,7 +83,7 @@ function SnapSection({ children, className = '' }: { children: React.ReactNode; 
 function HeroSection({ prefix }: { prefix: DestinationPrefix }) {
   const { t } = useLanguage()
   return (
-    <SnapSection>
+    <section className="min-h-screen md:h-screen w-full flex items-center justify-center relative">
       <Image src={heroImageMap[prefix]} alt={t(`${prefix}.title`)} fill className="object-cover" priority unoptimized sizes="100vw" />
       <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/50 to-primary/80" />
       <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center">
@@ -96,7 +96,7 @@ function HeroSection({ prefix }: { prefix: DestinationPrefix }) {
           </p>
         </FadeIn>
       </div>
-    </SnapSection>
+    </section>
   )
 }
 
@@ -107,7 +107,7 @@ function DescriptionSection({ prefix }: { prefix: DestinationPrefix }) {
   if (desc1 === `${prefix}.description1`) return null
   const desc2 = t(`${prefix}.description2`)
   return (
-    <SnapSection className="bg-background">
+    <PageSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 max-w-4xl text-center">
         <FadeIn>
           <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground/80 leading-relaxed text-justify">{desc1}</p>
@@ -116,7 +116,7 @@ function DescriptionSection({ prefix }: { prefix: DestinationPrefix }) {
           )}
         </FadeIn>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -128,7 +128,7 @@ function HighlightsSection({ prefix }: { prefix: DestinationPrefix }) {
   const keys = HIGHLIGHT_KEYS.filter(k => t(`${prefix}.${k}`) !== `${prefix}.${k}`)
   if (keys.length === 0) return null
   return (
-    <SnapSection className="bg-background">
+    <PageSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12">
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{heading}</h2>
@@ -150,7 +150,7 @@ function HighlightsSection({ prefix }: { prefix: DestinationPrefix }) {
           })}
         </div>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -163,7 +163,7 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
   const zoneNames = ZONE_DISPLAY[prefix] ?? {}
 
   return (
-    <SnapSection>
+    <PageSection className="min-h-[60vh] md:min-h-[70vh]">
       {/* Background image — same as hero */}
       <Image src={heroImageMap[prefix]} alt="" fill className="object-cover" unoptimized sizes="100vw" />
       <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm" />
@@ -226,7 +226,7 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
           })}
         </div>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -242,7 +242,7 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
   })
 
   return (
-    <SnapSection className="bg-muted/20">
+    <PageSection className="bg-muted/20">
       <div className="container mx-auto px-6 lg:px-12">
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-10">{t('dest.calendar')}</h2>
@@ -261,7 +261,7 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
           })}
         </div>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -271,7 +271,7 @@ function GalleryIntro({ prefix }: { prefix: DestinationPrefix }) {
   const raw = t(`${prefix}.gallery.images`)
   if (raw === `${prefix}.gallery.images`) return null
   return (
-    <SnapSection className="bg-primary">
+    <PageSection className="bg-primary">
       <div className="container mx-auto px-6 lg:px-12 text-center">
         <FadeIn delay={300}>
           <p className="font-sans text-xs sm:text-sm md:text-base text-accent uppercase tracking-[0.3em] mb-6">{t(`${prefix}.subtitle`)}</p>
@@ -282,7 +282,7 @@ function GalleryIntro({ prefix }: { prefix: DestinationPrefix }) {
           <p className="font-sans text-lg text-white/50 mt-6">{t('gallery.scrollHint')}</p>
         </FadeIn>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -300,7 +300,7 @@ function GalleryImages({ prefix }: { prefix: DestinationPrefix }) {
   return (
     <>
       {images.map((img, i) => (
-        <SnapSection key={img.src}>
+        <section key={img.src} className="h-screen w-full relative">
           <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="100vw" />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-transparent" />
           <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/50 to-transparent" />
@@ -313,7 +313,7 @@ function GalleryImages({ prefix }: { prefix: DestinationPrefix }) {
               </div>
             </FadeIn>
           </div>
-        </SnapSection>
+        </section>
       ))}
     </>
   )
@@ -327,7 +327,7 @@ function ConservationSection({ prefix }: { prefix: DestinationPrefix }) {
   const pa = t(`${prefix}.conservation.protectedArea`)
   const des = t(`${prefix}.conservation.designation`)
   return (
-    <SnapSection className="bg-primary/90">
+    <PageSection className="bg-primary/90">
       <div className="container mx-auto px-6 lg:px-12 text-center max-w-3xl">
         <FadeIn delay={200}>
           <div className="mb-8 inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10">
@@ -339,7 +339,7 @@ function ConservationSection({ prefix }: { prefix: DestinationPrefix }) {
           <p className="font-sans text-sm text-white/50 mt-2">{des !== `${prefix}.conservation.designation` ? des : ''}</p>
         </FadeIn>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -369,7 +369,7 @@ function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
   )
 
   return (
-    <SnapSection className="bg-background">
+    <PageSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-4">{heading}</h2>
@@ -436,7 +436,7 @@ function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
           </FadeIn>
         )}
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -476,7 +476,7 @@ function WaterTempSection({ prefix }: { prefix: DestinationPrefix }) {
   const range = globalMax - globalMin || 1
 
   return (
-    <SnapSection className="bg-background">
+    <PageSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{title}</h2>
@@ -514,7 +514,7 @@ function WaterTempSection({ prefix }: { prefix: DestinationPrefix }) {
           </div>
         </FadeIn>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
@@ -537,7 +537,7 @@ function CTASection({ prefix }: { prefix: DestinationPrefix }) {
   const socialProof = socialProofRaw !== socialProofKey ? socialProofRaw : null
 
   return (
-    <SnapSection className="bg-background">
+    <PageSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 text-center">
         <FadeIn delay={200}>
           <h2 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-normal text-foreground tracking-tight leading-[0.95] mb-4">{ctaHeading}</h2>
@@ -558,7 +558,7 @@ function CTASection({ prefix }: { prefix: DestinationPrefix }) {
           </Button>
         </FadeIn>
       </div>
-    </SnapSection>
+    </PageSection>
   )
 }
 
