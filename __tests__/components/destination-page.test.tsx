@@ -100,11 +100,41 @@ const fullSocorroTranslations: Record<string, string> = {
   'socorro.conservation.designation': 'Designated in 2016',
   'socorro.gallery.title': 'Gallery',
   'socorro.gallery.images': '["/images/panoramicas/Isla Socorro.webp","/images/panoramicas/Manta el Boiler.webp","/images/panoramicas/Cabo Pearce.webp","/images/panoramicas/Clariones.webp"]',
+  // Day at Sea keys
+  'socorro.dayAtSea.heading': 'Your Day at Sea',
+  'socorro.dayAtSea.intro': 'Every day aboard the Quetzal follows a rhythm as old as the ocean itself.',
+  'socorro.dayAtSea.morning': 'Your day starts with a light continental breakfast at sunrise.',
+  'socorro.dayAtSea.afternoon': 'Midday brings your second and third dives.',
+  'socorro.dayAtSea.evening': 'As the sun dips toward the Pacific, you might squeeze in a fourth dive.',
+  'socorro.dayAtSea.note': 'Schedules are flexible and weather-dependent.',
+  // Water temp keys
+  'socorro.waterTemp.title': 'Water Temperature',
+  'socorro.waterTemp.nov': '26–29°C (79–84°F)',
+  'socorro.waterTemp.dec': '24–27°C (75–81°F)',
+  'socorro.waterTemp.jan': '22–25°C (72–77°F)',
+  'socorro.waterTemp.feb': '21–24°C (70–75°F)',
+  'socorro.waterTemp.mar': '21–24°C (70–75°F)',
+  'socorro.waterTemp.apr': '22–25°C (72–77°F)',
+  'socorro.waterTemp.may': '23–27°C (73–81°F)',
+  // Zone intros
+  'socorro.areas.sanBenedicto': 'Your journey begins at San Benedicto — a volcanic island with famous manta encounters.',
+  'socorro.areas.rocaPartida': 'In the middle of the open ocean rises Roca Partida.',
+  'socorro.areas.socorroIsland': 'Socorro Island combines dramatic volcanic landscapes with famous dive sites.',
+  // Per-destination CTA keys
+  'socorro.cta': 'Ready to Meet the Mantas?',
+  'socorro.ctaButton': 'Reserve Your Socorro Expedition',
+  'socorro.socialProof': '+500 divers have experienced Revillagigedo with us',
+  // Shared fallback keys
   'dest.bookNow': 'Book This Trip',
   'destination.cta': 'Ask Our Travel Expert',
   'dest.calendar': 'Seasonal Wildlife Calendar',
   'gallery.promise': 'This is what awaits you',
   'gallery.scrollHint': 'Scroll to discover',
+  // Section labels
+  'dest.morning': 'Morning',
+  'dest.afternoon': 'Afternoon',
+  'dest.evening': 'Evening',
+  'dest.wetsuitHint': 'We recommend a 5mm wetsuit for Nov–Apr and a 3mm for May.',
 }
 
 // ── Full Cortez mock translations ──────────────────────────────────────────
@@ -162,6 +192,17 @@ const fullCortezTranslations: Record<string, string> = {
   'cortez.calendar.sep': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.oct': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.nov': 'Sea lions, hammerheads',
+  // Day at Sea keys
+  'cortez.dayAtSea.heading': 'Your Day at Sea',
+  'cortez.dayAtSea.intro': 'Your days in the Sea of Cortez follow a rhythm shaped by the desert sun.',
+  'cortez.dayAtSea.morning': 'You wake up to golden light spilling over the Baja desert.',
+  'cortez.dayAtSea.afternoon': 'Between your second and third dives, lunch is served on deck.',
+  'cortez.dayAtSea.evening': 'As the sun drops behind the Baja mountains.',
+  'cortez.dayAtSea.note': 'Schedules are flexible and weather-dependent.',
+  // Per-destination CTA keys
+  'cortez.cta': 'Ready to Dive the Aquarium of the World?',
+  'cortez.ctaButton': 'Reserve Your Sea of Cortez Expedition',
+  'cortez.socialProof': '+500 divers have explored the Sea of Cortez with us',
   'cortez.conservation.unesco': 'UNESCO World Heritage Site',
   'cortez.conservation.protectedArea': 'Islands and Protected Areas of the Gulf of California',
   'cortez.conservation.designation': 'Designated in 2005',
@@ -201,6 +242,16 @@ const fullMagbayTranslations: Record<string, string> = {
   'magbay.calendar.oct': 'Sardine run begins',
   'magbay.calendar.nov': 'Sardine run (peak)',
   'magbay.calendar.dec': 'Sardine run, bait balls',
+  // Day in Lagoon keys
+  'magbay.dayInLagoon.heading': 'Your Day in the Lagoon',
+  'magbay.dayInLagoon.intro': 'Your expedition unfolds in two distinct phases.',
+  'magbay.dayInLagoon.lagoonPhase': 'You start your days in the lagoon at dawn.',
+  'magbay.dayInLagoon.archipelagoPhase': 'The second half shifts entirely to ocean diving.',
+  'magbay.dayInLagoon.note': 'Schedules are flexible and weather-dependent.',
+  // Per-destination CTA keys
+  'magbay.cta': 'Ready to Meet the Gray Whales?',
+  'magbay.ctaButton': 'Reserve Your Mag Bay Expedition',
+  'magbay.socialProof': '+500 divers have lived this two-world expedition',
   'magbay.conservation.unesco': 'UNESCO Whale Sanctuary',
   'magbay.conservation.protectedArea': 'Bahía Magdalena Protected Lagoon',
   'magbay.conservation.designation': 'Part of the UNESCO World Heritage Site',
@@ -218,30 +269,31 @@ describe('DestinationPage', () => {
     translationStore = { ...fullSocorroTranslations }
   })
 
-  // ── Test 1: 8-section render order ─────────────────────────────────────
-  it('renders all 8 sections in correct order for socorro prefix', () => {
+  // ── Test 1: 10-section render order ─────────────────────────────────────
+  it('renders all 10 sections in correct order for socorro prefix', () => {
     render(<DestinationPage prefix="socorro" />)
 
     // Verify each section's key text appears
     const heroTitle = screen.getByText('Socorro Islands')
-    // "The Galápagos of Mexico" appears in both hero subtitle AND CTA subtitle
-    const heroSubtitles = screen.getAllByText('The Galápagos of Mexico')
     const desc1 = screen.getByText(/Description paragraph 1/)
     const desc2 = screen.getByText(/Description paragraph 2/)
     const highlightsHeading = screen.getByText('What You Will See')
+    const dayAtSeaHeading = screen.getByText('Your Day at Sea')
     const diveSitesHeading = screen.getByText('Dive Sites')
+    const waterTempHeading = screen.getByText('Water Temperature')
     const calendarHeading = screen.getByText('Seasonal Wildlife Calendar')
     const galleryHeading = screen.getByText('This is what awaits you')
     const conservationText = screen.getByText('UNESCO World Heritage Site')
-    const ctaHeading = screen.getByText('Book This Trip')
+    const ctaHeading = screen.getByText('Ready to Meet the Mantas?')
 
     // All must be present
     expect(heroTitle).toBeInTheDocument()
-    expect(heroSubtitles.length).toBeGreaterThanOrEqual(2)
     expect(desc1).toBeInTheDocument()
     expect(desc2).toBeInTheDocument()
     expect(highlightsHeading).toBeInTheDocument()
+    expect(dayAtSeaHeading).toBeInTheDocument()
     expect(diveSitesHeading).toBeInTheDocument()
+    expect(waterTempHeading).toBeInTheDocument()
     expect(calendarHeading).toBeInTheDocument()
     expect(galleryHeading).toBeInTheDocument()
     expect(conservationText).toBeInTheDocument()
@@ -250,13 +302,14 @@ describe('DestinationPage', () => {
     // Verify order via compareDocumentPosition
     const following = Node.DOCUMENT_POSITION_FOLLOWING
 
-    // Use heroSubtitles[0] for order check (the first occurrence is in the Hero section)
-    // Hero title < Highlights heading
-    expect(heroTitle.compareDocumentPosition(highlightsHeading) & following).toBe(following)
-    // Highlights < Dive Sites
-    expect(highlightsHeading.compareDocumentPosition(diveSitesHeading) & following).toBe(following)
-    // Dive Sites < Calendar
-    expect(diveSitesHeading.compareDocumentPosition(calendarHeading) & following).toBe(following)
+    // Hero title < Day at Sea heading
+    expect(heroTitle.compareDocumentPosition(dayAtSeaHeading) & following).toBe(following)
+    // Day at Sea < Dive Sites
+    expect(dayAtSeaHeading.compareDocumentPosition(diveSitesHeading) & following).toBe(following)
+    // Dive Sites < Water Temp
+    expect(diveSitesHeading.compareDocumentPosition(waterTempHeading) & following).toBe(following)
+    // Water Temp < Calendar
+    expect(waterTempHeading.compareDocumentPosition(calendarHeading) & following).toBe(following)
     // Calendar < Gallery
     expect(calendarHeading.compareDocumentPosition(galleryHeading) & following).toBe(following)
     // Gallery < Conservation
@@ -397,7 +450,7 @@ describe('DestinationPage', () => {
   it('CTA button links to /contacto', () => {
     render(<DestinationPage prefix="socorro" />)
 
-    const ctaLink = screen.getByRole('link', { name: /Ask Our Travel Expert/i })
+    const ctaLink = screen.getByRole('link', { name: /Reserve Your Socorro Expedition/i })
     expect(ctaLink).toBeInTheDocument()
     expect(ctaLink).toHaveAttribute('href', '/contacto')
     // ArrowRight icon should be present
@@ -411,9 +464,9 @@ describe('DestinationPage', () => {
 
     // Hero
     expect(screen.getByText('Sea of Cortez')).toBeInTheDocument()
-    // Subtitle appears in both hero and CTA sections
+    // Subtitle still appears in hero section
     const cortezSubtitles = screen.getAllByText('The Aquarium of the World')
-    expect(cortezSubtitles.length).toBeGreaterThanOrEqual(2)
+    expect(cortezSubtitles.length).toBeGreaterThanOrEqual(1)
 
     // Highlights
     expect(screen.getByText('What You Will See')).toBeInTheDocument()
@@ -429,8 +482,8 @@ describe('DestinationPage', () => {
     // Conservation
     expect(screen.getByText('UNESCO World Heritage Site')).toBeInTheDocument()
 
-    // CTA
-    expect(screen.getByText('Book This Trip')).toBeInTheDocument()
+    // CTA — per-destination key
+    expect(screen.getByText('Ready to Dive the Aquarium of the World?')).toBeInTheDocument()
   })
 
   // ── Test 11: Cortez renders its specific dive zones ────────────────────
@@ -460,5 +513,143 @@ describe('DestinationPage', () => {
     expect(screen.getByText('UNESCO World Heritage Site')).toBeInTheDocument()
     expect(screen.getByText('Revillagigedo Archipelago National Park')).toBeInTheDocument()
     expect(screen.getByText('Designated in 2016')).toBeInTheDocument()
+  })
+
+  // ── Test 13: DayAtSeaSection renders with correct content ───────────────
+  it('renders DayAtSeaSection with morning/afternoon/evening narrative', () => {
+    render(<DestinationPage prefix="socorro" />)
+
+    // Section heading
+    expect(screen.getByText('Your Day at Sea')).toBeInTheDocument()
+    // Intro text
+    expect(screen.getByText(/Every day aboard the Quetzal/)).toBeInTheDocument()
+    // Morning phase
+    expect(screen.getByText(/Your day starts with a light continental breakfast/)).toBeInTheDocument()
+    // Afternoon phase
+    expect(screen.getByText(/Midday brings your second and third dives/)).toBeInTheDocument()
+    // Evening phase
+    expect(screen.getByText(/As the sun dips toward the Pacific/)).toBeInTheDocument()
+    // Flexibility note
+    expect(screen.getByText(/Schedules are flexible/)).toBeInTheDocument()
+  })
+
+  // ── Test 14: WaterTempSection renders Socorro data ─────────────────────
+  it('renders WaterTempSection with Socorro Nov–May temperature data', () => {
+    render(<DestinationPage prefix="socorro" />)
+
+    // Section heading
+    expect(screen.getByText('Water Temperature')).toBeInTheDocument()
+    // Month data
+    expect(screen.getByText('26–29°C (79–84°F)')).toBeInTheDocument()
+    expect(screen.getByText('24–27°C (75–81°F)')).toBeInTheDocument()
+    // jan AND apr both have 22–25°C, feb AND mar both have 21–24°C
+    const janAprTemps = screen.getAllByText('22–25°C (72–77°F)')
+    expect(janAprTemps.length).toBeGreaterThanOrEqual(2)
+    const febMarTemps = screen.getAllByText('21–24°C (70–75°F)')
+    expect(febMarTemps.length).toBeGreaterThanOrEqual(2)
+    expect(screen.getByText('23–27°C (73–81°F)')).toBeInTheDocument()
+  })
+
+  // ── Test 15: Cortez WaterTempSection returns null ──────────────────────
+  it('hides WaterTempSection for Cortez when waterTemp keys are missing', () => {
+    translationStore = { ...fullCortezTranslations }
+    render(<DestinationPage prefix="cortez" />)
+
+    // Water Temperature should NOT appear (no waterTemp keys in Cortez mock)
+    expect(screen.queryByText('Water Temperature')).not.toBeInTheDocument()
+
+    // But Day at Sea and Dive Sites still render
+    expect(screen.getByText('Your Day at Sea')).toBeInTheDocument()
+    expect(screen.getByText('Dive Sites')).toBeInTheDocument()
+  })
+
+  // ── Test 16: MagBay reads dayInLagoon keys not dayAtSea ────────────────
+  it('renders DayInLagoon content for MagBay, not DayAtSea', () => {
+    translationStore = { ...fullMagbayTranslations }
+    render(<DestinationPage prefix="magbay" />)
+
+    // Day in Lagoon heading should render
+    expect(screen.getByText('Your Day in the Lagoon')).toBeInTheDocument()
+    // Lagoon phase content
+    expect(screen.getByText(/You start your days in the lagoon at dawn/)).toBeInTheDocument()
+    // Archipelago phase content
+    expect(screen.getByText(/The second half shifts entirely/)).toBeInTheDocument()
+    // Day at Sea heading should NOT appear
+    expect(screen.queryByText('Your Day at Sea')).not.toBeInTheDocument()
+    // Note
+    expect(screen.getByText(/Schedules are flexible/)).toBeInTheDocument()
+  })
+
+  // ── Test 17: CTASection uses per-destination keys when available ───────
+  it('CTASection displays per-destination CTA heading, button, and social proof', () => {
+    render(<DestinationPage prefix="socorro" />)
+
+    // Per-destination heading
+    expect(screen.getByText('Ready to Meet the Mantas?')).toBeInTheDocument()
+    // Social proof
+    expect(screen.getByText('+500 divers have experienced Revillagigedo with us')).toBeInTheDocument()
+    // Per-destination button text
+    expect(screen.getByRole('link', { name: /Reserve Your Socorro Expedition/i })).toBeInTheDocument()
+  })
+
+  // ── Test 18: CTASection falls back to shared keys ─────────────────────
+  it('CTASection falls back to shared keys when per-destination CTA keys are missing', () => {
+    // Use a store without per-destination CTA keys
+    translationStore = {
+      ...fullSocorroTranslations,
+    }
+    delete translationStore['socorro.cta']
+    delete translationStore['socorro.ctaButton']
+    delete translationStore['socorro.socialProof']
+
+    render(<DestinationPage prefix="socorro" />)
+
+    // Should fall back to shared 'dest.bookNow'
+    expect(screen.getByText('Book This Trip')).toBeInTheDocument()
+    // Should fall back to shared 'destination.cta'
+    expect(screen.getByRole('link', { name: /Ask Our Travel Expert/i })).toBeInTheDocument()
+    // Social proof should not appear
+    expect(screen.queryByText('+500 divers have experienced Revillagigedo with us')).not.toBeInTheDocument()
+  })
+
+  // ── Test 19: DiveSitesSection renders zone intros for Socorro ──────────
+  it('renders zone narrative intros before each zone group for Socorro', () => {
+    render(<DestinationPage prefix="socorro" />)
+
+    // San Benedicto zone intro
+    expect(screen.getByText(/Your journey begins at San Benedicto/)).toBeInTheDocument()
+    // Roca Partida zone intro
+    expect(screen.getByText(/In the middle of the open ocean rises Roca Partida/)).toBeInTheDocument()
+    // Socorro Island zone intro
+    expect(screen.getByText(/Socorro Island combines dramatic volcanic landscapes/)).toBeInTheDocument()
+  })
+
+  // ── Test 20: MagBay suppresses DiveSitesSection ────────────────────────
+  it('suppresses DiveSitesSection when magbay ZONES is empty', () => {
+    translationStore = { ...fullMagbayTranslations }
+    render(<DestinationPage prefix="magbay" />)
+
+    // "Dive Sites" should NOT appear (ZONES[magbay] is empty)
+    expect(screen.queryByText('Dive Sites')).not.toBeInTheDocument()
+
+    // But other sections should still render
+    expect(screen.getByText('Bahía Magdalena')).toBeInTheDocument()
+    expect(screen.getByText('What You Will See')).toBeInTheDocument()
+    expect(screen.getByText('Your Day in the Lagoon')).toBeInTheDocument()
+    expect(screen.getByText('UNESCO Whale Sanctuary')).toBeInTheDocument()
+    expect(screen.getByText('Ready to Meet the Gray Whales?')).toBeInTheDocument()
+  })
+
+  // ── Test 21: Cortez DayAtSea renders without zone intros ──────────────
+  it('Cortez DiveSites does not render zone intros when areas keys are absent', () => {
+    translationStore = { ...fullCortezTranslations }
+    render(<DestinationPage prefix="cortez" />)
+
+    // Dive Sites should render
+    expect(screen.getByText('Dive Sites')).toBeInTheDocument()
+    // But no zone intros should appear (no cortez.areas keys)
+    // The zone badges should still appear
+    const laPazElements = screen.getAllByText('La Paz Bay')
+    expect(laPazElements.length).toBeGreaterThanOrEqual(1)
   })
 })

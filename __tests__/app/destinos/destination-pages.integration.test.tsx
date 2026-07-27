@@ -109,11 +109,41 @@ const fullSocorroTranslations: Record<string, string> = {
   'socorro.conservation.designation': 'Designated in 2016',
   'socorro.gallery.title': 'Gallery',
   'socorro.gallery.images': '["/images/panoramicas/Isla Socorro.webp","/images/panoramicas/Manta el Boiler.webp","/images/panoramicas/Cabo Pearce.webp","/images/panoramicas/Clariones.webp"]',
+  // Day at Sea keys
+  'socorro.dayAtSea.heading': 'Your Day at Sea',
+  'socorro.dayAtSea.intro': 'Every day aboard the Quetzal follows a rhythm.',
+  'socorro.dayAtSea.morning': 'Your day starts with a light continental breakfast at sunrise.',
+  'socorro.dayAtSea.afternoon': 'Midday brings your second and third dives.',
+  'socorro.dayAtSea.evening': 'As the sun dips toward the Pacific.',
+  'socorro.dayAtSea.note': 'Schedules are flexible and weather-dependent.',
+  // Water temp keys
+  'socorro.waterTemp.title': 'Water Temperature',
+  'socorro.waterTemp.nov': '26–29°C (79–84°F)',
+  'socorro.waterTemp.dec': '24–27°C (75–81°F)',
+  'socorro.waterTemp.jan': '22–25°C (72–77°F)',
+  'socorro.waterTemp.feb': '21–24°C (70–75°F)',
+  'socorro.waterTemp.mar': '21–24°C (70–75°F)',
+  'socorro.waterTemp.apr': '22–25°C (72–77°F)',
+  'socorro.waterTemp.may': '23–27°C (73–81°F)',
+  // Zone intros
+  'socorro.areas.sanBenedicto': 'Your journey begins at San Benedicto.',
+  'socorro.areas.rocaPartida': 'In the middle of the open ocean rises Roca Partida.',
+  'socorro.areas.socorroIsland': 'Socorro Island combines dramatic volcanic landscapes with dive sites.',
+  // Per-destination CTA keys
+  'socorro.cta': 'Ready to Meet the Mantas?',
+  'socorro.ctaButton': 'Reserve Your Socorro Expedition',
+  'socorro.socialProof': '+500 divers have experienced Revillagigedo with us',
+  // Shared fallback keys
   'dest.bookNow': 'Book This Trip',
   'destination.cta': 'Ask Our Travel Expert',
   'dest.calendar': 'Seasonal Wildlife Calendar',
   'gallery.promise': 'This is what awaits you',
   'gallery.scrollHint': 'Scroll to discover',
+  // Section labels
+  'dest.morning': 'Morning',
+  'dest.afternoon': 'Afternoon',
+  'dest.evening': 'Evening',
+  'dest.wetsuitHint': 'We recommend a 5mm wetsuit.',
 }
 
 // ── Full Cortez mock translations ──────────────────────────────────────────
@@ -171,6 +201,17 @@ const fullCortezTranslations: Record<string, string> = {
   'cortez.calendar.sep': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.oct': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.nov': 'Sea lions, hammerheads',
+  // Day at Sea keys
+  'cortez.dayAtSea.heading': 'Your Day at Sea',
+  'cortez.dayAtSea.intro': 'Your days in the Sea of Cortez follow a rhythm.',
+  'cortez.dayAtSea.morning': 'You wake up to golden light over the Baja desert.',
+  'cortez.dayAtSea.afternoon': 'Between your second and third dives, lunch is served.',
+  'cortez.dayAtSea.evening': 'As the sun drops behind the Baja mountains.',
+  'cortez.dayAtSea.note': 'Schedules are flexible and weather-dependent.',
+  // Per-destination CTA keys
+  'cortez.cta': 'Ready to Dive the Aquarium of the World?',
+  'cortez.ctaButton': 'Reserve Your Sea of Cortez Expedition',
+  'cortez.socialProof': '+500 divers have explored the Sea of Cortez with us',
   'cortez.conservation.unesco': 'UNESCO World Heritage Site',
   'cortez.conservation.protectedArea': 'Islands and Protected Areas of the Gulf of California',
   'cortez.conservation.designation': 'Designated in 2005',
@@ -210,6 +251,16 @@ const fullMagbayTranslations: Record<string, string> = {
   'magbay.calendar.oct': 'Sardine run begins',
   'magbay.calendar.nov': 'Sardine run (peak)',
   'magbay.calendar.dec': 'Sardine run, bait balls',
+  // Day in Lagoon keys
+  'magbay.dayInLagoon.heading': 'Your Day in the Lagoon',
+  'magbay.dayInLagoon.intro': 'Your expedition unfolds in two distinct phases.',
+  'magbay.dayInLagoon.lagoonPhase': 'You start your days in the lagoon at dawn.',
+  'magbay.dayInLagoon.archipelagoPhase': 'The second half shifts entirely to ocean diving.',
+  'magbay.dayInLagoon.note': 'Schedules are flexible and weather-dependent.',
+  // Per-destination CTA keys
+  'magbay.cta': 'Ready to Meet the Gray Whales?',
+  'magbay.ctaButton': 'Reserve Your Mag Bay Expedition',
+  'magbay.socialProof': '+500 divers have lived this two-world expedition',
   'magbay.conservation.unesco': 'UNESCO Whale Sanctuary',
   'magbay.conservation.protectedArea': 'Bahía Magdalena Protected Lagoon',
   'magbay.conservation.designation': 'Part of the UNESCO World Heritage Site',
@@ -248,15 +299,15 @@ describe('Destination Pages Integration', () => {
       translationStore = { ...fullSocorroTranslations }
     })
 
-    it('renders all 8 sections in the DOM', async () => {
+    it('renders all sections in the DOM', async () => {
       const { default: SocorroPage } = await importSocorroPage()
       render(<SocorroPage />)
 
       // Hero section
       expect(screen.getByText('Socorro Islands')).toBeInTheDocument()
-      // "The Galápagos of Mexico" appears in both hero subtitle AND CTA subtitle
+      // "The Galápagos of Mexico" appears in hero subtitle
       const heroSubtitles = screen.getAllByText('The Galápagos of Mexico')
-      expect(heroSubtitles.length).toBeGreaterThanOrEqual(2)
+      expect(heroSubtitles.length).toBeGreaterThanOrEqual(1)
 
       // Description section
       expect(screen.getByText(/Description paragraph 1 for Socorro/)).toBeInTheDocument()
@@ -266,6 +317,12 @@ describe('Destination Pages Integration', () => {
       expect(screen.getByText('What You Will See')).toBeInTheDocument()
       expect(screen.getByText('Giant Oceanic Mantas')).toBeInTheDocument()
       expect(screen.getByText('Tiger & Silky Sharks')).toBeInTheDocument()
+
+      // Day at Sea section
+      expect(screen.getByText('Your Day at Sea')).toBeInTheDocument()
+
+      // Water Temp section
+      expect(screen.getByText('Water Temperature')).toBeInTheDocument()
 
       // Dive Sites section
       expect(screen.getByText('Dive Sites')).toBeInTheDocument()
@@ -293,9 +350,9 @@ describe('Destination Pages Integration', () => {
       expect(screen.getByText('UNESCO World Heritage Site')).toBeInTheDocument()
       expect(screen.getByText('Revillagigedo Archipelago National Park')).toBeInTheDocument()
 
-      // CTA section
-      expect(screen.getByText('Book This Trip')).toBeInTheDocument()
-      const ctaLink = screen.getByRole('link', { name: /Ask Our Travel Expert/i })
+      // CTA section — per-destination keys
+      expect(screen.getByText('Ready to Meet the Mantas?')).toBeInTheDocument()
+      const ctaLink = screen.getByRole('link', { name: /Reserve Your Socorro Expedition/i })
       expect(ctaLink).toHaveAttribute('href', '/contacto')
     })
 
@@ -364,7 +421,7 @@ describe('Destination Pages Integration', () => {
       expect(screen.getByText('Bahía Magdalena')).toBeInTheDocument()
       expect(screen.getByText('What You Will See')).toBeInTheDocument()
       expect(screen.getByText('UNESCO Whale Sanctuary')).toBeInTheDocument()
-      expect(screen.getByText('Book This Trip')).toBeInTheDocument()
+      expect(screen.getByText('Ready to Meet the Gray Whales?')).toBeInTheDocument()
     })
 
     it('renders hero image with correct src', async () => {
