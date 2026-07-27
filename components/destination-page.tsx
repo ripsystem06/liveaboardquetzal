@@ -220,9 +220,9 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
     rocaPartida:  { accent: 'text-cyan-300',    border: 'border-cyan-500/30',    bg: 'bg-cyan-500/10',    badge: 'bg-cyan-600',    badgeBorder: 'border-cyan-500' },
     socorroIsland:{ accent: 'text-violet-300',  border: 'border-violet-500/30',  bg: 'bg-violet-500/10',  badge: 'bg-violet-600',  badgeBorder: 'border-violet-500' },
     // Cortez zones
-    laPaz:        { accent: 'text-amber-300',   border: 'border-amber-500/30',   bg: 'bg-amber-500/10',   badge: 'bg-amber-600',   badgeBorder: 'border-amber-500' },
-    caboPulmo:    { accent: 'text-orange-300',  border: 'border-orange-500/30',  bg: 'bg-orange-500/10',  badge: 'bg-orange-600',  badgeBorder: 'border-orange-500' },
-    loreto:       { accent: 'text-rose-300',    border: 'border-rose-500/30',    bg: 'bg-rose-500/10',    badge: 'bg-rose-600',    badgeBorder: 'border-rose-500' },
+    laPazBay:        { accent: 'text-amber-300',   border: 'border-amber-500/30',   bg: 'bg-amber-500/10',   badge: 'bg-amber-600',   badgeBorder: 'border-amber-500' },
+    northernIslands: { accent: 'text-teal-300',    border: 'border-teal-500/30',    bg: 'bg-teal-500/10',    badge: 'bg-teal-600',    badgeBorder: 'border-teal-500' },
+    eastCape:        { accent: 'text-orange-300',  border: 'border-orange-500/30',  bg: 'bg-orange-500/10',  badge: 'bg-orange-600',  badgeBorder: 'border-orange-500' },
   }
 
   const defaultColor = { accent: 'text-blue-300', border: 'border-blue-500/30', bg: 'bg-blue-500/10', badge: 'bg-blue-600', badgeBorder: 'border-blue-500' }
@@ -390,6 +390,7 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
     'sperm whales': '🐋',
     'orca': '🐋',
     'marlin': '🐟',
+    'marlines': '🐟',
     'tuna': '🐟',
     'wahoo': '🐟',
     'dorado': '🐟',
