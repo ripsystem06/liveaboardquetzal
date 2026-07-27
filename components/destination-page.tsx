@@ -162,7 +162,7 @@ function HighlightsSection({ prefix }: { prefix: DestinationPrefix }) {
         <FadeIn>
           <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-12">{heading}</h2>
         </FadeIn>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mx-auto">
           {keys.map((hKey, i) => {
             const Icon = HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]
             return (
