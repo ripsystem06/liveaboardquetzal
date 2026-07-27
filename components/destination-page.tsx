@@ -262,26 +262,26 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
             return (
               <div key={zone.zoneKey}>
                 <FadeIn delay={zi * 150}>
-                  <div className={`relative ${isRight ? 'ml-auto' : 'mr-auto'}`} style={{ maxWidth: hasAreaIntro ? '100%' : '42rem' }}>
+                  <div className={`relative ${isRight ? 'ml-auto' : 'mr-auto'}`}>
                     {/* Zone number — large graphic element */}
                     <span className={`absolute -top-6 -left-2 font-serif text-7xl md:text-8xl font-bold ${c.accent} opacity-20 select-none pointer-events-none`}>
                       {zoneNumber}
                     </span>
 
-                    {/* Zone intro with icon */}
-                    {hasAreaIntro && (
-                      <div className={`relative flex items-start gap-3 mb-8 p-4 md:p-5 rounded-xl ${c.bg} border ${c.border}`}>
-                        <div className={`flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl ${c.bg} border ${c.border}`}>
-                          <MapPin className={`w-4 h-4 ${c.accent}`} />
-                        </div>
-                        <div>
-                          <h3 className={`font-serif text-lg md:text-xl font-semibold ${c.accent} mb-1`}>
-                            {zoneNames[zone.zoneKey] ?? zone.zoneKey}
-                          </h3>
-                          <p className="font-sans text-sm md:text-base text-white/90 font-medium leading-relaxed">{areaIntro}</p>
-                        </div>
+                    {/* Zone intro with icon — always shown for consistent design */}
+                    <div className={`relative flex items-start gap-3 mb-8 p-4 md:p-5 rounded-xl ${c.bg} border ${c.border}`}>
+                      <div className={`flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl ${c.bg} border ${c.border}`}>
+                        <MapPin className={`w-4 h-4 ${c.accent}`} />
                       </div>
-                    )}
+                      <div>
+                        <h3 className={`font-serif text-lg md:text-xl font-semibold ${c.accent} mb-1`}>
+                          {zoneNames[zone.zoneKey] ?? zone.zoneKey}
+                        </h3>
+                        {hasAreaIntro && (
+                          <p className="font-sans text-sm md:text-base text-white/90 font-medium leading-relaxed">{areaIntro}</p>
+                        )}
+                      </div>
+                    </div>
 
                     {/* Site cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -290,12 +290,6 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
                         return (
                         <FadeIn key={`${zone.zoneKey}-${siteKey}`} delay={i * 60}>
                           <div className={`group/card relative bg-white/5 backdrop-blur-xl rounded-xl border ${c.border} p-4 transition-all duration-500 hover:shadow-lg hover:bg-white/10 hover:-translate-y-1`}>
-                            {/* Zone badge */}
-                            {!hasAreaIntro && (
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider ${c.badge} text-white border ${c.badgeBorder} mb-1.5`}>
-                                {zoneNames[zone.zoneKey] ?? zone.zoneKey}
-                              </span>
-                            )}
                             <h4 className="font-serif text-base font-semibold text-white mb-1">{name}</h4>
                             <p className="font-sans text-xs text-white/85 font-medium leading-relaxed mb-1.5 line-clamp-2">{desc}</p>
 
