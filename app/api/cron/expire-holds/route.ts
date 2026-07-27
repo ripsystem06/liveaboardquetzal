@@ -6,7 +6,7 @@ import { sendExpiryEmail } from '@/lib/email'
  * GET /api/cron/expire-holds
  * Vercel Cron endpoint — expires all reservations where
  * status = 'pending_approval' AND holdExpiry < now().
- * Runs every 15 minutes via vercel.json.
+ * Runs daily at midnight via vercel.json.
  */
 export async function GET(request: NextRequest) {
   // Verify cron secret if configured

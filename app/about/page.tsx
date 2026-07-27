@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Fish, Compass, Heart, Shield, Star, Users } from 'lucide-react'
+import { ArrowRight, Fish, Compass, Heart, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
@@ -12,9 +12,7 @@ const values = [
   { icon: Fish, key: 'v1' },
   { icon: Compass, key: 'v2' },
   { icon: Heart, key: 'v3' },
-  { icon: Shield, key: 'v4' },
   { icon: Star, key: 'v5' },
-  { icon: Users, key: 'v6' },
 ] as const
 
 export default function AboutPage() {
@@ -57,30 +55,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Mission */}
-      <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h2 className="font-serif text-3xl font-normal mb-4">{t('about.mission')}</h2>
-          <div className="font-sans text-lg text-primary-foreground/90 max-w-3xl mx-auto leading-relaxed space-y-4">
-            <p>{t('about.missionText')}</p>
-            <p>{t('about.missionText2')}</p>
-            <p>{t('about.missionText3')}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Vision */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h2 className="font-serif text-3xl font-normal text-foreground mb-4">{t('about.vision')}</h2>
-          <div className="font-sans text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed space-y-4">
-            <p>{t('about.visionText')}</p>
-            <p>{t('about.visionText2')}</p>
-            <p>{t('about.visionText3')}</p>
-          </div>
-        </div>
-      </section>
-
       {/* Values */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4 lg:px-8">
@@ -101,26 +75,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Philosophy */}
-      <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h2 className="font-serif text-3xl font-normal mb-4">{t('about.philosophy')}</h2>
-          <div className="font-sans text-lg text-primary-foreground/90 max-w-3xl mx-auto leading-relaxed space-y-4">
-            <p>{t('about.philosophyText')}</p>
-            <p>{t('about.philosophyText2')}</p>
-            <p>{t('about.philosophyText3')}</p>
-            <p>{t('about.philosophyText4')}</p>
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h2 className="font-serif text-3xl font-normal text-foreground mb-4">{t('collab.cta')}</h2>
+          <h2 className="font-serif text-3xl font-normal text-foreground mb-4">{t('about.cta')}</h2>
+          <p className="font-sans text-lg text-muted-foreground mb-6">{t('about.socialProof')}</p>
           <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-sans font-semibold">
             <Link href="/contacto">
-              {t('destination.cta')}
+              {t('about.ctaButton')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
