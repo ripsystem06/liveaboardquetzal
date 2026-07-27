@@ -6,7 +6,7 @@ import { DestinationPage } from '@/components/destination-page'
 
 export default function SeaOfCortezPage() {
   return (
-    <main className="h-screen overflow-y-scroll snap-y snap-mandatory">
+    <main className="min-h-screen">
       <Navigation />
       <DestinationPage prefix="cortez" />
       <Footer />
