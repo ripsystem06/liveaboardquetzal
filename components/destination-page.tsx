@@ -418,7 +418,6 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
     'marlín': '🐟',
     'atún': '🐟',
     'pez vela': '🐟',
-    'dorado': '🐟',
     'sardinas': '🐟',
   }
 
