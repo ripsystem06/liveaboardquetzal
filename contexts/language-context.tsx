@@ -166,6 +166,10 @@ const translations = {
     'dest.nextDeparture': 'Next Departure',
     'dest.bookNow': 'Book This Trip',
     'dest.calendar': 'Seasonal Wildlife Calendar',
+    'dest.morning': 'Morning',
+    'dest.afternoon': 'Afternoon',
+    'dest.evening': 'Evening',
+    'dest.wetsuitHint': 'We recommend a 5mm wetsuit for Nov–Apr and a 3mm for May.',
 
     // Socorro
     'socorro.title': 'Socorro Islands',
@@ -332,6 +336,8 @@ const translations = {
     'magbay.gallery.title': 'Gallery',
     'magbay.gallery.images': '[{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"The protected lagoon of Bahía Magdalena at sunset"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Whitetip reef sharks resting on the sandy bottom"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curious whitetip sharks patrolling the reef"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Panoramic view from the Balcón dive site"}]',
     'magbay.dayInLagoon.heading': 'Your Day in the Lagoon',
+    'magbay.dayInLagoon.lagoonHeading': 'The Lagoon',
+    'magbay.dayInLagoon.archipelagoHeading': 'The Archipelago',
     'magbay.dayInLagoon.intro': 'Your expedition unfolds in two distinct phases — first the quiet magic of Bahía Magdalena\'s protected lagoon, then the open-ocean intensity of Revillagigedo. Here\'s what each phase looks like.',
     'magbay.dayInLagoon.lagoonPhase': 'You start your days in the lagoon at dawn, when the light is soft and the water is like glass. After a light breakfast, you board a small panga and head into the channels where gray whale mothers and calves rest. You might spend hours here — watching, waiting, and — when a whale chooses to approach — experiencing a connection so personal it defies words. Between encounters, you kayak through mangroves, walk pristine beaches, and eat fresh meals prepared on board.',
     'magbay.dayInLagoon.archipelagoPhase': 'The second half shifts entirely. You leave the lagoon behind and the Quetzal sails toward Revillagigedo. Your days become the classic liveaboard rhythm: early morning dives with mantas, afternoon drift dives through hammerhead schools, and evenings on deck watching the sunset paint the volcanic islands. Same boat, same crew — but now you\'re in the domain of giant pelagics.',
@@ -847,6 +853,10 @@ const translations = {
     'dest.nextDeparture': 'Próxima Salida',
     'dest.bookNow': 'Reservar Este Viaje',
     'dest.calendar': 'Calendario de Fauna',
+    'dest.morning': 'Mañana',
+    'dest.afternoon': 'Tarde',
+    'dest.evening': 'Noche',
+    'dest.wetsuitHint': 'Recomendamos traje de 5mm para nov–abr y de 3mm para mayo.',
 
     // Socorro
     'socorro.title': 'Islas Socorro',
@@ -1013,6 +1023,8 @@ const translations = {
     'magbay.gallery.title': 'Galería',
     'magbay.gallery.images': '[{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"La laguna protegida de Bahía Magdalena al atardecer"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Tiburones punta blanca descansando en el fondo arenoso"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curiosos tiburones punta blanca patrullando el arrecife"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Vista panorámica desde el sitio de buceo El Balcón"}]',
     'magbay.dayInLagoon.heading': 'Tu Día en la Laguna',
+    'magbay.dayInLagoon.lagoonHeading': 'La Laguna',
+    'magbay.dayInLagoon.archipelagoHeading': 'El Archipiélago',
     'magbay.dayInLagoon.intro': 'Tu expedición se desarrolla en dos fases bien distintas — primero la magia tranquila de la laguna protegida de Bahía Magdalena, después la intensidad de mar abierto de Revillagigedo. Así se ve cada fase.',
     'magbay.dayInLagoon.lagoonPhase': 'Tus días en la laguna empiezan al amanecer, cuando la luz es suave y el agua es un espejo. Después de un desayuno liviano, subís a una panga y te adentrás en los canales donde las madres ballena gris y sus crías descansan. Podés pasar horas acá — mirando, esperando, y — cuando una ballena elige acercarse — experimentando una conexión tan personal que desafía las palabras. Entre encuentros, hacés kayak por los manglares, caminás playas vírgenes, y comés comida fresca preparada a bordo.',
     'magbay.dayInLagoon.archipelagoPhase': 'La segunda mitad cambia por completo. Dejás la laguna atrás y el Quetzal navega hacia Revillagigedo. Tus días se vuelven el ritmo clásico del liveaboard: inmersiones al amanecer con mantas, derivas de la tarde entre cardúmenes de tiburones martillo, y atardeceres en cubierta viendo el sol pintar las islas volcánicas. El mismo barco, la misma tripulación — pero ahora estás en el dominio de los grandes pelágicos.',

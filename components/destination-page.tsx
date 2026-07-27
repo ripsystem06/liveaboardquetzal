@@ -379,7 +379,7 @@ function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
         </FadeIn>
 
         {/* Timeline layout */}
-        <div className="relative pl-16 md:pl-20 space-y-12 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-border/60">
+        <div className="relative pl-16 md:pl-20 space-y-12 before:absolute before:left-16 md:before:left-20 before:top-2 before:bottom-2 before:w-px before:bg-border/60">
           {/* Phase 1 — Morning / Lagoon */}
           <FadeIn delay={100}>
             <div className="relative">
