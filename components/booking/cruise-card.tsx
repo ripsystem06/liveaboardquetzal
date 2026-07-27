@@ -1,6 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/contexts/language-context'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ChevronRight } from 'lucide-react'
@@ -20,6 +21,14 @@ interface CruiseCardProps {
 
 const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+
+function getRouteImage(route: string): string {
+  const lower = route.toLowerCase()
+  if (lower.includes('socorro') || lower.includes('revillagigedo')) return '/images/panoramicas/Isla Socorro.webp'
+  if (lower.includes('cortez') || lower.includes('cortés')) return '/images/panoramicas/burritos galapagos 1.webp'
+  if (lower.includes('magdalena') || lower.includes('magbay')) return '/images/panoramicas/loreto-magdalena-bay.webp'
+  return '/images/panoramicas/Isla Socorro.webp'
+}
 
 function parseDate(dateStr: string) {
   const [year, month, day] = dateStr.split('-')
@@ -89,8 +98,20 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        {/* Left: Date + Cruise Info */}
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+        {/* Left: Thumbnail + Date + Cruise Info */}
+        <div className="flex items-center gap-4 sm:gap-5">
+          {/* Destination thumbnail */}
+          <div className="hidden sm:block relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0 shadow-sm bg-muted">
+            <Image
+              src={getRouteImage(cruise.route)}
+              alt={cruise.name}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           {/* Big Departure Date */}
           <div className="flex flex-col items-start">
             <div className="flex items-start gap-1.5">
@@ -123,6 +144,7 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
               <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
+        </div>
         </div>
 
         {/* Right: Price + Select */}
