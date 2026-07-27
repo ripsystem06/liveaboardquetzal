@@ -93,6 +93,8 @@ function HeroSection({ prefix }: { prefix: DestinationPrefix }) {
     <section className="min-h-screen md:h-screen w-full flex items-center justify-center relative">
       <Image src={heroImageMap[prefix]} alt={t(`${prefix}.title`)} fill className="object-cover" priority unoptimized sizes="100vw" />
       <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/50 to-primary/80" />
+      {/* Bottom fade — smooth transition to next section */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-background to-transparent" />
       <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center">
         <FadeIn delay={200}>
           <h1 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-9xl font-normal text-white leading-[0.9] tracking-tight max-w-5xl mx-auto">
