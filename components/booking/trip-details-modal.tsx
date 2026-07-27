@@ -1,6 +1,6 @@
 'use client'
 
-import { ShipWheel, Anchor, CalendarArrowDown, Fish, Clock } from 'lucide-react'
+import { ShipWheel, Anchor, CalendarArrowDown, Fish, Clock, Sunrise, Sun, Moon } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import type { Cruise } from './booking-page-client'
@@ -90,6 +90,37 @@ export function TripDetailsModal({ cruise, embarkDate, onClose }: TripDetailsMod
                 <span className="text-muted-foreground ml-1">— 9-day expedition</span>
               </div>
             </div>
+          </div>
+
+          {/* Your Day at Sea — daily rhythm */}
+          <div className="rounded-xl bg-muted/30 border border-border/50 p-4">
+            <h4 className="font-serif text-sm font-semibold text-primary mb-3">
+              {t('dest.daySchedule.title') !== 'dest.daySchedule.title' ? t('dest.daySchedule.title') : 'Your Day at Sea'}
+            </h4>
+            <div className="space-y-2.5">
+              {[
+                { icon: Sunrise, bg: 'bg-amber-500/10', fg: 'text-amber-500', labelKey: 'dest.morning', descKey: 'dest.daySchedule.morning', fallback: 'Morning', descFallback: 'Continental breakfast, dive briefing, first dive, full breakfast' },
+                { icon: Sun, bg: 'bg-sky-500/10', fg: 'text-sky-500', labelKey: 'dest.afternoon', descKey: 'dest.daySchedule.afternoon', fallback: 'Afternoon', descFallback: 'Second dive, lunch, third dive, surface interval' },
+                { icon: Moon, bg: 'bg-indigo-500/10', fg: 'text-indigo-500', labelKey: 'dest.evening', descKey: 'dest.daySchedule.evening', fallback: 'Evening', descFallback: 'Fourth dive (optional), dinner, stars on deck' },
+              ].map(({ icon: Icon, bg, fg, labelKey, descKey, fallback, descFallback }) => (
+                <div key={labelKey} className="flex items-start gap-2.5">
+                  <div className={`flex size-6 items-center justify-center rounded-full shrink-0 mt-0.5 ${bg}`}>
+                    <Icon size={12} className={fg} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-primary">
+                      {t(labelKey) !== labelKey ? t(labelKey) : fallback}
+                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {t(descKey) !== descKey ? t(descKey) : descFallback}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-3 italic">
+              {t('dest.wetsuitHint') !== 'dest.wetsuitHint' ? t('dest.wetsuitHint') : 'Schedules are flexible and weather-dependent.'}
+            </p>
           </div>
 
           {/* Duration bar */}

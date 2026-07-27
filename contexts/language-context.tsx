@@ -170,6 +170,9 @@ const translations = {
     'dest.afternoon': 'Afternoon',
     'dest.evening': 'Evening',
     'dest.wetsuitHint': 'We recommend a 5mm wetsuit for Nov–Apr and a 3mm for May.',
+    'dest.daySchedule.morning': 'Continental breakfast, dive briefing, first dive, full breakfast',
+    'dest.daySchedule.afternoon': 'Second dive, lunch, third dive, surface interval',
+    'dest.daySchedule.evening': 'Fourth dive (optional), dinner, stars on deck',
 
     // Socorro
     'socorro.title': 'Socorro Islands',
@@ -861,6 +864,9 @@ const translations = {
     'dest.afternoon': 'Tarde',
     'dest.evening': 'Noche',
     'dest.wetsuitHint': 'Recomendamos traje de 5mm para nov–abr y de 3mm para mayo.',
+    'dest.daySchedule.morning': 'Desayuno continental, briefing, primera inmersión, desayuno completo',
+    'dest.daySchedule.afternoon': 'Segunda inmersión, almuerzo, tercera inmersión, descanso',
+    'dest.daySchedule.evening': 'Cuarta inmersión (opcional), cena, estrellas en cubierta',
 
     // Socorro
     'socorro.title': 'Islas Socorro',
