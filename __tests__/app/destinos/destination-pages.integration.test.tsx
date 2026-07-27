@@ -339,7 +339,7 @@ describe('Destination Pages Integration', () => {
       // Calendar section
       expect(screen.getByText('Seasonal Wildlife Calendar')).toBeInTheDocument()
       // Calendar months: jan, feb, mar, apr, may, jun, jul, nov, dec (9 months)
-      const janElements = screen.getAllByText('January')
+      const janElements = screen.getAllByText('Jan')
       expect(janElements.length).toBeGreaterThan(0)
 
       // Gallery intro section

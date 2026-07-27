@@ -48,6 +48,30 @@ const ZONE_DISPLAY: Partial<Record<DestinationPrefix, Record<string, string>>> =
   cortez: { laPazBay: 'La Paz Bay', northernIslands: 'Northern Islands', eastCape: 'East Cape' },
 }
 
+// ── Dive site specs (depth, current, visibility) ────────────────────────────
+interface DiveSpec { depth: string; current: string; visibility: string }
+const DIVE_SPECS: Partial<Record<DestinationPrefix, Record<string, Record<string, DiveSpec>>>> = {
+  socorro: {
+    sanBenedicto: {
+      boiler:  { depth: '25m',  current: 'Moderate',    visibility: '30m+' },
+      canyon:  { depth: '30m',  current: 'Mod–Strong',  visibility: '25m+' },
+    },
+    rocaPartida: {
+      rocaPartida: { depth: '40m+', current: 'Strong',  visibility: 'Variable' },
+    },
+    socorroIsland: {
+      caboPearce:  { depth: '20–30m', current: 'Moderate', visibility: '25m+' },
+    },
+  },
+  cortez: {
+    laPazBay: {
+      elBajo:     { depth: '30m',  current: 'Moderate',  visibility: '20m+' },
+      swanee:     { depth: '18m',  current: 'Mild',      visibility: '15m+' },
+      salvatierra:{ depth: '80m',  current: 'Moderate',  visibility: '15m+' },
+    },
+  },
+}
+
 // ── Constants ───────────────────────────────────────────────────────────────
 const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'] as const
 const HIGHLIGHT_KEYS = ['h1','h2','h3','h4','h5','h6'] as const
@@ -261,9 +285,11 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
 
                     {/* Site cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {sites.map(({ siteKey, name, desc, faunaItems }, i) => (
+                      {sites.map(({ siteKey, name, desc, faunaItems }, i) => {
+                        const specs = DIVE_SPECS[prefix]?.[zone.zoneKey]?.[siteKey]
+                        return (
                         <FadeIn key={`${zone.zoneKey}-${siteKey}`} delay={i * 60}>
-                          <div className={`group/card relative bg-white/10 backdrop-blur-md rounded-xl border ${c.border} p-4 transition-all duration-500 hover:shadow-lg hover:bg-white/15 hover:-translate-y-1`}>
+                          <div className={`group/card relative bg-white/5 backdrop-blur-xl rounded-xl border ${c.border} p-4 transition-all duration-500 hover:shadow-lg hover:bg-white/10 hover:-translate-y-1`}>
                             {/* Zone badge */}
                             {!hasAreaIntro && (
                               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider ${c.badge} text-white border ${c.badgeBorder} mb-1.5`}>
@@ -272,6 +298,25 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
                             )}
                             <h4 className="font-serif text-base font-normal text-white mb-1">{name}</h4>
                             <p className="font-sans text-xs text-white/70 leading-relaxed mb-1.5 line-clamp-2">{desc}</p>
+
+                            {/* Dive specs strip */}
+                            {specs && (
+                              <div className="flex gap-3 mb-1.5 pb-1.5 border-b border-white/10">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[10px] font-label-caps font-bold uppercase tracking-wider text-white/40">Depth</span>
+                                  <span className="text-[10px] font-sans text-white/80">{specs.depth}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[10px] font-label-caps font-bold uppercase tracking-wider text-white/40">Current</span>
+                                  <span className="text-[10px] font-sans text-white/80">{specs.current}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[10px] font-label-caps font-bold uppercase tracking-wider text-white/40">Viz</span>
+                                  <span className="text-[10px] font-sans text-white/80">{specs.visibility}</span>
+                                </div>
+                              </div>
+                            )}
+
                             {faunaItems.length > 0 && (
                               <div className="flex flex-wrap gap-1">
                                 {faunaItems.map(item => (
@@ -281,7 +326,7 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
                             )}
                           </div>
                         </FadeIn>
-                      ))}
+                      )})}
                     </div>
                   </div>
                 </FadeIn>
@@ -294,7 +339,7 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
   )
 }
 
-// ── Calendar ────────────────────────────────────────────────────────────────
+// ── Fauna Pulse ─────────────────────────────────────────────────────────────
 function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
   const { t, language } = useLanguage()
   const existing = MONTHS.filter(m => t(`${prefix}.calendar.${m}`) !== `${prefix}.calendar.${m}`)
@@ -302,23 +347,66 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
 
   const monthNames = MONTHS.map(m => {
     const date = new Date(2024, MONTHS.indexOf(m), 1)
-    return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { month: 'long' })
+    return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { month: 'short' })
   })
+
+  // Parse each month's species list
+  const monthData = existing.map(m => {
+    const raw = t(`${prefix}.calendar.${m}`)
+    const species = raw.split(',').map(s => s.trim()).filter(Boolean)
+    return { key: m, label: monthNames[MONTHS.indexOf(m)], species, count: species.length }
+  })
+
+  const maxCount = Math.max(...monthData.map(d => d.count), 1)
 
   return (
     <PageSection className="bg-muted/20">
-      <div className="container mx-auto px-6 lg:px-12">
+      <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
         <FadeIn>
-          <h2 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-10">{t('dest.calendar')}</h2>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground tracking-tight leading-[0.95] text-center mb-4">
+            {t('dest.calendar')}
+          </h2>
+          <p className="font-sans text-sm md:text-base text-muted-foreground text-center mb-12 max-w-xl mx-auto">
+            {language === 'es' ? 'Probabilidad de avistamiento por temporada' : 'Seasonal sighting probability'}
+          </p>
         </FadeIn>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto">
-          {existing.map((m, i) => {
-            const fauna = t(`${prefix}.calendar.${m}`)
+
+        <div className="space-y-3">
+          {monthData.map((month, i) => {
+            const barPct = (month.count / maxCount) * 100
             return (
-              <FadeIn key={m} delay={40}>
-                <div className="p-6 rounded-2xl border bg-card/60 border-border/20 hover:border-accent/30 transition-all duration-500">
-                  <h4 className="font-serif text-xl md:text-2xl font-normal text-foreground mb-2">{monthNames[MONTHS.indexOf(m)]}</h4>
-                  <p className="font-sans text-sm text-muted-foreground leading-relaxed">{fauna}</p>
+              <FadeIn key={month.key} delay={i * 50}>
+                <div className="group flex items-center gap-3 md:gap-4">
+                  {/* Month label */}
+                  <span className="w-10 md:w-12 text-right font-label-caps text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground group-hover:text-foreground transition-colors">
+                    {month.label}
+                  </span>
+
+                  {/* Bar */}
+                  <div className="flex-1 h-8 md:h-9 relative rounded-full bg-muted/40 overflow-hidden">
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-accent/30 via-accent/50 to-accent transition-all duration-700 ease-out"
+                      style={{ width: `${barPct}%` }}
+                    />
+                    {/* Species pills overlaid on bar */}
+                    <div className="absolute inset-0 flex items-center px-3">
+                      <div className="flex gap-1.5 overflow-hidden">
+                        {month.species.slice(0, 4).map((s, si) => (
+                          <span key={si} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-sans font-medium bg-background/80 text-foreground/80 whitespace-nowrap">
+                            {s.replace(/\(peak\)/i, '').trim()}
+                          </span>
+                        ))}
+                        {month.species.length > 4 && (
+                          <span className="text-[10px] text-muted-foreground self-center">+{month.species.length - 4}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Count */}
+                  <span className="w-6 text-center font-label-caps text-[10px] font-bold text-muted-foreground group-hover:text-accent transition-colors">
+                    {month.count}
+                  </span>
                 </div>
               </FadeIn>
             )
