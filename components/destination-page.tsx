@@ -275,10 +275,10 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
                           <MapPin className={`w-4 h-4 ${c.accent}`} />
                         </div>
                         <div>
-                          <h3 className={`font-serif text-lg md:text-xl font-normal ${c.accent} mb-1`}>
+                          <h3 className={`font-serif text-lg md:text-xl font-semibold ${c.accent} mb-1`}>
                             {zoneNames[zone.zoneKey] ?? zone.zoneKey}
                           </h3>
-                          <p className="font-sans text-sm md:text-base text-white/70 leading-relaxed">{areaIntro}</p>
+                          <p className="font-sans text-sm md:text-base text-white/90 font-medium leading-relaxed">{areaIntro}</p>
                         </div>
                       </div>
                     )}
@@ -296,23 +296,23 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
                                 {zoneNames[zone.zoneKey] ?? zone.zoneKey}
                               </span>
                             )}
-                            <h4 className="font-serif text-base font-normal text-white mb-1">{name}</h4>
-                            <p className="font-sans text-xs text-white/70 leading-relaxed mb-1.5 line-clamp-2">{desc}</p>
+                            <h4 className="font-serif text-base font-semibold text-white mb-1">{name}</h4>
+                            <p className="font-sans text-xs text-white/85 font-medium leading-relaxed mb-1.5 line-clamp-2">{desc}</p>
 
                             {/* Dive specs strip */}
                             {specs && (
                               <div className="flex gap-3 mb-1.5 pb-1.5 border-b border-white/10">
                                 <div className="flex items-center gap-1">
                                   <span className="text-[10px] font-label-caps font-bold uppercase tracking-wider text-white/40">Depth</span>
-                                  <span className="text-[10px] font-sans text-white/80">{specs.depth}</span>
+                                  <span className="text-[10px] font-sans text-white font-semibold">{specs.depth}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <span className="text-[10px] font-label-caps font-bold uppercase tracking-wider text-white/40">Current</span>
-                                  <span className="text-[10px] font-sans text-white/80">{specs.current}</span>
+                                  <span className="text-[10px] font-sans text-white font-semibold">{specs.current}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <span className="text-[10px] font-label-caps font-bold uppercase tracking-wider text-white/40">Viz</span>
-                                  <span className="text-[10px] font-sans text-white/80">{specs.visibility}</span>
+                                  <span className="text-[10px] font-sans text-white font-semibold">{specs.visibility}</span>
                                 </div>
                               </div>
                             )}
