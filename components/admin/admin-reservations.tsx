@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { useLanguage } from '@/contexts/language-context'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -42,6 +43,14 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; border: string; l
   pending_approval: { bg: 'bg-yellow-500/10', text: 'text-yellow-600', border: 'border-yellow-500/30', label: 'pending' },
   confirmed: { bg: 'bg-emerald-500/10', text: 'text-emerald-600', border: 'border-emerald-500/30', label: 'confirmed' },
   cancelled: { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-border', label: 'cancelled' },
+}
+
+function getRouteImage(route: string): string {
+  const lower = route.toLowerCase()
+  if (lower.includes('socorro') || lower.includes('revillagigedo')) return '/images/panoramicas/Isla Socorro.webp'
+  if (lower.includes('cortez') || lower.includes('cortés')) return '/images/panoramicas/burritos galapagos 1.webp'
+  if (lower.includes('magdalena') || lower.includes('magbay')) return '/images/panoramicas/loreto-magdalena-bay.webp'
+  return '/images/panoramicas/Isla Socorro.webp'
 }
 
 export function AdminReservations() {
@@ -172,7 +181,19 @@ export function AdminReservations() {
                   {monthName} {year}
                 </div>
 
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex gap-5">
+                  {/* Destination thumbnail */}
+                  <div className="hidden sm:block relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
+                    <Image
+                      src={getRouteImage(res.route)}
+                      alt={res.route}
+                      fill
+                      className="object-cover"
+                      sizes="112px"
+                    />
+                  </div>
+
+                <div className="flex-1 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                   {/* Left: Date + Cruise Info */}
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                     {/* Big Departure Date */}
@@ -282,6 +303,7 @@ export function AdminReservations() {
                       )}
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             )
