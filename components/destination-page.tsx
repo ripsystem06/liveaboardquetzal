@@ -431,9 +431,9 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
 
   const getSeasonLabel = (months: string[]): string => {
     if (months.length === monthOrder.length) return language === 'es' ? 'Todo el año' : 'Year round'
-    const indices = months.map(m => monthOrder.indexOf(m)).sort((a, b) => a - b)
-    const first = monthNames[MONTHS.indexOf(months[indices[0]])]
-    const last = monthNames[MONTHS.indexOf(months[indices[indices.length - 1]])]
+    const indices = months.map(m => monthOrder.indexOf(m as typeof MONTHS[number])).sort((a, b) => a - b)
+    const first = monthNames[MONTHS.indexOf(months[indices[0]] as typeof MONTHS[number])]
+    const last = monthNames[MONTHS.indexOf(months[indices[indices.length - 1]] as typeof MONTHS[number])]
     return `${first}–${last}`
   }
 
@@ -656,7 +656,7 @@ function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
       number: '03',
       icon: Moon,
       label: t('dest.evening') !== 'dest.evening' ? t('dest.evening') : 'Evening',
-      content: phase3,
+      content: phase3 as string,
       color: 'indigo',
       align: 'left',
     })
