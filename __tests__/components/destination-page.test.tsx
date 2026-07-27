@@ -40,6 +40,7 @@ vi.mock('lucide-react', () => ({
   Sunrise: () => React.createElement('span', { 'data-testid': 'icon-sunrise' }),
   Sun: () => React.createElement('span', { 'data-testid': 'icon-sun' }),
   Moon: () => React.createElement('span', { 'data-testid': 'icon-moon' }),
+  MapPin: () => React.createElement('span', { 'data-testid': 'icon-map-pin' }),
 }))
 
 // ── Mock useLanguage ───────────────────────────────────────────────────────

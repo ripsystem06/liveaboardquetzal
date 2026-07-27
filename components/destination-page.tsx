@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, ArrowUp, Compass, Fish, Moon, Shell, Sparkles, Star, Sun, Sunrise, Waves } from 'lucide-react'
+import { ArrowRight, ArrowUp, Compass, Fish, MapPin, Moon, Shell, Sparkles, Star, Sun, Sunrise, Waves } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/language-context'
 
@@ -191,9 +191,21 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
   const zones = ZONES[prefix]
   const zoneNames = ZONE_DISPLAY[prefix] ?? {}
 
+  const zoneColors: Record<string, { accent: string; border: string; bg: string; badge: string; badgeBorder: string }> = {
+    sanBenedicto: { accent: 'text-emerald-300', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10', badge: 'bg-emerald-600', badgeBorder: 'border-emerald-500' },
+    rocaPartida:  { accent: 'text-cyan-300',    border: 'border-cyan-500/30',    bg: 'bg-cyan-500/10',    badge: 'bg-cyan-600',    badgeBorder: 'border-cyan-500' },
+    socorroIsland:{ accent: 'text-violet-300',  border: 'border-violet-500/30',  bg: 'bg-violet-500/10',  badge: 'bg-violet-600',  badgeBorder: 'border-violet-500' },
+    // Cortez zones
+    laPaz:        { accent: 'text-amber-300',   border: 'border-amber-500/30',   bg: 'bg-amber-500/10',   badge: 'bg-amber-600',   badgeBorder: 'border-amber-500' },
+    caboPulmo:    { accent: 'text-orange-300',  border: 'border-orange-500/30',  bg: 'bg-orange-500/10',  badge: 'bg-orange-600',  badgeBorder: 'border-orange-500' },
+    loreto:       { accent: 'text-rose-300',    border: 'border-rose-500/30',    bg: 'bg-rose-500/10',    badge: 'bg-rose-600',    badgeBorder: 'border-rose-500' },
+  }
+
+  const defaultColor = { accent: 'text-blue-300', border: 'border-blue-500/30', bg: 'bg-blue-500/10', badge: 'bg-blue-600', badgeBorder: 'border-blue-500' }
+
   return (
     <PageSection className="min-h-[60vh] md:min-h-[70vh]">
-      {/* Background image — same as hero */}
+      {/* Background image */}
       <Image src={heroImageMap[prefix]} alt="" fill className="object-cover" unoptimized sizes="100vw" />
       <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm" />
       <div className="relative z-10 container mx-auto px-6 lg:px-12">
@@ -201,10 +213,9 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
           <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[0.95] text-center mb-6 drop-shadow-lg">{title}</h2>
         </FadeIn>
 
-        {/* Zone groups with narrative intros */}
-        <div className="space-y-10 max-w-6xl mx-auto">
-          {zones.map(zone => {
-            // Zone intro narrative (Socorro only — reads {prefix}.areas.{zoneKey})
+        {/* Zone groups */}
+        <div className="space-y-16 md:space-y-24 max-w-5xl mx-auto">
+          {zones.map((zone, zi) => {
             const areaIntroKey = `${prefix}.areas.${zone.zoneKey}`
             const areaIntro = t(areaIntroKey)
             const hasAreaIntro = areaIntro !== areaIntroKey
@@ -220,36 +231,60 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
 
             if (sites.length === 0) return null
 
+            const c = zoneColors[zone.zoneKey] ?? defaultColor
+            const zoneNumber = String(zi + 1).padStart(2, '0')
+            const isRight = zi % 2 === 1
+
             return (
               <div key={zone.zoneKey}>
-                {/* Zone narrative intro */}
-                {hasAreaIntro && (
-                  <FadeIn delay={100}>
-                    <p className="font-sans text-sm md:text-base text-white/70 leading-relaxed mb-5 max-w-3xl text-center mx-auto italic">{areaIntro}</p>
-                  </FadeIn>
-                )}
+                <FadeIn delay={zi * 150}>
+                  <div className={`relative ${isRight ? 'ml-auto' : 'mr-auto'}`} style={{ maxWidth: hasAreaIntro ? '100%' : '42rem' }}>
+                    {/* Zone number — large graphic element */}
+                    <span className={`absolute -top-6 -left-2 font-serif text-7xl md:text-8xl font-bold ${c.accent} opacity-20 select-none pointer-events-none`}>
+                      {zoneNumber}
+                    </span>
 
-                {/* Site cards grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                  {sites.map(({ siteKey, name, desc, faunaItems }, i) => (
-                    <FadeIn key={`${zone.zoneKey}-${siteKey}`} delay={i * 60}>
-                      <div className="group/card relative bg-white/10 backdrop-blur-md rounded-xl border border-white/10 p-4 transition-all duration-500 hover:shadow-lg hover:bg-white/15 hover:-translate-y-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-blue-600 text-white border border-blue-500 mb-1.5">
-                          {zoneNames[zone.zoneKey] ?? zone.zoneKey}
-                        </span>
-                        <h4 className="font-serif text-base font-normal text-white mb-1">{name}</h4>
-                        <p className="font-sans text-xs text-white/70 leading-relaxed mb-1.5 line-clamp-2">{desc}</p>
-                        {faunaItems.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {faunaItems.map(item => (
-                              <span key={item} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-sans font-medium bg-blue-600/30 text-blue-100 border border-blue-500/30">{item.trim()}</span>
-                            ))}
-                          </div>
-                        )}
+                    {/* Zone intro with icon */}
+                    {hasAreaIntro && (
+                      <div className={`relative flex items-start gap-3 mb-8 p-4 md:p-5 rounded-xl ${c.bg} border ${c.border}`}>
+                        <div className={`flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl ${c.bg} border ${c.border}`}>
+                          <MapPin className={`w-4 h-4 ${c.accent}`} />
+                        </div>
+                        <div>
+                          <h3 className={`font-serif text-lg md:text-xl font-normal ${c.accent} mb-1`}>
+                            {zoneNames[zone.zoneKey] ?? zone.zoneKey}
+                          </h3>
+                          <p className="font-sans text-sm md:text-base text-white/70 leading-relaxed">{areaIntro}</p>
+                        </div>
                       </div>
-                    </FadeIn>
-                  ))}
-                </div>
+                    )}
+
+                    {/* Site cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {sites.map(({ siteKey, name, desc, faunaItems }, i) => (
+                        <FadeIn key={`${zone.zoneKey}-${siteKey}`} delay={i * 60}>
+                          <div className={`group/card relative bg-white/10 backdrop-blur-md rounded-xl border ${c.border} p-4 transition-all duration-500 hover:shadow-lg hover:bg-white/15 hover:-translate-y-1`}>
+                            {/* Zone badge */}
+                            {!hasAreaIntro && (
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider ${c.badge} text-white border ${c.badgeBorder} mb-1.5`}>
+                                {zoneNames[zone.zoneKey] ?? zone.zoneKey}
+                              </span>
+                            )}
+                            <h4 className="font-serif text-base font-normal text-white mb-1">{name}</h4>
+                            <p className="font-sans text-xs text-white/70 leading-relaxed mb-1.5 line-clamp-2">{desc}</p>
+                            {faunaItems.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {faunaItems.map(item => (
+                                  <span key={item} className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-sans font-medium ${c.bg} ${c.accent} border ${c.border}`}>{item.trim()}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </FadeIn>
+                      ))}
+                    </div>
+                  </div>
+                </FadeIn>
               </div>
             )
           })}
