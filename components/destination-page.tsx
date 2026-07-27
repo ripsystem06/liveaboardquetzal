@@ -676,7 +676,7 @@ function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
   }
 
   return (
-    <PageSection className="bg-gradient-to-b from-background via-background via-60% to-primary/90">
+    <PageSection className="bg-background">
       <div className="container mx-auto px-6 lg:px-12 max-w-5xl">
         {/* Heading */}
         <FadeIn>
