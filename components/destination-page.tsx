@@ -347,17 +347,69 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
 
   const monthNames = MONTHS.map(m => {
     const date = new Date(2024, MONTHS.indexOf(m), 1)
-    return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { month: 'long' })
+    return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { month: 'short' })
   })
 
-  // Parse each month's species
-  const monthData = existing.map(m => {
+  // Build species → months map by parsing all calendar keys
+  const speciesMonths = new Map<string, string[]>()
+  existing.forEach(m => {
     const raw = t(`${prefix}.calendar.${m}`)
-    const species = raw.split(',').map(s => s.trim()).filter(Boolean)
-    return { key: m, label: monthNames[MONTHS.indexOf(m)], species, count: species.length }
+    raw.split(',').forEach(s => {
+      const name = s.replace(/\(peak\)/i, '').trim()
+      if (!name) return
+      if (!speciesMonths.has(name)) speciesMonths.set(name, [])
+      speciesMonths.get(name)!.push(m)
+    })
   })
 
-  const maxCount = Math.max(...monthData.map(d => d.count), 1)
+  // Build ordered list of month keys for this destination
+  const monthOrder = existing
+
+  // Sort species by number of active months (most present first)
+  const species = Array.from(speciesMonths.entries())
+    .sort((a, b) => b[1].length - a[1].length)
+
+  // Icons/emojis for common species
+  const speciesIcons: Record<string, string> = {
+    'humpback whales': '🐋',
+    'giant mantas': '🦈',
+    'hammerhead sharks': '🔨',
+    'bottlenose dolphins': '🐬',
+    'dolphins': '🐬',
+    'whale sharks': '🦈',
+    'false orcas': '🐋',
+    'giant bait balls': '🐟',
+    'silky sharks': '🦈',
+    'galapagos sharks': '🦈',
+    'tiger sharks': '🐅',
+    'mobula rays': '🦅',
+    'sea lions': '🦭',
+    'gray whales': '🐋',
+    'blue whales': '🐋',
+    'sperm whales': '🐋',
+    'orca': '🐋',
+    'marlin': '🐟',
+    'tuna': '🐟',
+    'wahoo': '🐟',
+    'dorado': '🐟',
+    'sardine run': '🐟',
+  }
+
+  const getIcon = (name: string): string => {
+    const lower = name.toLowerCase()
+    for (const [key, icon] of Object.entries(speciesIcons)) {
+      if (lower.includes(key)) return icon
+    }
+    return '●'
+  }
+
+  const getSeasonLabel = (months: string[]): string => {
+    if (months.length === monthOrder.length) return language === 'es' ? 'Todo el año' : 'Year round'
+    const indices = months.map(m => monthOrder.indexOf(m)).sort((a, b) => a - b)
+    const first = monthNames[MONTHS.indexOf(months[indices[0]])]
+    const last = monthNames[MONTHS.indexOf(months[indices[indices.length - 1]])]
+    return `${first}–${last}`
+  }
 
   return (
     <PageSection className="bg-muted/20">
@@ -371,50 +423,67 @@ function CalendarSection({ prefix }: { prefix: DestinationPrefix }) {
           </p>
         </FadeIn>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-w-6xl mx-auto">
-          {monthData.map((month, i) => {
-            const intensityPct = (month.count / maxCount) * 100
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 max-w-6xl mx-auto">
+          {species.map(([name, months], i) => {
+            const isYearRound = months.length === monthOrder.length
+            const icon = getIcon(name)
+
             return (
-              <FadeIn key={month.key} delay={i * 40}>
+              <FadeIn key={name} delay={i * 60}>
                 <div className="group relative bg-card/60 backdrop-blur-sm rounded-2xl border border-border/20 p-5 transition-all duration-500 hover:shadow-lg hover:border-accent/20 hover:-translate-y-1">
-                  {/* Intensity bar — subtle top accent */}
-                  <div className="absolute top-0 left-3 right-3 h-1 rounded-full bg-muted/50 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-accent/40 to-accent transition-all duration-700"
-                      style={{ width: `${intensityPct}%` }}
-                    />
+                  {/* Icon + Name */}
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <span className="text-xl">{icon}</span>
+                    <h4 className="font-serif text-base md:text-lg font-normal text-foreground capitalize leading-tight">
+                      {name}
+                    </h4>
                   </div>
 
-                  {/* Month name */}
-                  <h4 className="font-serif text-lg md:text-xl font-normal text-foreground mt-2 mb-3">
-                    {month.label}
-                  </h4>
+                  {/* Month timeline strip */}
+                  <div className="flex gap-1 mb-2">
+                    {monthOrder.map(m => {
+                      const isActive = months.includes(m)
+                      const isPeak = t(`${prefix}.calendar.${m}`).toLowerCase().includes(`${name} (peak)`)
+                      return (
+                        <div
+                          key={m}
+                          title={monthNames[MONTHS.indexOf(m)]}
+                          className={`flex-1 h-2 rounded-sm transition-all duration-300 ${
+                            isPeak
+                              ? 'bg-accent shadow-[0_0_4px_rgba(var(--accent),0.5)]'
+                              : isActive
+                                ? 'bg-accent/40 group-hover:bg-accent/60'
+                                : 'bg-muted/20'
+                          }`}
+                        />
+                      )
+                    })}
+                  </div>
 
-                  {/* Species tags */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {month.species.map((s, si) => (
+                  {/* Month labels (compact) */}
+                  <div className="flex gap-1 mb-3">
+                    {monthOrder.map(m => (
                       <span
-                        key={si}
-                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-sans font-medium bg-accent/5 text-muted-foreground border border-accent/10 group-hover:bg-accent/10 group-hover:text-foreground group-hover:border-accent/20 transition-colors"
+                        key={m}
+                        className={`flex-1 text-center text-[8px] md:text-[9px] font-sans font-medium uppercase ${
+                          months.includes(m) ? 'text-foreground/60' : 'text-muted-foreground/30'
+                        }`}
                       >
-                        {s.replace(/\(peak\)/i, '').trim()}
+                        {monthNames[MONTHS.indexOf(m)].charAt(0)}
                       </span>
                     ))}
                   </div>
 
-                  {/* Species count */}
-                  <div className="mt-3 flex items-center gap-1.5">
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: maxCount }).map((_, di) => (
-                        <div
-                          key={di}
-                          className={`w-1.5 h-1.5 rounded-full transition-colors ${di < month.count ? 'bg-accent/60' : 'bg-muted/30'}`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-[10px] font-sans text-muted-foreground">
-                      {month.count} {language === 'es' ? 'especies' : 'species'}
+                  {/* Season label */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] md:text-[11px] font-sans text-muted-foreground">
+                      {getSeasonLabel(months)}
                     </span>
+                    {isYearRound && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold bg-accent/10 text-accent border border-accent/20">
+                        {language === 'es' ? 'Todo el año' : 'Year round'}
+                      </span>
+                    )}
                   </div>
                 </div>
               </FadeIn>

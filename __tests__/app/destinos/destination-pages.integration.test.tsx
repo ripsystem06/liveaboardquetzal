@@ -336,11 +336,10 @@ describe('Destination Pages Integration', () => {
       expect(rocaPartidaElements.length).toBeGreaterThanOrEqual(1)
       expect(screen.getByText('Cabo Pearce')).toBeInTheDocument()
 
-      // Calendar section
+      // Calendar section — species-based cards
       expect(screen.getByText('Seasonal Wildlife Calendar')).toBeInTheDocument()
-      // Calendar months: jan, feb, mar, apr, may, jun, jul, nov, dec (9 months)
-      const janElements = screen.getAllByText('January')
-      expect(janElements.length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Humpback whales').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Giant mantas').length).toBeGreaterThan(0)
 
       // Gallery intro section
       expect(screen.getByText('This is what awaits you')).toBeInTheDocument()
