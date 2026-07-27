@@ -107,14 +107,28 @@ function DescriptionSection({ prefix }: { prefix: DestinationPrefix }) {
   if (desc1 === `${prefix}.description1`) return null
   const desc2 = t(`${prefix}.description2`)
   return (
-    <PageSection className="bg-background">
-      <div className="container mx-auto px-6 lg:px-12 max-w-4xl text-center">
-        <FadeIn>
-          <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground/80 leading-relaxed text-justify">{desc1}</p>
-          {desc2 !== `${prefix}.description2` && (
-            <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground/80 leading-relaxed text-justify mt-8">{desc2}</p>
-          )}
-        </FadeIn>
+    <PageSection className="relative overflow-hidden">
+      {/* Background image */}
+      <Image
+        src={heroImageMap[prefix]}
+        alt=""
+        fill
+        className="object-cover"
+        unoptimized
+        sizes="100vw"
+      />
+      {/* Gradient: transparent at right, fades to dark at left */}
+      <div className="absolute inset-0 bg-gradient-to-l from-transparent via-background/30 to-background/90" />
+
+      <div className="relative z-10 container mx-auto px-6 lg:px-12">
+        <div className="max-w-2xl">
+          <FadeIn>
+            <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground leading-relaxed drop-shadow-sm">{desc1}</p>
+            {desc2 !== `${prefix}.description2` && (
+              <p className="font-serif text-lg md:text-2xl lg:text-4xl text-foreground leading-relaxed drop-shadow-sm mt-8">{desc2}</p>
+            )}
+          </FadeIn>
+        </div>
       </div>
     </PageSection>
   )
