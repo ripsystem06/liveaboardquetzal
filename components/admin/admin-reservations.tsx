@@ -183,13 +183,13 @@ export function AdminReservations() {
 
                 <div className="flex gap-5">
                   {/* Destination thumbnail */}
-                  <div className="hidden sm:block relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
+                  <div className="hidden sm:block relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden flex-shrink-0 shadow-sm bg-muted">
                     <Image
                       src={getRouteImage(res.route)}
                       alt={res.route}
                       fill
                       className="object-cover"
-                      sizes="112px"
+                      unoptimized
                     />
                   </div>
 
