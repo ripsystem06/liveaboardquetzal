@@ -40,26 +40,26 @@ Chain strategy: pending
 
 ## Phase 2: Component Changes
 
-- [ ] 2.1 Create `DayAtSeaSection({ prefix })` — reads `{prefix}.dayAtSea.*`, conditional null if heading missing, positioned between Highlights and Dive Sites
-- [ ] 2.2 Wire MagBay asymmetry: when `prefix === 'magbay'`, read `magbay.dayInLagoon.*` instead of `dayAtSea.*`
-- [ ] 2.3 Create `WaterTempSection({ prefix })` — reads `{prefix}.waterTemp.title`, renders 7 months (Socorro), returns null when key absent (Cortez/MagBay)
-- [ ] 2.4 Enhance `DiveSitesSection`: render `t('{prefix}.areas.{zoneKey}')` narrative intro paragraph above each zone's site cards (Socorro only; Cortez/MagBay skip when key missing)
-- [ ] 2.5 Update `CTASection`: heading from `t('{prefix}.cta')`, button from `t('{prefix}.ctaButton')`, social proof from `t('{prefix}.socialProof')` below heading. Fallback to shared keys when absent
+- [x] 2.1 Create `DayAtSeaSection({ prefix })` — reads `{prefix}.dayAtSea.*`, conditional null if heading missing, positioned between Highlights and Dive Sites
+- [x] 2.2 Wire MagBay asymmetry: when `prefix === 'magbay'`, read `magbay.dayInLagoon.*` instead of `dayAtSea.*`
+- [x] 2.3 Create `WaterTempSection({ prefix })` — reads `{prefix}.waterTemp.title`, renders 7 months (Socorro), returns null when key absent (Cortez/MagBay)
+- [x] 2.4 Enhance `DiveSitesSection`: render `t('{prefix}.areas.{zoneKey}')` narrative intro paragraph above each zone's site cards (Socorro only; Cortez/MagBay skip when key missing)
+- [x] 2.5 Update `CTASection`: heading from `t('{prefix}.cta')`, button from `t('{prefix}.ctaButton')`, social proof from `t('{prefix}.socialProof')` below heading. Fallback to shared keys when absent
 
 ## Phase 3: Test Updates
 
-- [ ] 3.1 Add Day at Sea keys to mock Socorro/Cortez translations in destination-page.test.tsx and integration test
-- [ ] 3.2 Add test: renders DayAtSeaSection with heading + morning/afternoon/evening narrative between Highlights and DiveSitesSection
-- [ ] 3.3 Add test: Socorro renders WaterTempSection with 7 months (21–29°C) between Dive Sites and Calendar
-- [ ] 3.4 Add test: Cortez WaterTempSection returns null (no gap)
-- [ ] 3.5 Add test: MagBay reads `dayInLagoon.*` not `dayAtSea.*`, hides DiveSitesSection
-- [ ] 3.6 Add per-destination CTA keys to mock translations; update CTA assertions to expect `{prefix}.cta` text
-- [ ] 3.7 Update integration test CTA assertions for new per-destination keys; verify shared `dest.bookNow`/`destination.cta` still resolve
+- [x] 3.1 Add Day at Sea keys to mock Socorro/Cortez translations in destination-page.test.tsx and integration test
+- [x] 3.2 Add test: renders DayAtSeaSection with heading + morning/afternoon/evening narrative between Highlights and DiveSitesSection
+- [x] 3.3 Add test: Socorro renders WaterTempSection with 7 months (21–29°C) between Dive Sites and Calendar
+- [x] 3.4 Add test: Cortez WaterTempSection returns null (no gap)
+- [x] 3.5 Add test: MagBay reads `dayInLagoon.*` not `dayAtSea.*`, hides DiveSitesSection
+- [x] 3.6 Add per-destination CTA keys to mock translations; update CTA assertions to expect `{prefix}.cta` text
+- [x] 3.7 Update integration test CTA assertions for new per-destination keys; verify shared `dest.bookNow`/`destination.cta` still resolve
 
 ## Phase 4: Verification
 
-- [ ] 4.1 Run `npx tsc --noEmit` — zero type errors
-- [ ] 4.2 Run `npx eslint .` — zero new warnings
-- [ ] 4.3 Run all tests: `npx vitest run` — zero failures
+- [x] 4.1 Run `npx tsc --noEmit` — zero type errors (no new errors in changed files)
+- [x] 4.2 Run `npx eslint .` — zero new warnings
+- [x] 4.3 Run all tests: `npx vitest run` — zero failures (477/477)
 - [ ] 4.4 Visual review: `npm run dev`, visit all 3 /destinos/* pages in EN, verify zero third-person patterns, 10-section order, Day at Sea renders, water temp (Socorro only)
 - [ ] 4.5 Visual review: switch to ES, verify Rioplatense voseo in all sections, zero tuteo patterns, no raw keys
