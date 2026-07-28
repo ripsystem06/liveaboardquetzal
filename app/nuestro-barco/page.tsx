@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Ship, Bed, UtensilsCrossed, ThermometerSun, Ruler } from 'lucide-react'
+import { ArrowRight, Ship, Bed, UtensilsCrossed, ThermometerSun, Ruler, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
@@ -10,15 +10,15 @@ import { useLanguage } from '@/contexts/language-context'
 
 const galleryImages = [
   // Habitaciones
-  { src: '/images/Habitaciones/cabin-01.webp', alt: 'Stateroom with panoramic ocean view', category: 'staterooms' },
-  { src: '/images/Habitaciones/cabin-02.webp', alt: 'Luxury cabin interior', category: 'staterooms' },
-  { src: '/images/Habitaciones/cabin-03.webp', alt: 'Double bed cabin with natural light', category: 'staterooms' },
-  { src: '/images/Habitaciones/cabin-04.webp', alt: 'Cozy cabin with premium bedding', category: 'staterooms' },
+  { src: '/images/Habitaciones/cabin-01.webp', category: 'staterooms' as const },
+  { src: '/images/Habitaciones/cabin-02.webp', category: 'staterooms' as const },
+  { src: '/images/Habitaciones/cabin-03.webp', category: 'staterooms' as const },
+  { src: '/images/Habitaciones/cabin-04.webp', category: 'staterooms' as const },
   // Interior
-  { src: '/images/Interior/interior-01.webp', alt: 'Elegant dining salon', category: 'interior' },
-  { src: '/images/Interior/interior-02.webp', alt: 'Spacious lounge area', category: 'interior' },
-  { src: '/images/Interior/interior-03.webp', alt: 'Common area with panoramic windows', category: 'interior' },
-  { src: '/images/Interior/interior-04.webp', alt: 'Cozy social lounge onboard', category: 'interior' },
+  { src: '/images/Interior/interior-01.webp', category: 'interior' as const },
+  { src: '/images/Interior/interior-02.webp', category: 'interior' as const },
+  { src: '/images/Interior/interior-03.webp', category: 'interior' as const },
+  { src: '/images/Interior/interior-04.webp', category: 'interior' as const },
 ]
 
 const specs = [
@@ -48,7 +48,7 @@ export default function OurBoatPage() {
       <section className="relative h-[60vh] min-h-[400px] w-full overflow-hidden">
         <Image
           src="/images/Exterior/quetzal-navegando-1.webp"
-          alt="Quetzal Liveaboard"
+          alt={t('boat.heroImageAlt')}
           fill
           className="object-cover"
           priority
@@ -66,14 +66,37 @@ export default function OurBoatPage() {
         </div>
       </section>
 
+      {/* Your Floating Home */}
+      <section className="py-16 md:py-24 bg-muted/20">
+        <div className="container mx-auto px-4 lg:px-8 max-w-3xl mx-auto">
+          <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground text-center mb-8">
+            {t('boat.story')}
+          </h2>
+          <div className="space-y-6">
+            <p className="font-serif text-lg md:text-xl text-muted-foreground leading-relaxed">
+              {t('boat.storyText1')}
+            </p>
+            <p className="font-serif text-lg md:text-xl text-muted-foreground leading-relaxed">
+              {t('boat.storyText2')}
+            </p>
+            <p className="font-serif text-lg md:text-xl text-muted-foreground leading-relaxed">
+              {t('boat.storyText3')}
+            </p>
+            <p className="font-serif text-lg md:text-xl text-muted-foreground leading-relaxed">
+              {t('boat.storyText4')}
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Deck Plans */}
       <section className="py-20 bg-background">
         <div className="text-center mb-12 px-4">
           <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground mb-4">
-            Deck Plans
+            {t('boat.deck.title')}
           </h2>
           <p className="font-sans text-lg text-muted-foreground max-w-2xl mx-auto">
-            Explore the layout of our 120-foot vessel, designed for comfort and functionality at sea.
+            {t('boat.deck.subtitle')}
           </p>
         </div>
         <div className="px-[5vw]">
@@ -164,7 +187,7 @@ export default function OurBoatPage() {
               >
                 <Image
                   src={image.src}
-                  alt={image.alt}
+                  alt={image.category === 'staterooms' ? t('boat.gallery.altStateroom') : t('boat.gallery.altInterior')}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -182,10 +205,16 @@ export default function OurBoatPage() {
       {/* CTA */}
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-normal mb-4">{t('dest.bookNow')}</h2>
+          <h2 className="font-serif text-3xl md:text-4xl font-normal mb-4">{t('boat.cta')}</h2>
+          <div className="flex items-center justify-center gap-1 mb-6">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            ))}
+          </div>
+          <p className="font-sans text-lg text-primary-foreground/80 mb-6">{t('boat.socialProof')}</p>
           <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-sans font-semibold mt-4">
             <Link href="/contacto">
-              {t('destination.cta')}
+              {t('boat.ctaButton')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>

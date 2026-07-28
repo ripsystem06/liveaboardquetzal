@@ -57,10 +57,12 @@ const translations = {
     'destination.cta': 'Ask Our Travel Expert',
     
     // Boat Gallery
-    'boat.gallery.title': 'Our Boat',
-    'boat.gallery.subtitle': 'Step aboard the Quetzal — a classic vessel designed for comfort, adventure, and unforgettable moments at sea.',
+    'boat.gallery.title': 'Your Space on the Quetzal',
+    'boat.gallery.subtitle': 'Every corner is designed with you in mind — explore the staterooms, interiors, and decks that will become your home.',
     'boat.gallery.staterooms': 'Staterooms',
     'boat.gallery.interior': 'Interior',
+    'boat.gallery.altStateroom': 'Comfortable stateroom aboard the Quetzal',
+    'boat.gallery.altInterior': 'Shared interior space aboard the Quetzal',
     
     // Marine Life Section
     'marine.title': 'This Is What You will See With Us',
@@ -130,8 +132,9 @@ const translations = {
     'footer.divingRisks': 'Diving Risks',
 
     // Our Boat Page
-    'boat.hero': 'Meet the Quetzal',
-    'boat.subtitle': 'A classic luxury vessel designed for exploration, comfort, and unforgettable moments on the open sea.',
+    'boat.hero': 'Step Aboard Your Adventure',
+    'boat.subtitle': 'Your 120-foot floating home awaits — designed for you, the ocean, and the stories you will bring back.',
+    'boat.heroImageAlt': 'Quetzal sailing through the Pacific at sunrise',
     'boat.specs.title': 'Vessel Specifications',
     'boat.specs.length': 'Length',
     'boat.specs.lengthVal': '120 ft (36.5 m)',
@@ -145,16 +148,33 @@ const translations = {
     'boat.specs.speedVal': '10 knots',
     'boat.specs.compressor': 'Compressors',
     'boat.specs.compressorVal': '2x Bauer',
-    'boat.comfort.title': 'Comfort Onboard',
-    'boat.comfort.subtitle': 'Every detail is designed so you can focus on what matters — the adventure.',
+
+    // Your Floating Home
+    'boat.story': 'Your Floating Home',
+    'boat.storyText1': 'From the moment you step aboard, the Quetzal is yours. The crew greets you not as a passenger, but as someone who belongs here — part of a small community of explorers who share your curiosity about the ocean.',
+    'boat.storyText2': 'Your cabin becomes your sanctuary. Air conditioning cools the tropical air, your private bathroom waits after a long dive, and the gentle rhythm of the sea rocks you to sleep. In the morning, sunlight spills through your window and the smell of fresh coffee drifts from the galley.',
+    'boat.storyText3': 'Your days follow your rhythm — not a schedule. Coffee on the sun deck while the Pacific stretches endlessly around you. A dive when you are ready, not when you are told. Lunch with new friends who share your passion for the underwater world.',
+    'boat.storyText4': 'This is not just a boat. It is your home at sea — and every detail, from the dive platform to the dinner table, exists so you can live the adventure, not just observe it.',
+
+    // Deck Plans
+    'boat.deck.title': 'Explore Your Space',
+    'boat.deck.subtitle': 'From your cabin to the sun deck, every corner of the Quetzal is built for your comfort and your curiosity.',
+
+    'boat.comfort.title': 'Life Onboard',
+    'boat.comfort.subtitle': 'Everything you need to focus on what matters — your dives, your rest, and your connection with the sea.',
     'boat.comfort.dining': 'Gourmet Dining',
-    'boat.comfort.diningDesc': 'Freshly prepared meals with local seafood and international cuisine, paired with fine wines and cold beverages.',
+    'boat.comfort.diningDesc': 'Your meals are prepared fresh daily with local seafood and international cuisine, paired with fine wines and cold beverages.',
     'boat.comfort.sunDeck': 'Sun Deck & Lounge',
-    'boat.comfort.sunDeckDesc': 'A spacious top deck with lounge chairs and shade areas, perfect for sunset cocktails between dives.',
+    'boat.comfort.sunDeckDesc': 'Your top deck retreat: lounge chairs, shade areas, and the perfect spot for sunset cocktails between dives.',
     'boat.comfort.cabin': 'Private Cabins',
-    'boat.comfort.cabinDesc': 'Comfortable cabins with air conditioning, private bathrooms, and ample storage for your gear.',
+    'boat.comfort.cabinDesc': 'Your cabin features air conditioning, private bathroom, and ample storage for your dive gear.',
     'boat.comfort.dive': 'Dive Platform',
-    'boat.comfort.diveDesc': 'A purpose-built dive deck with individual gear stations, camera rinse tanks, and warm showers.',
+    'boat.comfort.diveDesc': 'Your purpose-built dive deck with individual gear stations, camera rinse tanks, and warm showers.',
+
+    // CTA
+    'boat.cta': 'Ready to Come Aboard?',
+    'boat.ctaButton': 'Start Planning Your Trip',
+    'boat.socialProof': '500+ divers have called the Quetzal home',
 
     // Destination Pages
     'dest.hero': 'Explore Our',
@@ -751,10 +771,12 @@ const translations = {
     'destination.cta': 'Consulta con Nuestro Experto',
 
     // Boat Gallery
-    'boat.gallery.title': 'Nuestro Bote',
-    'boat.gallery.subtitle': 'Sube a bordo del Quetzal — una embarcación clásica diseñada para la comodidad, la aventura y momentos inolvidables en el mar.',
+    'boat.gallery.title': 'Tu Espacio en el Quetzal',
+    'boat.gallery.subtitle': 'Cada rincón está pensado para vos — explorá las habitaciones, los interiores y las cubiertas que van a ser tu hogar.',
     'boat.gallery.staterooms': 'Habitaciones',
     'boat.gallery.interior': 'Interior',
+    'boat.gallery.altStateroom': 'Cabina cómoda a bordo del Quetzal',
+    'boat.gallery.altInterior': 'Espacio interior compartido a bordo del Quetzal',
 
     // Marine Life Section
     'marine.title': 'Esto Es Lo Que Verás Con Nosotros',
@@ -824,8 +846,9 @@ const translations = {
     'footer.divingRisks': 'Riesgos de Buceo',
 
     // Our Boat Page
-    'boat.hero': 'Conoce el Quetzal',
-    'boat.subtitle': 'Una embarcación clásica de lujo diseñada para la exploración, la comodidad y los momentos inolvidables en alta mar.',
+    'boat.hero': 'Subí a Tu Aventura',
+    'boat.subtitle': 'Tu hogar flotante de 120 pies te espera — diseñado para vos, el océano, y las historias que vas a traer de vuelta.',
+    'boat.heroImageAlt': 'Quetzal navegando en el Pacífico al amanecer',
     'boat.specs.title': 'Especificaciones del Barco',
     'boat.specs.length': 'Eslora',
     'boat.specs.lengthVal': '120 ft (36.5 m)',
@@ -839,16 +862,33 @@ const translations = {
     'boat.specs.speedVal': '10 nudos',
     'boat.specs.compressor': 'Compresores',
     'boat.specs.compressorVal': '2x Bauer',
-    'boat.comfort.title': 'Comodidad a Bordo',
-    'boat.comfort.subtitle': 'Cada detalle está diseñado para que te enfoques en lo importante — la aventura.',
+
+    // Tu Hogar Flotante
+    'boat.story': 'Tu Hogar Flotante',
+    'boat.storyText1': 'Desde el momento en que subís a bordo, el Quetzal es tuyo. La tripulación te recibe no como un pasajero, sino como alguien que pertenece acá — parte de una pequeña comunidad de exploradores que comparten tu curiosidad por el océano.',
+    'boat.storyText2': 'Tu cabina se convierte en tu santuario. El aire acondicionado enfría el aire tropical, tu baño privado te espera después de una larga inmersión, y el suave balanceo del mar te arrulla hasta dormirte. A la mañana, la luz del sol entra por tu ventana y el aroma del café recién hecho llega desde la cocina.',
+    'boat.storyText3': 'Tus días siguen tu ritmo — no un horario. Café en la cubierta superior mientras el Pacífico se extiende infinito a tu alrededor. Una inmersión cuando vos estás listo, no cuando te lo indican. Almuerzo con nuevos amigos que comparten tu pasión por el mundo submarino.',
+    'boat.storyText4': 'Esto no es solo un barco. Es tu hogar en el mar — y cada detalle, desde la plataforma de buceo hasta la mesa de cena, existe para que vos vivas la aventura, no solo la observes.',
+
+    // Planos de Cubierta
+    'boat.deck.title': 'Explorá Tu Espacio',
+    'boat.deck.subtitle': 'Desde tu cabina hasta la cubierta superior, cada rincón del Quetzal está construido para tu comodidad y tu curiosidad.',
+
+    'boat.comfort.title': 'Vida a Bordo',
+    'boat.comfort.subtitle': 'Todo lo que necesitás para concentrarte en lo que importa — tus inmersiones, tu descanso, y tu conexión con el mar.',
     'boat.comfort.dining': 'Cena Gourmet',
-    'boat.comfort.diningDesc': 'Comidas recién preparadas con mariscos locales y cocina internacional, acompañadas de vinos finos y bebidas frías.',
+    'boat.comfort.diningDesc': 'Tus comidas se preparan frescas cada día con mariscos locales y cocina internacional, acompañadas de vinos finos y bebidas frías.',
     'boat.comfort.sunDeck': 'Solárium y Terraza',
-    'boat.comfort.sunDeckDesc': 'Una cubierta superior espaciosa con tumbonas y zonas con sombra, perfecta para cócteles al atardecer entre inmersiones.',
+    'boat.comfort.sunDeckDesc': 'Tu refugio en la cubierta superior: tumbonas, zonas con sombra, y el lugar perfecto para cócteles al atardecer entre inmersiones.',
     'boat.comfort.cabin': 'Cabinas Privadas',
-    'boat.comfort.cabinDesc': 'Cabinas cómodas con aire acondicionado, baños privados y amplio espacio de almacenamiento para tu equipo.',
+    'boat.comfort.cabinDesc': 'Tu cabina tiene aire acondicionado, baño privado y amplio espacio para guardar tu equipo de buceo.',
     'boat.comfort.dive': 'Plataforma de Buceo',
-    'boat.comfort.diveDesc': 'Un área de buceo diseñada con estaciones individuales de equipo, tanques de enjuague para cámaras y duchas de agua caliente.',
+    'boat.comfort.diveDesc': 'Tu cubierta de buceo diseñada con estaciones individuales de equipo, tanques de enjuague para cámaras y duchas de agua caliente.',
+
+    // CTA
+    'boat.cta': '¿Listo para Subir a Bordo?',
+    'boat.ctaButton': 'Empezá a Planificar Tu Viaje',
+    'boat.socialProof': '+500 buzos han llamado hogar al Quetzal',
 
     // Destination Pages
     'dest.hero': 'Explora Nuestros',
