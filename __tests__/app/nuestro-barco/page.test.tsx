@@ -90,17 +90,17 @@ const fullBoatTranslations: Record<string, string> = {
   // Specs (unchanged)
   'boat.specs.title': 'Vessel Specifications',
   'boat.specs.length': 'Length',
-  'boat.specs.lengthVal': '120 ft (36.5 m)',
+  'boat.specs.lengthVal': '81.2 ft (24.76 m)',
   'boat.specs.beam': 'Beam',
-  'boat.specs.beamVal': '24 ft (7.3 m)',
+  'boat.specs.beamVal': '24.2 ft (7.38 m)',
   'boat.specs.guests': 'Guests',
-  'boat.specs.guestsVal': 'Up to 20',
+  'boat.specs.guestsVal': 'Up to 18',
   'boat.specs.cabins': 'Cabins',
-  'boat.specs.cabinsVal': '10 Private',
+  'boat.specs.cabinsVal': '6 Private',
   'boat.specs.speed': 'Cruising Speed',
   'boat.specs.speedVal': '10 knots',
   'boat.specs.compressor': 'Compressors',
-  'boat.specs.compressorVal': '2x Bauer',
+  'boat.specs.compressorVal': '2 O₂ + 1 Nitrox',
 
   // Comfort / Life Onboard
   'boat.comfort.title': 'Life Onboard',
