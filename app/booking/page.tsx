@@ -9,7 +9,14 @@ export const metadata: Metadata = {
   description: 'Reserve your liveaboard expedition to the Sea of Cortez, Socorro Islands, and Baja California. Choose from 3 curated itineraries.',
 }
 
-export default function BookingPage() {
+export default async function BookingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams
+  const oauthStep = typeof params.step === 'string' ? parseInt(params.step, 10) : undefined
+
   return (
     <main className="min-h-screen">
       <Navigation />
@@ -33,7 +40,7 @@ export default function BookingPage() {
       </section>
 
       {/* Booking Flow (Login first, then cruise selection) */}
-      <BookingPageClient />
+      <BookingPageClient oauthStep={oauthStep} />
 
       {/* Reservation Info — always visible, below the booking flow */}
       <section className="py-12 bg-[#f3f1ec]">

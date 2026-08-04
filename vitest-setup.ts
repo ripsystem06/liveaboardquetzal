@@ -15,6 +15,23 @@ vi.mock('@/lib/auth.config', () => ({
   signOut: vi.fn(),
 }))
 
+// ---------------------------------------------------------------------------
+// Global next-auth/react mock — provides useSession, signIn, signOut
+// for all client-side component tests. Tests needing specific behavior
+// should import and configure the mock per-test via vi.mocked().
+// ---------------------------------------------------------------------------
+vi.mock('next-auth/react', () => ({
+  useSession: vi.fn(() => ({
+    data: null,
+    status: 'unauthenticated' as const,
+    update: vi.fn(),
+  })),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  getSession: vi.fn(),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+}))
+
 // Mock IntersectionObserver (not available in jsdom)
 class MockIntersectionObserver {
   readonly root: Element | null = null

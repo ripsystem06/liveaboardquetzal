@@ -102,7 +102,7 @@ vi.mock('@/lib/auth', () => {
     }
   }
   return {
-    getAuthUserId: vi.fn(),
+    auth: vi.fn(),
     AuthError,
     ForbiddenError,
   }

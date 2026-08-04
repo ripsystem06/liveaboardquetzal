@@ -1,8 +1,9 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from 'next-auth/react'
 
-type User = { id: string; name: string; email: string; phone: string; isAdmin: boolean }
+type User = { id: string; name?: string | null; email?: string | null; phone?: string; isAdmin?: boolean }
 
 interface UserContextType {
   user: User | null
@@ -18,23 +19,25 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [sessionReady, setSessionReady] = useState(false)
+  const { data: session, status } = useSession()
+  const [localUser, setLocalUser] = useState<User | null>(null)
 
-  // Restore session from sessionStorage on mount (survives refresh, dies on tab close)
+  const sessionReady = status !== 'loading'
+
+  // Derive user from Auth.js session
   useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem('quetzal_user')
-      if (stored !== null) {
-        const parsed = JSON.parse(stored) as User
-        setUser(parsed)
-      }
-    } catch {
-      // Corrupted data — ignore, user stays logged out
-    } finally {
-      setSessionReady(true)
+    if (session?.user) {
+      setLocalUser({
+        id: (session.user as { id?: string }).id ?? '',
+        name: session.user.name,
+        email: session.user.email,
+        phone: (session.user as { phone?: string }).phone ?? '',
+        isAdmin: (session.user as { isAdmin?: boolean }).isAdmin ?? false,
+      })
+    } else if (sessionReady && !session) {
+      setLocalUser(null)
     }
-  }, [])
+  }, [session, sessionReady])
 
   const register = async (name: string, email: string, password: string): Promise<User> => {
     const response = await fetch('/api/auth/session', {
@@ -53,47 +56,40 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const data = await response.json()
     const newUser = data.user as User
-    setUser(newUser)
-    sessionStorage.setItem('quetzal_user', JSON.stringify(newUser))
+    // After registration, sign in with credentials to create Auth.js session
+    await nextAuthSignIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    })
     return newUser
   }
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const response = await fetch('/api/auth/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+    const result = await nextAuthSignIn('credentials', {
+      email,
+      password,
+      redirect: false,
     })
 
-    if (!response.ok) return false
-
-    const data = await response.json()
-    const loggedInUser = data.user as User
-    setUser(loggedInUser)
-    sessionStorage.setItem('quetzal_user', JSON.stringify(loggedInUser))
-    return true
+    return !result?.error
   }
 
   const logout = () => {
-    setUser(null)
-    sessionStorage.removeItem('quetzal_user')
-    // Clear server session cookie so API routes no longer authenticate
-    fetch('/api/auth/session', { method: 'DELETE' }).catch(() => {})
+    nextAuthSignOut({ redirect: false })
   }
 
   const updateProfile = (data: { name?: string; phone?: string }) => {
-    if (user === null) return
-    const updated = { ...user, ...data }
-    setUser(updated)
-    sessionStorage.setItem('quetzal_user', JSON.stringify(updated))
+    if (localUser === null) return
+    setLocalUser({ ...localUser, ...data })
   }
 
   return (
     <UserContext.Provider
       value={{
-        user,
-        isAuthenticated: user !== null,
-        isAdmin: user?.isAdmin ?? false,
+        user: localUser,
+        isAuthenticated: localUser !== null && !!session,
+        isAdmin: localUser?.isAdmin ?? false,
         sessionReady,
         login,
         register,

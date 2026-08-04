@@ -46,7 +46,7 @@ vi.mock('@/lib/pdf-generator', () => ({
 }))
 
 vi.mock('@/lib/auth', () => ({
-  getAuthUserId: vi.fn(() => Promise.resolve('user_123')),
+  auth: vi.fn(() => Promise.resolve({ user: { id: 'user_123', name: 'Test', email: 'test@test.com', isAdmin: false } })),
   AuthError: class extends Error {
     constructor(m: string) {
       super(m)
@@ -63,13 +63,13 @@ const { GET: GET_PDF } = await import('@/app/api/reservations/[id]/pdf/route')
 const { GET: GET_AVAILABILITY } = await import('@/app/api/reservations/check-availability/route')
 
 // Re-import auth mocks for test control
-const { getAuthUserId, AuthError } = await import('@/lib/auth')
+const { auth, AuthError } = await import('@/lib/auth')
 
 describe('Reservation API Routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Default: authenticated as user_123
-    vi.mocked(getAuthUserId).mockResolvedValue('user_123')
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'user_123', name: 'Test', email: 'test@test.com', isAdmin: false } })
   })
 
   describe('POST /api/reservations', () => {
@@ -155,7 +155,7 @@ describe('Reservation API Routes', () => {
     })
 
     it('returns 401 when no session cookie', async () => {
-      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+      vi.mocked(auth).mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost/api/reservations', {
         method: 'POST',
@@ -206,7 +206,7 @@ describe('Reservation API Routes', () => {
     })
 
     it('returns 401 when no session cookie', async () => {
-      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+      vi.mocked(auth).mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost/api/reservations')
       const response = await GET(request)
@@ -269,7 +269,7 @@ describe('Reservation API Routes', () => {
     })
 
     it('returns 401 when no session cookie', async () => {
-      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+      vi.mocked(auth).mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost/api/reservations/res_123')
       const response = await GET_SINGLE(request, { params: Promise.resolve({ id: 'res_123' }) })
@@ -352,7 +352,7 @@ describe('Reservation API Routes', () => {
     })
 
     it('returns 401 when no session cookie', async () => {
-      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+      vi.mocked(auth).mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
         method: 'POST',
@@ -432,7 +432,7 @@ describe('Reservation API Routes', () => {
     })
 
     it('returns 401 when no session cookie', async () => {
-      vi.mocked(getAuthUserId).mockRejectedValue(new AuthError('Authentication required'))
+      vi.mocked(auth).mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
       const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })

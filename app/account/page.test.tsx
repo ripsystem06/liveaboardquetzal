@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor, act } from '@testing-library/react'
-import { renderWithProviders } from '@/test-utils'
+import { renderWithProviders, screen, waitFor } from '@/test-utils'
 import { AccountPageClient } from '@/components/account/account-page-client'
 
 // Mock next/navigation - must be before imports
@@ -12,42 +11,35 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/account',
 }))
 
-// Mock localStorage and sessionStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
-  }
-})()
-
-const sessionStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock })
+// Mock fetch for account data
+vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+  ok: true,
+  json: () => Promise.resolve({ reservations: [] }),
+}))
 
 describe('app/account/page', () => {
-  beforeEach(() => {
-    localStorageMock.clear()
-    sessionStorageMock.clear()
+  beforeEach(async () => {
     replaceMock.mockClear()
   })
 
   describe('authenticated access', () => {
     it('renders account page when user is authenticated', async () => {
-      // Pre-populate sessionStorage with user data
-      const userData = { id: '1', name: 'Test User', email: 'test@example.com', phone: '+1 555 0100' }
-      sessionStorageMock.setItem('quetzal_user', JSON.stringify(userData))
+      // Mock useSession to return authenticated state
+      const { useSession } = await import('next-auth/react')
+      const useSessionMock = useSession as ReturnType<typeof vi.fn>
+      useSessionMock.mockReturnValue({
+        data: {
+          user: {
+            id: '1',
+            name: 'Test User',
+            email: 'test@example.com',
+            image: null,
+          },
+          expires: '',
+        },
+        status: 'authenticated' as const,
+        update: vi.fn(),
+      })
 
       renderWithProviders(<AccountPageClient />)
 

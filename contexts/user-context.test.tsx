@@ -2,31 +2,32 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { UserProvider, useUser } from '@/contexts/user-context'
 
-// Mock localStorage and sessionStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
+// Mock auth.config to prevent cascade
+vi.mock('@/lib/auth.config', () => ({
+  auth: vi.fn(),
+  handlers: { GET: vi.fn(), POST: vi.fn() },
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}))
+
+// Mock next-auth/react inline (no top-level vars due to hoisting)
+vi.mock('next-auth/react', () => {
+  const useSession = vi.fn(() => ({
+    data: null,
+    status: 'unauthenticated' as const,
+    update: vi.fn(),
+  }))
+
   return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
+    useSession,
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+    SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+    getSession: vi.fn(),
   }
-})()
+})
 
-const sessionStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock })
-
-// Mock fetch globally — now login/register call the server instead of using hardcoded credentials
+// Mock fetch for register (which still uses direct fetch)
 const fetchMock = vi.fn()
 global.fetch = fetchMock
 
@@ -36,20 +37,41 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 describe('useUser', () => {
-  beforeEach(() => {
-    localStorageMock.clear()
-    sessionStorageMock.clear()
+  let signInMock: ReturnType<typeof vi.fn>
+  let signOutMock: ReturnType<typeof vi.fn>
+  let useSessionMock: ReturnType<typeof vi.fn>
+
+  beforeEach(async () => {
     fetchMock.mockReset()
+    const naModule = await import('next-auth/react')
+    signInMock = naModule.signIn as ReturnType<typeof vi.fn>
+    signOutMock = naModule.signOut as ReturnType<typeof vi.fn>
+    useSessionMock = naModule.useSession as ReturnType<typeof vi.fn>
+    signInMock.mockReset()
+    signOutMock.mockReset()
+    useSessionMock.mockReturnValue({
+      data: null,
+      status: 'unauthenticated' as const,
+      update: vi.fn(),
+    })
   })
 
   describe('login', () => {
     it('updates state when valid credentials are provided', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ok: true,
-          user: { id: '1', name: 'Demo User', email: 'demo@quetzal.com', phone: '+1 555 0100', isAdmin: false },
-        }),
+      signInMock.mockResolvedValue({ ok: true, error: null })
+
+      useSessionMock.mockReturnValue({
+        data: {
+          user: {
+            id: '1',
+            name: 'Demo User',
+            email: 'demo@quetzal.com',
+            image: null,
+          },
+          expires: '',
+        },
+        status: 'authenticated' as const,
+        update: vi.fn(),
       })
 
       const { result } = renderHook(() => useUser(), { wrapper })
@@ -60,22 +82,15 @@ describe('useUser', () => {
       })
 
       expect(loginSuccess).toBe(true)
-      expect(result.current.user).toEqual({
-        id: '1',
-        name: 'Demo User',
+      expect(signInMock).toHaveBeenCalledWith('credentials', {
         email: 'demo@quetzal.com',
-        phone: '+1 555 0100',
-        isAdmin: false,
+        password: '123456',
+        redirect: false,
       })
-      expect(result.current.isAuthenticated).toBe(true)
     })
 
     it('returns false when invalid credentials are provided', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: async () => ({ error: 'Invalid credentials' }),
-      })
+      signInMock.mockResolvedValue({ ok: false, error: 'CredentialsSignin' })
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
@@ -85,26 +100,6 @@ describe('useUser', () => {
       })
 
       expect(loginSuccess).toBe(false)
-      expect(result.current.user).toBeNull()
-      expect(result.current.isAuthenticated).toBe(false)
-    })
-
-    it('returns false when email is not found', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: async () => ({ error: 'Invalid credentials' }),
-      })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      let loginSuccess: boolean | undefined
-      await act(async () => {
-        loginSuccess = await result.current.login('other@example.com', '123456')
-      })
-
-      expect(loginSuccess).toBe(false)
-      expect(result.current.user).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
     })
   })
@@ -118,6 +113,7 @@ describe('useUser', () => {
           user: { id: 'user-amFuZUBle', name: 'Jane Doe', email: 'jane@example.com', phone: '', isAdmin: false },
         }),
       })
+      signInMock.mockResolvedValue({ ok: true, error: null })
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
@@ -129,9 +125,11 @@ describe('useUser', () => {
       expect(newUser).toBeDefined()
       expect(newUser!.name).toBe('Jane Doe')
       expect(newUser!.email).toBe('jane@example.com')
-      expect(newUser!.phone).toBe('')
-      expect(result.current.isAuthenticated).toBe(true)
-      expect(result.current.user).toEqual(newUser)
+      expect(signInMock).toHaveBeenCalledWith('credentials', {
+        email: 'jane@example.com',
+        password: 'password123',
+        redirect: false,
+      })
     })
 
     it('throws error when email is already registered', async () => {
@@ -151,145 +149,102 @@ describe('useUser', () => {
 
       expect(result.current.isAuthenticated).toBe(false)
     })
-
-    it('persists registered user to sessionStorage', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ok: true,
-          user: { id: 'user-amFuZUBle', name: 'Jane Doe', email: 'jane@example.com', phone: '', isAdmin: false },
-        }),
-      })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      await act(async () => {
-        await result.current.register('Jane Doe', 'jane@example.com', 'password123')
-      })
-
-      const stored = sessionStorageMock.getItem('quetzal_user')
-      expect(stored).not.toBeNull()
-      const parsed = JSON.parse(stored!)
-      expect(parsed.name).toBe('Jane Doe')
-      expect(parsed.email).toBe('jane@example.com')
-    })
   })
 
   describe('logout', () => {
     it('clears user state when logout is called', async () => {
-      // Mock fetch for login
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ok: true,
-          user: { id: '1', name: 'Demo User', email: 'demo@quetzal.com', phone: '+1 555 0100', isAdmin: false },
-        }),
+      signOutMock.mockResolvedValue({ url: '/' })
+      useSessionMock.mockReturnValue({
+        data: {
+          user: {
+            id: '1',
+            name: 'Demo User',
+            email: 'demo@quetzal.com',
+            image: null,
+          },
+          expires: '',
+        },
+        status: 'authenticated' as const,
+        update: vi.fn(),
       })
-      // Mock fetch for logout (DELETE request — fire-and-forget)
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ ok: true }),
-      })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      // Login first
-      await act(async () => {
-        await result.current.login('demo@quetzal.com', '123456')
-      })
-      expect(result.current.isAuthenticated).toBe(true)
-
-      // Then logout
-      await act(async () => {
-        result.current.logout()
-      })
-
-      expect(result.current.user).toBeNull()
-      expect(result.current.isAuthenticated).toBe(false)
-    })
-  })
-
-  describe('isAdmin', () => {
-    it('sets isAdmin true when registering with admin@quetzal.com', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ok: true,
-          user: { id: 'admin', name: 'Admin User', email: 'admin@quetzal.com', phone: '', isAdmin: true },
-        }),
-      })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      await act(async () => {
-        await result.current.register('Admin User', 'admin@quetzal.com', 'password123')
-      })
-
-      expect(result.current.user?.email).toBe('admin@quetzal.com')
-      expect(result.current.isAdmin).toBe(true)
-    })
-
-    it('sets isAdmin false when registering with non-admin email', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ok: true,
-          user: { id: 'user-dXNlckBl', name: 'Regular User', email: 'user@example.com', phone: '', isAdmin: false },
-        }),
-      })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      await act(async () => {
-        await result.current.register('Regular User', 'user@example.com', 'password123')
-      })
-
-      expect(result.current.user?.email).toBe('user@example.com')
-      expect(result.current.isAdmin).toBe(false)
-    })
-
-    it('sets isAdmin true when logging in with admin@quetzal.com', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ok: true,
-          user: { id: 'admin', name: 'Admin', email: 'admin@quetzal.com', phone: '', isAdmin: true },
-        }),
-      })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      let loginSuccess: boolean | undefined
-      await act(async () => {
-        loginSuccess = await result.current.login('admin@quetzal.com', 'admin123')
-      })
-
-      expect(loginSuccess).toBe(true)
-      expect(result.current.user?.email).toBe('admin@quetzal.com')
-      expect(result.current.isAdmin).toBe(true)
-    })
-  })
-
-  describe('session restore on mount', () => {
-    it('restores session from sessionStorage when valid data exists', async () => {
-      // Pre-populate sessionStorage with user data
-      const userData = { id: '1', name: 'Demo User', email: 'demo@quetzal.com', phone: '+1 555 0100' }
-      sessionStorageMock.setItem('quetzal_user', JSON.stringify(userData))
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
       await waitFor(() => {
         expect(result.current.isAuthenticated).toBe(true)
       })
-      expect(result.current.user).toEqual(userData)
-    })
 
-    it('does not restore session when sessionStorage has no data', async () => {
+      await act(async () => {
+        result.current.logout()
+      })
+
+      expect(signOutMock).toHaveBeenCalledWith({ redirect: false })
+    })
+  })
+
+  describe('isAdmin', () => {
+    it('detects admin from session user', async () => {
+      useSessionMock.mockReturnValue({
+        data: {
+          user: {
+            id: 'admin',
+            name: 'Admin',
+            email: 'admin@quetzal.com',
+            image: null,
+            isAdmin: true,
+          } as Record<string, unknown>,
+          expires: '',
+        },
+        status: 'authenticated' as const,
+        update: vi.fn(),
+      })
+
       const { result } = renderHook(() => useUser(), { wrapper })
 
       await waitFor(() => {
-        expect(result.current.isAuthenticated).toBe(false)
+        expect(result.current.isAuthenticated).toBe(true)
       })
+      expect(result.current.isAdmin).toBe(true)
+    })
+  })
+
+  describe('session restore on mount', () => {
+    it('reads session from useSession on mount', async () => {
+      useSessionMock.mockReturnValue({
+        data: {
+          user: {
+            id: '1',
+            name: 'Demo User',
+            email: 'demo@quetzal.com',
+            image: null,
+          },
+          expires: '',
+        },
+        status: 'authenticated' as const,
+        update: vi.fn(),
+      })
+
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+      })
+      expect(result.current.user?.email).toBe('demo@quetzal.com')
+    })
+
+    it('shows unauthenticated when session is null', async () => {
+      useSessionMock.mockReturnValue({
+        data: null,
+        status: 'unauthenticated' as const,
+        update: vi.fn(),
+      })
+
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      await waitFor(() => {
+        expect(result.current.sessionReady).toBe(true)
+      })
+      expect(result.current.isAuthenticated).toBe(false)
       expect(result.current.user).toBeNull()
     })
   })

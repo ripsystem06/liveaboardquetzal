@@ -99,11 +99,20 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
   }
 }
 
-export function BookingPageClient() {
+export function BookingPageClient({ oauthStep }: { oauthStep?: number }) {
   const { isAuthenticated } = useUser()
+
+  // Determine initial step: oauthStep from searchParams takes precedence
+  const initialStep = (): 1 | 2 | 3 => {
+    if (oauthStep === 2 && isAuthenticated) return 2
+    if (isAuthenticated) return 2
+    return 1
+  }
+
   const [state, dispatch] = useReducer(bookingReducer, {
     ...initialBookingState,
-    step: isAuthenticated ? 2 : 1,
+    step: initialStep(),
+    loginCompleted: isAuthenticated && oauthStep === 2,
   })
 
   // Reset to login step when user logs out while on a later step

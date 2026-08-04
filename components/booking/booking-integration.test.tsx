@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderWithProviders, screen, fireEvent, waitFor } from '@/test-utils'
+import { renderWithProviders, screen, waitFor } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { BookingPageClient } from './booking-page-client'
+
+// Get the globally mocked next-auth/react hooks for configuration
+const { useSession: mockUseSession, signIn: mockSignIn } = await import('next-auth/react')
 
 // Mock PayPalSimulator to auto-complete
 vi.mock('./paypal-simulator', () => ({
@@ -29,6 +32,28 @@ const mockCruises = [
 
 describe('BookingPageClient integration', () => {
   beforeEach(() => {
+    // Configure global next-auth/react mocks for integration tests
+    mockSignIn.mockImplementation(async (provider: string, options?: Record<string, unknown>) => {
+      if (provider === 'credentials' && options?.email === 'demo@quetzal.com' && options?.password !== 'wrongpassword') {
+        return { ok: true, error: null }
+      }
+      return { ok: false, error: 'CredentialsSignin' }
+    })
+
+    mockUseSession.mockReturnValue({
+      data: {
+        user: {
+          id: 'demo-1',
+          name: 'Demo User',
+          email: 'demo@quetzal.com',
+          image: null,
+        },
+        expires: '',
+      },
+      status: 'authenticated' as const,
+      update: vi.fn(),
+    })
+
     // Stub sessionStorage for UserProvider
     const sessionGetItem = vi.fn(() => null)
     const sessionSetItem = vi.fn()

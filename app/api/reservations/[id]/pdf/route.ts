@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generateBankTransferPDF } from '@/lib/pdf-generator'
-import { getAuthUserId, AuthError } from '@/lib/auth'
+import { auth, AuthError } from '@/lib/auth'
 import { PaymentMethod } from '@/lib/validations'
 
 interface RouteParams {
@@ -15,7 +15,11 @@ interface RouteParams {
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const authUserId = await getAuthUserId()
+    const session = await auth()
+    if (!session?.user?.id) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
+    }
+    const authUserId = session.user.id as string
     const { id } = await params
 
     const reservation = await prisma.reservation.findUnique({

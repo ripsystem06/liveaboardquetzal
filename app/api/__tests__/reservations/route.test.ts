@@ -22,7 +22,7 @@ vi.mock('@/lib/db', () => ({
 }))
 
 vi.mock('@/lib/auth', () => ({
-  getAuthUserId: vi.fn().mockResolvedValue('user-123'),
+  auth: vi.fn().mockResolvedValue({ user: { id: 'user-123', name: 'Test', email: 'test@test.com', isAdmin: false } }),
   AuthError: class AuthError extends Error {
     constructor(m: string) { super(m); this.name = 'AuthError' }
   },

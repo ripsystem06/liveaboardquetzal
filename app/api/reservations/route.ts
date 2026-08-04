@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getAuthUserId, AuthError } from '@/lib/auth'
+import { auth, AuthError } from '@/lib/auth'
 import { CreateReservationSchema, ReservationStatus } from '@/lib/validations'
 import { sendReservationCreatedEmail } from '@/lib/email'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
@@ -22,7 +22,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = await getAuthUserId()
+    const session = await auth()
+    if (!session?.user?.id) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
+    }
+    const userId = session.user.id as string
     const rawBody = await request.json()
 
     const parsed = CreateReservationSchema.safeParse(rawBody)
@@ -125,7 +129,11 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getAuthUserId()
+    const session = await auth()
+    if (!session?.user?.id) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
+    }
+    const userId = session.user.id as string
 
     const reservations = await prisma.reservation.findMany({
       where: { userId },

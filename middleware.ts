@@ -1,7 +1,11 @@
+import { auth } from '@/lib/auth.config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+// Auth.js v5 middleware wraps our custom middleware.
+// The auth() call protects matched routes by checking the session.
+// Unauthenticated requests to /api/admin/* return 401 automatically.
+export default auth((request: NextRequest) => {
   const response = NextResponse.next()
 
   // Security headers
@@ -17,8 +21,10 @@ export function middleware(request: NextRequest) {
   )
 
   return response
-}
+})
 
 export const config = {
-  matcher: '/((?!_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.webp|.*\\.mp4|.*\\.mov).*)',
+  // Auth.js protects /api/admin/* via the auth() wrapper.
+  // Security headers apply to all routes except static assets.
+  matcher: ['/api/admin/:path*', '/((?!_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.webp|.*\\.mp4|.*\\.mov).*)'],
 }

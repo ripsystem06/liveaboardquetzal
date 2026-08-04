@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getAuthUserId, AuthError } from '@/lib/auth'
+import { auth, AuthError } from '@/lib/auth'
 import { ReservationStatus } from '@/lib/validations'
 import { sendReservationConfirmedEmail } from '@/lib/email'
 
@@ -16,7 +16,11 @@ interface RouteParams {
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const authUserId = await getAuthUserId()
+    const session = await auth()
+    if (!session?.user?.id) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
+    }
+    const authUserId = session.user.id as string
     const { id } = await params
 
     const reservation = await prisma.reservation.findUnique({

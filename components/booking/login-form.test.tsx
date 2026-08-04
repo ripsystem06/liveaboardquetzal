@@ -14,6 +14,10 @@ vi.mock('@/contexts/user-context', async (importOriginal) => {
   }
 })
 
+// next-auth/react is mocked globally via vitest-setup.ts.
+// Import signIn for assertions after the global mock is applied.
+const { signIn: mockSignIn } = await import('next-auth/react')
+
 describe('LoginForm', () => {
   const mockDispatch = vi.fn()
 
@@ -21,30 +25,29 @@ describe('LoginForm', () => {
     vi.clearAllMocks()
   })
 
-  it('renders email and password inputs', () => {
+  const mockUseUserDefaults = () => {
     vi.mocked(useUser).mockReturnValue({
       user: null,
       isAuthenticated: false,
+      isAdmin: false,
+      sessionReady: true,
       login: vi.fn(),
+      register: vi.fn(),
       logout: vi.fn(),
       updateProfile: vi.fn(),
     })
-    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
+  }
 
+  it('renders email and password inputs', () => {
+    mockUseUserDefaults()
+    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
   })
 
   it('renders a submit button', () => {
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
+    mockUseUserDefaults()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
-
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
   })
 
@@ -53,7 +56,10 @@ describe('LoginForm', () => {
     vi.mocked(useUser).mockReturnValue({
       user: null,
       isAuthenticated: false,
+      isAdmin: false,
+      sessionReady: true,
       login: loginMock,
+      register: vi.fn(),
       logout: vi.fn(),
       updateProfile: vi.fn(),
     })
@@ -77,7 +83,10 @@ describe('LoginForm', () => {
     vi.mocked(useUser).mockReturnValue({
       user: null,
       isAuthenticated: false,
+      isAdmin: false,
+      sessionReady: true,
       login: loginMock,
+      register: vi.fn(),
       logout: vi.fn(),
       updateProfile: vi.fn(),
     })
@@ -100,13 +109,7 @@ describe('LoginForm', () => {
   })
 
   it('shows error message on invalid email (empty)', async () => {
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
+    mockUseUserDefaults()
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
@@ -122,7 +125,10 @@ describe('LoginForm', () => {
     vi.mocked(useUser).mockReturnValue({
       user: null,
       isAuthenticated: false,
+      isAdmin: false,
+      sessionReady: true,
       login: loginMock,
+      register: vi.fn(),
       logout: vi.fn(),
       updateProfile: vi.fn(),
     })
@@ -143,26 +149,53 @@ describe('LoginForm', () => {
   })
 
   it('clears error message when user starts typing', async () => {
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
+    mockUseUserDefaults()
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
     const emailInput = screen.getByLabelText(/email/i)
 
-    // Trigger error first by clicking login without typing
     await user.click(screen.getByRole('button', { name: /login/i }))
     await waitFor(() => {
       expect(screen.getByText(/please enter a valid email/i)).toBeInTheDocument()
     })
 
-    // Start typing in email field
     await user.type(emailInput, 'u')
     expect(screen.queryByText(/please enter a valid email/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('Google OAuth button', () => {
+  const mockDispatch = vi.fn()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(useUser).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isAdmin: false,
+      sessionReady: true,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      updateProfile: vi.fn(),
+    })
+  })
+
+  it('renders a "Sign in with Google" button', () => {
+    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
+    expect(screen.getByRole('button', { name: /google/i })).toBeInTheDocument()
+  })
+
+  it('calls signIn("google") with callbackUrl when clicked', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
+
+    const googleButton = screen.getByRole('button', { name: /google/i })
+    await user.click(googleButton)
+
+    expect(mockSignIn).toHaveBeenCalledWith('google', expect.objectContaining({
+      callbackUrl: expect.stringContaining('/booking'),
+    }))
   })
 })
