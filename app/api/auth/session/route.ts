@@ -1,11 +1,15 @@
-import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
-import { sign, hashPassword, verifyPassword } from '@/lib/auth'
+import { hashPassword } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 import { SessionBodySchema } from '@/lib/validations'
 import { sendWelcomeEmail } from '@/lib/email'
 
+/**
+ * POST /api/auth/session — Registration only
+ * Login is handled by Auth.js's signIn('credentials') via [...nextauth] route.
+ * Logout is handled by Auth.js's signOut().
+ */
 export async function POST(request: NextRequest) {
   // CSRF: verify same-origin request
   const origin = request.headers.get('origin')
@@ -27,89 +31,55 @@ export async function POST(request: NextRequest) {
   const rawBody = await request.json()
 
   const parsed = SessionBodySchema.safeParse(rawBody)
-    if (!parsed.success) {
-      return Response.json(
-        {
-          error: 'Validation failed',
-          ...(process.env.NODE_ENV !== 'production' ? { details: parsed.error.flatten() } : {}),
-        },
-        { status: 400 }
-      )
-    }
+  if (!parsed.success) {
+    return Response.json(
+      {
+        error: 'Validation failed',
+        ...(process.env.NODE_ENV !== 'production' ? { details: parsed.error.flatten() } : {}),
+      },
+      { status: 400 }
+    )
+  }
   const { email, password, name } = parsed.data
 
-  let user: { id: string; name: string; email: string; phone: string; isAdmin: boolean }
-
-  // Register mode — name field present, create real DB user
-  if (name) {
-    // Check if email already exists
-    const existing = await prisma.user.findUnique({ where: { email } })
-    if (existing) {
-      return Response.json({ error: 'Email already registered' }, { status: 409 })
-    }
-
-    const passwordHash = await hashPassword(password)
-    const created = await prisma.user.create({
-      data: { email, passwordHash, name, phone: '' },
-    })
-
-    sendWelcomeEmail(email, name).catch(err => console.error('Failed to send welcome email:', err))
-
-    // Fire-and-forget audit log
-    prisma.auditLog.create({
-      data: {
-        action: 'user.registered',
-        entityType: 'user',
-        entityId: created.id,
-        actorEmail: email,
-      },
-    }).catch(err => console.error('Audit log failed:', err))
-
-    user = {
-      id: created.id,
-      name: created.name,
-      email: created.email,
-      phone: created.phone,
-      isAdmin: created.isAdmin,
-    }
-  }
-  // Login mode — no name field, authenticate against DB
-  else {
-    const dbUser = await prisma.user.findUnique({ where: { email } })
-    if (!dbUser) {
-      return Response.json({ error: 'Invalid credentials' }, { status: 401 })
-    }
-
-    const valid = await verifyPassword(password, dbUser.passwordHash)
-    if (!valid) {
-      return Response.json({ error: 'Invalid credentials' }, { status: 401 })
-    }
-
-    user = {
-      id: dbUser.id,
-      name: dbUser.name,
-      email: dbUser.email,
-      phone: dbUser.phone,
-      isAdmin: dbUser.isAdmin,
-    }
+  // Registration requires a name field
+  if (!name) {
+    return Response.json(
+      { error: 'Name is required for registration. Use [...nextauth] for login.' },
+      { status: 400 }
+    )
   }
 
-  // Store HMAC-signed user JSON in cookie so server-side auth can extract email
-  const cookieValue = sign(JSON.stringify(user))
-  const cookieStore = await cookies()
-  cookieStore.set('quetzal_session', cookieValue, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+  // Check if email already exists
+  const existing = await prisma.user.findUnique({ where: { email } })
+  if (existing) {
+    return Response.json({ error: 'Email already registered' }, { status: 409 })
+  }
+
+  const passwordHash = await hashPassword(password)
+  const created = await prisma.user.create({
+    data: { email, passwordHash, name, phone: '' },
   })
 
-  return Response.json({ ok: true, user })
-}
+  sendWelcomeEmail(email, name).catch(err => console.error('Failed to send welcome email:', err))
 
-export async function DELETE() {
-  const cookieStore = await cookies()
-  cookieStore.delete('quetzal_session')
-  return Response.json({ ok: true })
+  // Fire-and-forget audit log
+  prisma.auditLog.create({
+    data: {
+      action: 'user.registered',
+      entityType: 'user',
+      entityId: created.id,
+      actorEmail: email,
+    },
+  }).catch(err => console.error('Audit log failed:', err))
+
+  const user = {
+    id: created.id,
+    name: created.name,
+    email: created.email,
+    phone: created.phone,
+    isAdmin: created.isAdmin,
+  }
+
+  return Response.json({ ok: true, user })
 }

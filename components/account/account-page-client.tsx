@@ -39,7 +39,7 @@ export function AccountPageClient() {
           {t('account.title')}
         </p>
         <h1 className="font-serif text-3xl md:text-4xl font-normal text-foreground text-balance">
-          {t('account.welcome').replace('{name}', user.name)}
+          {t('account.welcome').replace('{name}', user.name ?? '')}
         </h1>
       </div>
 

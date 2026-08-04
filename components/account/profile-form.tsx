@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/language-context'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-type User = { id: string; name: string; email: string; phone: string }
+type User = { id: string; name?: string | null; email?: string | null; phone?: string }
 
 interface ProfileFormProps {
   user: User
@@ -15,12 +15,12 @@ interface ProfileFormProps {
 export function ProfileForm({ user }: ProfileFormProps) {
   const { updateProfile } = useUser()
   const { t } = useLanguage()
-  const [name, setName] = useState(user.name)
-  const [phone, setPhone] = useState(user.phone)
+  const [name, setName] = useState(user.name ?? '')
+  const [phone, setPhone] = useState(user.phone ?? '')
   const [showSuccess, setShowSuccess] = useState(false)
 
   const handleSave = () => {
-    updateProfile({ name, phone })
+    updateProfile({ name: name || undefined, phone: phone || undefined })
     setShowSuccess(true)
     setTimeout(() => setShowSuccess(false), 3000)
   }
@@ -49,7 +49,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('account.email')}</label>
         <Input
-          value={user.email}
+          value={user.email ?? ''}
           readOnly
           disabled
           className="h-11 rounded-xl bg-muted/60 border-transparent text-muted-foreground cursor-not-allowed"
