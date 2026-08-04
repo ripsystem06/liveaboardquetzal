@@ -6,7 +6,7 @@ import { SessionBodySchema } from '@/lib/validations'
 import { sendWelcomeEmail } from '@/lib/email'
 
 /**
- * POST /api/auth/session — Registration only
+ * POST /api/auth/register — User registration
  * Login is handled by Auth.js's signIn('credentials') via [...nextauth] route.
  * Logout is handled by Auth.js's signOut().
  */
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   // Registration requires a name field
   if (!name) {
     return Response.json(
-      { error: 'Name is required for registration. Use [...nextauth] for login.' },
+      { error: 'Name is required for registration.' },
       { status: 400 }
     )
   }

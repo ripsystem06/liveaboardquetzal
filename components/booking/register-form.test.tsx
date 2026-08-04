@@ -32,6 +32,8 @@ describe('RegisterForm', () => {
     vi.mocked(useUser).mockReturnValue({
       user: null,
       isAuthenticated: false,
+      isAdmin: false,
+      sessionReady: true,
       login: vi.fn(),
       register: mockRegisterFn,
       logout: vi.fn(),

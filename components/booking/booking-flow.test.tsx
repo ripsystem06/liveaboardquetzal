@@ -167,6 +167,9 @@ describe('BookingFlow', () => {
         selectedCruise={mockCruise}
         guestCount={2}
         bookingConfirmed={true}
+        availableCruises={[]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={state}
         dispatch={mockDispatch}
       />
@@ -191,6 +194,9 @@ describe('BookingFlow', () => {
         selectedCruise={mockCruise}
         guestCount={2}
         bookingConfirmed={true}
+        availableCruises={[]}
+        cruisesLoading={false}
+        cruisesError={null}
         state={state}
         dispatch={mockDispatch}
       />

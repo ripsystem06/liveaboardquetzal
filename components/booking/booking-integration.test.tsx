@@ -4,7 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { BookingPageClient } from './booking-page-client'
 
 // Get the globally mocked next-auth/react hooks for configuration
-const { useSession: mockUseSession, signIn: mockSignIn } = await import('next-auth/react')
+const { useSession: mockUseSessionRaw, signIn: mockSignInRaw } = await import('next-auth/react')
+const mockSignIn = mockSignInRaw as unknown as ReturnType<typeof vi.fn>
+const mockUseSession = mockUseSessionRaw as unknown as ReturnType<typeof vi.fn>
 
 // Mock PayPalSimulator to auto-complete
 vi.mock('./paypal-simulator', () => ({
@@ -77,8 +79,8 @@ describe('BookingPageClient integration', () => {
           json: () => Promise.resolve({ expeditions: mockCruises }),
         })
       }
-      // Auth session endpoint — return demo user
-      if (url.includes('/api/auth/session') && isPost) {
+      // Auth register endpoint — return demo user
+      if (url.includes('/api/auth/register') && isPost) {
         const bodyStr = typeof init?.body === 'string' ? init.body : '{}'
         const body = JSON.parse(bodyStr)
         if (body.email === 'demo@quetzal.com' && body.password === '123456') {

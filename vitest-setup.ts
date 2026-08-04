@@ -58,14 +58,13 @@ mockUsers.set('demo@quetzal.com', {
   passwordHash: 'mock-hash', // the mock fetch doesn't actually verify the hash
 })
 
-// Mock fetch globally for session cookie endpoint and auth calls.
-// Simulates the server's POST /api/auth/session behavior:
+// Mock fetch globally for registration and auth calls.
+// Simulates the server's POST /api/auth/register behavior:
 // - Admin login: verified against the mock credentials
 // - Register: creates user in mock DB, returns 409 for duplicates
-// - Login: looks up user in mock DB
 // - Rate limit is NOT simulated in tests (not needed for client-side tests)
 vi.stubGlobal('fetch', vi.fn((url: string, init?: RequestInit) => {
-  if (url === '/api/auth/session' && init?.method === 'POST') {
+  if (url === '/api/auth/register' && init?.method === 'POST') {
     try {
       const body = JSON.parse(init.body as string)
       const { email, password, name } = body

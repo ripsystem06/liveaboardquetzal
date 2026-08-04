@@ -117,7 +117,7 @@ describe('useUser', () => {
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
-      let newUser: { id: string; name: string; email: string; phone: string } | undefined
+      let newUser: Awaited<ReturnType<typeof result.current.register>> | undefined
       await act(async () => {
         newUser = await result.current.register('Jane Doe', 'jane@example.com', 'password123')
       })

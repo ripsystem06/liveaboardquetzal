@@ -40,7 +40,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [session, sessionReady])
 
   const register = async (name: string, email: string, password: string): Promise<User> => {
-    const response = await fetch('/api/auth/session', {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name }),

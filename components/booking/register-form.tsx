@@ -41,13 +41,7 @@ export function RegisterForm({ dispatch }: RegisterFormProps) {
       return
     }
 
-    const newUser = await register(name, email, password)
-    // Set session cookie for API authentication using the generated user ID
-    await fetch('/api/auth/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: newUser.id }),
-    })
+    await register(name, email, password)
     dispatch({ type: 'LOGIN_COMPLETED' })
   }
 

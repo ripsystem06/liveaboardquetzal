@@ -18,12 +18,12 @@ describe('DB initialization for PostgreSQL', () => {
     vi.resetModules()
     // Reset globalForPrisma so each test gets fresh initialization
     delete (globalThis as Record<string, unknown>).prisma
+    vi.unstubAllEnvs()
   })
 
   it('does NOT execute any SQLite PRAGMA during cold start (DB-REQ-001)', async () => {
-    const originalNodeEnv = process.env.NODE_ENV
     const originalDbUrl = process.env.DATABASE_URL
-    process.env.NODE_ENV = 'development'
+    vi.stubEnv('NODE_ENV', 'development')
     process.env.DATABASE_URL = 'postgresql://user:pass@host:5432/db'
 
     await import('@/lib/db')
@@ -33,7 +33,6 @@ describe('DB initialization for PostgreSQL', () => {
     )
     expect(pragmaCalls).toHaveLength(0)
 
-    process.env.NODE_ENV = originalNodeEnv
     process.env.DATABASE_URL = originalDbUrl
   })
 

@@ -14,7 +14,7 @@ describe('Auth.js Schema Migration', () => {
     // The DMMF field descriptor marks optional fields with isRequired=false.
     // In Prisma v5 runtime, isRequired may be undefined for nullable fields.
     // The authoritative check is TypeScript: `passwordHash: string | null`.
-    expect([false, undefined]).toContain(passwordHashField.isRequired)
+    expect([false, undefined]).toContain((passwordHashField as unknown as { isRequired?: boolean }).isRequired)
   })
 
   it('Account model must exist for Auth.js Prisma adapter', () => {
