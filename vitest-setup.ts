@@ -1,5 +1,20 @@
 import '@testing-library/jest-dom'
 
+// ---------------------------------------------------------------------------
+// Global Auth.js v5 mock — prevents cascading next-auth imports in tests
+// that mock @/lib/auth with importOriginal. Without this, any module loading
+// @/lib/auth triggers @/lib/auth.config → next-auth → headers() → crash.
+// Test files that need real auth() behavior must unmock via vi.unmock().
+// ---------------------------------------------------------------------------
+vi.mock('@/lib/auth.config', () => ({
+  auth: vi.fn().mockResolvedValue({
+    user: { id: 'mock-user', name: 'Mock', email: 'mock@test.com', isAdmin: false, phone: '' },
+  }),
+  handlers: { GET: vi.fn(), POST: vi.fn() },
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}))
+
 // Mock IntersectionObserver (not available in jsdom)
 class MockIntersectionObserver {
   readonly root: Element | null = null

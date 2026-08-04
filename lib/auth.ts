@@ -1,110 +1,17 @@
-import { cookies } from 'next/headers'
-import { createHmac, randomBytes, scrypt, timingSafeEqual } from 'crypto'
+import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import { promisify } from 'util'
 
 const scryptAsync = promisify(scrypt)
 
-const SESSION_COOKIE = 'quetzal_session'
-
-// SESSION_SECRET is required in production; dev gets a random ephemeral fallback
-const SECRET = process.env.SESSION_SECRET
-if (!SECRET) {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('SESSION_SECRET environment variable is required in production')
-  }
-  // Dev fallback: warn but continue with random secret
-  console.warn('[auth] SESSION_SECRET not set — using random ephemeral secret (sessions will expire on restart)')
-}
-const effectiveSecret = SECRET || randomBytes(32).toString('hex')
-
-/**
- * Signs a payload with HMAC-SHA256.
- * Returns base64url(payload).base64url(hmac)
- */
-export function sign(payload: string): string {
-  const hmac = createHmac('sha256', effectiveSecret).update(payload).digest('base64url')
-  return `${Buffer.from(payload).toString('base64url')}.${hmac}`
-}
-
-/**
- * Verifies and decodes an HMAC-signed token.
- * Returns the payload string if valid, null if forged/tampered.
- */
-export function verify(token: string): string | null {
-  const lastDot = token.lastIndexOf('.')
-  if (lastDot === -1) return null
-  const encoded = token.slice(0, lastDot)
-  const sig = token.slice(lastDot + 1)
-  if (!encoded || !sig) return null
-  const expectedSig = createHmac('sha256', effectiveSecret).update(Buffer.from(encoded, 'base64url').toString()).digest('base64url')
-  let sigBuffer: Buffer, expectedBuffer: Buffer
-  try {
-    sigBuffer = Buffer.from(sig, 'base64url')
-    expectedBuffer = Buffer.from(expectedSig, 'base64url')
-  } catch {
-    return null
-  }
-  if (sigBuffer.length !== expectedBuffer.length || !timingSafeEqual(sigBuffer, expectedBuffer)) {
-    return null
-  }
-  try {
-    return Buffer.from(encoded, 'base64url').toString()
-  } catch {
-    return null
-  }
-}
+// Re-export auth() from Auth.js config for server-side session reads
+export { auth } from '@/lib/auth.config'
 
 export interface SessionUser {
   id: string
-  name: string
+  name?: string | null
   email: string
-  phone: string
-  isAdmin: boolean
-}
-
-export async function getAuthUserId(): Promise<string> {
-  const cookieStore = await cookies()
-  const sessionValue = cookieStore.get(SESSION_COOKIE)?.value
-  if (!sessionValue) {
-    throw new AuthError('Authentication required')
-  }
-  // Session cookie stores HMAC-signed JSON: base64url(payload).base64url(hmac)
-  try {
-    const payload = verify(sessionValue)
-    if (payload === null) {
-      throw new AuthError('Authentication required')
-    }
-    const user = JSON.parse(payload)
-    if (!user || !user.id) {
-      throw new AuthError('Authentication required')
-    }
-    return user.id
-  } catch (e) {
-    if (e instanceof AuthError) throw e
-    throw new AuthError('Authentication required')
-  }
-}
-
-export async function getSessionUser(): Promise<SessionUser> {
-  const cookieStore = await cookies()
-  const sessionValue = cookieStore.get(SESSION_COOKIE)?.value
-  if (!sessionValue) {
-    throw new AuthError('Authentication required')
-  }
-  try {
-    const payload = verify(sessionValue)
-    if (payload === null) {
-      throw new AuthError('Authentication required')
-    }
-    const user = JSON.parse(payload)
-    if (!user || !user.id) {
-      throw new AuthError('Authentication required')
-    }
-    return user as SessionUser
-  } catch (e) {
-    if (e instanceof AuthError) throw e
-    throw new AuthError('Authentication required')
-  }
+  phone?: string
+  isAdmin?: boolean
 }
 
 /**
