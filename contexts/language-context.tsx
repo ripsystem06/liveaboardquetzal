@@ -62,7 +62,7 @@ const translations = {
     // Marine Life Section
     'marine.title': 'This Is What You will See With Us',
     'marine.description': 'Join Quetzal\'s liveaboard adventure and witness breathtaking marine life—exactly what our guests see on this unforgettable underwater experience.',
-    'marine.cta': 'See Upcoming Trips',
+    'marine.cta': 'Book Your Expedition',
     
     // Destinations Grid
     'destinations.title': 'Our Destinations',
@@ -74,20 +74,6 @@ const translations = {
     'destinations.cortez.title': 'SEA OF CORTEZ',
     'destinations.cortez.description': 'Visit one of the most beautiful places on the planet, with days full of saltwater and sun, mountains, wildlife, culture, and history!',
     'destinations.explore': 'Explore Destination',
-    
-    // Upcoming Trips
-    'trips.title': 'Upcoming Destination',
-    'trips.subtitle': 'Guided by Experience Perfected by Passion',
-    'trips.trip1.title': 'Magdalena Bay & Socorro Islands',
-    'trips.trip1.dates': '16 OCT 2025 - 30 OCT 2025',
-    'trips.trip1.price': 'from $5,199 USD per person',
-    'trips.trip2.title': 'Socorro Islands (Revillagigedo)',
-    'trips.trip2.dates': '06 JAN 2026 - 14 JAN 2026',
-    'trips.trip2.price': 'from $3,500 USD per person',
-    'trips.trip3.title': 'Sea of Cortez Trip',
-    'trips.trip3.dates': '09 JUL 2026 - 16 JUL 2026',
-    'trips.trip3.price': 'from $2,350 USD per person',
-    'trips.details': 'Trip & Price Details',
     
     // Testimonials
     'testimonials.title': 'What Our Guests Say',
@@ -537,7 +523,7 @@ const translations = {
     // Booking Info Cards
     'booking.info.types': 'Reservation Types',
     'booking.info.individual': 'Individual Pass',
-    'booking.info.individualDesc': 'Reserve your spot on our shared expeditions. Choose from three comfort tiers: Basic ($2,500), Standard ($3,000), or Premium ($3,500). Up to 18 passengers per trip.',
+    'booking.info.individualDesc': 'Reserve your spot on our shared expeditions. Choose from three comfort tiers: Explorer ($2,500), Adventurer ($3,000), or Expedition ($3,500). Up to 18 passengers per trip.',
     'booking.info.half': 'Half Charter',
     'booking.info.halfDesc': 'Book as a group and save. For every 8 paid spaces, receive 1 complimentary spot. Ideal for dive clubs, families, and groups of friends.',
     'booking.info.full': 'Full Charter',
@@ -553,9 +539,9 @@ const translations = {
     'booking.info.confirmDesc': 'Review your selection, complete the payment, and receive your booking confirmation instantly via email.',
 
     // Tier Pricing Keys
-    'booking.tier.basic': 'Basic',
-    'booking.tier.standard': 'Standard',
-    'booking.tier.premium': 'Premium',
+    'booking.tier.basic': 'Explorer',
+    'booking.tier.standard': 'Adventurer',
+    'booking.tier.premium': 'Expedition',
     'booking.tier.selectHint': 'Select a pricing tier to continue',
     'booking.tier.selected': 'Tier selected',
     'booking.payment.freeSpaces': 'Free spaces',
@@ -682,9 +668,9 @@ const translations = {
     'admin.cruise.route': 'Route',
     'admin.cruise.boat': 'Boat',
     'admin.cruise.dives': 'Dives',
-    'admin.cruise.basic': 'Basic',
-    'admin.cruise.standard': 'Standard',
-    'admin.cruise.premium': 'Premium',
+    'admin.cruise.basic': 'Explorer',
+    'admin.cruise.standard': 'Adventurer',
+    'admin.cruise.premium': 'Expedition',
     'admin.cruise.status': 'Status',
     'admin.cruise.active': 'Active',
     'admin.cruise.inactive': 'Inactive',
@@ -773,7 +759,7 @@ const translations = {
     // Marine Life Section
     'marine.title': 'Esto Es Lo Que Verás Con Nosotros',
     'marine.description': 'Únete a la aventura a bordo de Quetzal y presencia la impresionante vida marina—exactamente lo que nuestros huéspedes ven en esta inolvidable experiencia submarina.',
-    'marine.cta': 'Ver Próximos Viajes',
+    'marine.cta': 'Reserva tu Expedición',
 
     // Destinations Grid
     'destinations.title': 'Nuestros Destinos',
@@ -785,20 +771,6 @@ const translations = {
     'destinations.cortez.title': 'MAR DE CORTÉS',
     'destinations.cortez.description': '¡Visita uno de los lugares más hermosos del planeta, con días llenos de agua salada y sol, montañas, vida silvestre, cultura e historia!',
     'destinations.explore': 'Explorar Destino',
-
-    // Upcoming Trips
-    'trips.title': 'Próximo Destino',
-    'trips.subtitle': 'Guiados por Experiencia Perfeccionados por Pasión',
-    'trips.trip1.title': 'Bahía Magdalena e Islas Socorro',
-    'trips.trip1.dates': '16 OCT 2025 - 30 OCT 2025',
-    'trips.trip1.price': 'desde $5,199 USD por persona',
-    'trips.trip2.title': 'Islas Socorro (Revillagigedo)',
-    'trips.trip2.dates': '06 ENE 2026 - 14 ENE 2026',
-    'trips.trip2.price': 'desde $3,500 USD por persona',
-    'trips.trip3.title': 'Viaje al Mar de Cortés',
-    'trips.trip3.dates': '09 JUL 2026 - 16 JUL 2026',
-    'trips.trip3.price': 'desde $2,350 USD por persona',
-    'trips.details': 'Detalles del Viaje y Precios',
 
     // Testimonials
     'testimonials.title': 'Lo Que Dicen Nuestros Huéspedes',
@@ -1248,7 +1220,7 @@ const translations = {
     // Booking Info Cards
     'booking.info.types': 'Tipos de Reserva',
     'booking.info.individual': 'Pase Individual',
-    'booking.info.individualDesc': 'Reserva tu lugar en nuestras expediciones compartidas. Elige entre tres niveles de confort: Basic ($2,500), Standard ($3,000) o Premium ($3,500). Hasta 18 pasajeros por viaje.',
+    'booking.info.individualDesc': 'Reserva tu lugar en nuestras expediciones compartidas. Elige entre tres niveles de confort: Explorer ($2,500), Adventurer ($3,000) o Expedition ($3,500). Hasta 18 pasajeros por viaje.',
     'booking.info.half': 'Medio Charter',
     'booking.info.halfDesc': 'Reserva en grupo y ahorra. Por cada 8 espacios pagados, recibe 1 cortesía. Ideal para clubes de buceo, familias y grupos de amigos.',
     'booking.info.full': 'Full Charter',
@@ -1264,9 +1236,9 @@ const translations = {
     'booking.info.confirmDesc': 'Revisa tu selección, completa el pago y recibe tu confirmación de reserva al instante por correo electrónico.',
 
     // Tier Pricing Keys
-    'booking.tier.basic': 'Básico',
-    'booking.tier.standard': 'Estándar',
-    'booking.tier.premium': 'Premium',
+    'booking.tier.basic': 'Explorer',
+    'booking.tier.standard': 'Adventurer',
+    'booking.tier.premium': 'Expedition',
     'booking.tier.selectHint': 'Selecciona un nivel de precio para continuar',
     'booking.tier.selected': 'Nivel seleccionado',
     'booking.payment.freeSpaces': 'Espacios gratuitos',
@@ -1393,9 +1365,9 @@ const translations = {
     'admin.cruise.route': 'Ruta',
     'admin.cruise.boat': 'Barco',
     'admin.cruise.dives': 'Inmersiones',
-    'admin.cruise.basic': 'Básico',
-    'admin.cruise.standard': 'Estándar',
-    'admin.cruise.premium': 'Premium',
+    'admin.cruise.basic': 'Explorer',
+    'admin.cruise.standard': 'Adventurer',
+    'admin.cruise.premium': 'Expedition',
     'admin.cruise.status': 'Estado',
     'admin.cruise.active': 'Activo',
     'admin.cruise.inactive': 'Inactivo',

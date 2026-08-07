@@ -4,8 +4,8 @@ import { Footer } from '@/components/footer'
 import { AccountPageClient } from '@/components/account/account-page-client'
 
 export const metadata: Metadata = {
-  title: 'My Account | Quetzal Liveaboard',
-  description: 'Manage your profile and view your reservation history.',
+  title: 'My Account — Quetzal Liveaboard',
+  description: 'Manage your expedition bookings, update your profile, and track reservation history with Quetzal Liveaboard. Your diving adventure starts here.',
 }
 
 export default function AccountPage() {

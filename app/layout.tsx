@@ -22,9 +22,13 @@ const _playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'Quetzal Liveaboard - Luxury Diving Expeditions',
-  description: 'Experience the greatest liveaboard adventure in the Pacific Ocean. Diving expeditions to Socorro Islands, Sea of Cortez, and Bahía Magdalena.',
-  
+  title: 'Quetzal Liveaboard — Luxury Diving Expeditions in Baja California',
+  description: 'Dive with giant mantas, whale sharks, and hammerhead sharks in Baja, Mexico. Luxury liveaboard expeditions to Socorro Islands, Sea of Cortez, and Magdalena Bay.',
+  openGraph: {
+    title: 'Quetzal Liveaboard — Luxury Diving Expeditions in Baja California',
+    description: 'Dive with giant mantas, whale sharks, and hammerhead sharks in Baja, Mexico. Luxury liveaboard expeditions to Socorro Islands, Sea of Cortez, and Magdalena Bay.',
+    siteName: 'Quetzal Liveaboard',
+  },
   icons: {
     icon: '/isologo-blanco.svg',
     apple: '/apple-icon.png',

@@ -27,25 +27,57 @@ const values = [
 
 const galleryImages = [
   {
-    src: "/images/Habitaciones/cabin-01.webp",
+    src: "/images/Habitaciones/cuadruplepremium1.webp",
     category: "staterooms" as const,
   },
   {
-    src: "/images/Habitaciones/cabin-02.webp",
+    src: "/images/Habitaciones/cuadruplepremium2.webp",
     category: "staterooms" as const,
   },
   {
-    src: "/images/Habitaciones/cabin-03.webp",
+    src: "/images/Habitaciones/cuadruplesencilla.webp",
     category: "staterooms" as const,
   },
   {
-    src: "/images/Habitaciones/cabin-04.webp",
+    src: "/images/Habitaciones/cuadruplesencilla2.webp",
     category: "staterooms" as const,
   },
-  { src: "/images/Interior/interior-01.webp", category: "interior" as const },
-  { src: "/images/Interior/interior-02.webp", category: "interior" as const },
-  { src: "/images/Interior/interior-03.webp", category: "interior" as const },
-  { src: "/images/Interior/interior-04.webp", category: "interior" as const },
+  {
+    src: "/images/Habitaciones/sencilladoble.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/sencilladoble2.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/barrabebidas.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/comedor.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/comedor2.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/comedor3.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/estancia.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/sala.webp",
+    category: "staterooms" as const,
+  },
+  {
+    src: "/images/Habitaciones/vino.webp",
+    category: "staterooms" as const,
+  },
 ];
 
 const specs = [
@@ -73,15 +105,28 @@ export default function AboutPage() {
     <main className="min-h-screen">
       <Navigation />
 
-      {/* About Hero */}
-      <section className="pt-32 pb-16 bg-muted/30">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl font-normal text-foreground mb-4">
-            {t("about.title")}
-          </h1>
-          <p className="font-sans text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t("about.subtitle")}
-          </p>
+      {/* About Hero — Video Background */}
+      <section className="relative h-[70vh] min-h-[500px] w-full overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/exteriornave/bannerpromo2.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-primary/60" />
+        <div className="relative z-10 flex h-full items-center justify-center">
+          <div className="container mx-auto px-4 lg:px-8 text-center">
+            <h1 className="font-serif text-4xl md:text-6xl font-normal text-white mb-4 tracking-tight">
+              {t("about.title")}
+            </h1>
+            <p className="font-sans text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+              {t("about.subtitle")}
+            </p>
+          </div>
         </div>
       </section>
 
@@ -292,6 +337,21 @@ export default function AboutPage() {
               {t("boat.gallery.subtitle")}
             </p>
           </div>
+
+          {/* Featured Video */}
+          <div className="mb-8 rounded-lg overflow-hidden shadow-lg">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className="w-full aspect-video object-cover"
+            >
+              <source src="/experiencia1.mp4" type="video/mp4" />
+            </video>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {galleryImages.map((image) => (
               <div

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Riesgos de Buceo | Quetzal Liveaboard',
-  description: 'Diving risks, safety guidelines, and guest responsibilities for Quetzal Liveaboard expeditions.',
+  title: 'Diving Risks & Safety — Quetzal Liveaboard',
+  description: 'Essential safety guidelines, diving risks, and passenger responsibilities for Quetzal Liveaboard expeditions in Socorro, Sea of Cortez, and Magdalena Bay.',
 }
 
 import { DivingRisksContent } from '@/components/diving-risks-content'

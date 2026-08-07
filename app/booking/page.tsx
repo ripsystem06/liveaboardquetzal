@@ -5,8 +5,8 @@ import { BookingPageClient } from '@/components/booking/booking-page-client'
 import { ReservationInfoCards } from '@/components/booking/reservation-info-cards'
 
 export const metadata: Metadata = {
-  title: 'Book Your Expedition | Quetzal Liveaboard',
-  description: 'Reserve your liveaboard expedition to the Sea of Cortez, Socorro Islands, and Baja California. Choose from 3 curated itineraries.',
+  title: 'Book Your Expedition — Quetzal Liveaboard',
+  description: 'Reserve your diving expedition to Socorro Islands, Sea of Cortez, and Magdalena Bay. Curated tiers aboard the finest liveaboard in Baja California, Mexico.',
 }
 
 export default async function BookingPage({

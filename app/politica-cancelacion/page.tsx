@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Política de Cancelación | Quetzal Liveaboard',
-  description: 'Cancellation and refund policy for Quetzal Liveaboard expeditions.',
+  title: 'Cancellation Policy — Quetzal Liveaboard',
+  description: 'Cancellation terms, refund schedules, and rescheduling options for Quetzal Liveaboard diving expeditions. Know before you book your Baja California adventure.',
 }
 
 import { CancellationContent } from '@/components/cancellation-content'
