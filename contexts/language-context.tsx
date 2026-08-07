@@ -30,12 +30,7 @@ const translations = {
     'nav.signOut': 'Sign out',
 
     // Hero
-    'hero.title': 'Quetzal',
-    'hero.subtitle': 'THE GREATEST LIVEABOARD ADVENTURE IN THE OCEAN AWAITS YOU',
-    
-    // Hero
-    'hero.button': 'View Calendar',
-    
+    'hero.tagline': 'Diving Expeditions · Baja California · México',
     // Experience Section
     'experience.title': 'What Awaits You Onboard',
     'experience.subtitle': 'Every moment aboard the Quetzal is an invitation to the extraordinary.',
@@ -746,10 +741,7 @@ const translations = {
     'nav.signOut': 'Cerrar sesión',
 
     // Hero
-    'hero.title': 'Quetzal',
-    'hero.subtitle': 'LA MEJOR AVENTURA DE BUCEO EN EL OCÉANO TE ESPERA',
-    'hero.button': 'Ver Calendario',
-
+    'hero.tagline': 'Expediciones de Buceo · Baja California · México',
     // Experience Section
     'experience.title': 'Lo Que Te Espera A Bordo',
     'experience.subtitle': 'Cada momento a bordo del Quetzal es una invitación a lo extraordinario.',

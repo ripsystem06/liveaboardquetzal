@@ -1,8 +1,6 @@
 'use client'
 
-import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLanguage } from '@/contexts/language-context'
 
 const videos = [
@@ -16,6 +14,16 @@ export function Hero() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const { t } = useLanguage()
 
+  // Stable ref setter — avoids re-running on every render
+  const setVideoRef = useCallback((el: HTMLVideoElement | null, i: number) => {
+    videoRefs.current[i] = el
+    // Preload and loop: ensures video is ready and never sits static
+    if (el) {
+      el.preload = 'auto'
+      el.loop = true
+    }
+  }, [])
+
   // Rotate videos every 9 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,15 +32,15 @@ export function Hero() {
     return () => clearInterval(interval)
   }, [])
 
-  // Play current video, reset others
+  // Play current video, pause others (no time reset — loop handles it)
   useEffect(() => {
     videoRefs.current.forEach((ref, i) => {
       if (!ref) return
       if (i === currentVideoIndex) {
-        ref.play().catch(() => {})
+        // Only call play if paused — prevents unnecessary play() on already-playing video
+        if (ref.paused) ref.play().catch(() => {})
       } else {
         ref.pause()
-        ref.currentTime = 0
       }
     })
   }, [currentVideoIndex])
@@ -44,7 +52,7 @@ export function Hero() {
         {videos.map((video, i) => (
           <video
             key={video.src}
-            ref={(el) => { videoRefs.current[i] = el }}
+            ref={(el) => setVideoRef(el, i)}
             muted
             playsInline
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
@@ -61,19 +69,12 @@ export function Hero() {
       {/* Content */}
       <div className="relative z-10 flex h-full items-end pb-16 md:pb-24">
         <div className="container mx-auto px-4 lg:px-8 text-left">
-          <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl font-normal text-white mb-8 tracking-tight leading-none whitespace-nowrap">
+          <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl font-normal text-white mb-4 tracking-tight leading-none whitespace-nowrap">
             MORE THAN A JOURNEY
           </h2>
-          
-          <Button 
-            asChild 
-            size="default"
-            className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6 py-5 font-semibold font-sans"
-          >
-            <Link href="/contacto?subject=booking">
-              {t('hero.button')}
-            </Link>
-          </Button>
+          <p className="font-sans text-lg md:text-xl text-white/80 max-w-2xl">
+            {t('hero.tagline')}
+          </p>
         </div>
       </div>
     </section>
