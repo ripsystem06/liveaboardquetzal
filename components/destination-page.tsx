@@ -16,7 +16,7 @@ interface DestinationPageProps { prefix: DestinationPrefix }
 const heroImageMap: Record<DestinationPrefix, string> = {
   socorro: 'https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=1200&q=80',
   cortez: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
-  magbay: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?w=1200&q=80',
+  magbay: '/ballena2.jpeg',
 }
 
 // ── Description section images ──────────────────────────────────────────────
@@ -557,8 +557,8 @@ function GalleryImages({ prefix }: { prefix: DestinationPrefix }) {
   return (
     <>
       {images.map((img, i) => (
-        <section key={img.src} className="h-screen w-full relative">
-          <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="100vw" />
+        <section key={img.src} className="h-[60vh] md:h-screen w-full relative max-h-[700px]">
+          <Image src={img.src} alt={img.alt} fill className={`object-cover ${prefix === 'magbay' && i === 0 ? 'object-left md:object-center' : ''}`} sizes="100vw" />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-transparent" />
           <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16">
@@ -868,7 +868,7 @@ function CTASection({ prefix }: { prefix: DestinationPrefix }) {
               <span className="font-sans text-sm text-muted-foreground">{socialProof}</span>
             </div>
           )}
-          <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold text-lg px-10 py-7 rounded-2xl">
+          <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold text-lg px-6 sm:px-10 py-4 sm:py-7 rounded-2xl max-w-full whitespace-normal text-center">
             <Link href="/contacto">{ctaButton}<ArrowRight className="ml-2 h-5 w-5" /></Link>
           </Button>
         </FadeIn>

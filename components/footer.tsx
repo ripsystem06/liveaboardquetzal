@@ -121,30 +121,30 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Quetzal Liveaboard.{" "}
             {t("footer.rights")}
           </p>
-          <div className="flex gap-6 font-sans text-sm flex-wrap justify-center md:justify-end">
+          <div className="flex gap-x-6 gap-y-3 font-sans text-sm flex-wrap justify-center md:justify-end">
             <Link
               href="/privacidad"
-              className="text-primary-foreground/60 hover:text-accent transition-colors"
+              className="text-primary-foreground/60 hover:text-accent transition-colors py-2 min-h-[44px] inline-flex items-center"
             >
               {t("footer.privacy")}
             </Link>
             <Link
               href="/terminos"
-              className="text-primary-foreground/60 hover:text-accent transition-colors"
+              className="text-primary-foreground/60 hover:text-accent transition-colors py-2 min-h-[44px] inline-flex items-center"
             >
               {t("footer.terms")}
             </Link>
             <Link
               href="/politica-cancelacion"
-              className="text-primary-foreground/60 hover:text-accent transition-colors"
+              className="text-primary-foreground/60 hover:text-accent transition-colors py-2 min-h-[44px] inline-flex items-center"
             >
               {t("footer.cancellation")}
             </Link>
             <Link
               href="/riesgos-buceo"
-              className="text-primary-foreground/60 hover:text-accent transition-colors"
+              className="text-primary-foreground/60 hover:text-accent transition-colors py-2 min-h-[44px] inline-flex items-center"
             >
-              {t("footer.divingRisks")}
+              {t("footer.risks")}
             </Link>
           </div>
         </div>

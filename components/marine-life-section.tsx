@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -7,13 +8,47 @@ import { ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 
 const marineImages = [
-  { src: '/images/panoramicas/Manta Clariones.webp', alt: 'Giant manta ray in crystal-clear waters', span: 'col-span-2 row-span-2' },
-  { src: '/images/panoramicas/Delfin Kike.webp', alt: 'Dolphins swimming alongside the Quetzal', span: '' },
+  { src: '/images/panoramicas/Manta Clariones.webp', alt: 'Giant manta ray in crystal-clear waters', span: 'md:col-span-2 md:row-span-2' },
   { src: '/images/panoramicas/Puntas blancas .webp', alt: 'Whitetip reef sharks in Socorro', span: '' },
+  { src: '/images/panoramicas/Delfin Kike.webp', alt: 'Dolphins swimming alongside the Quetzal', span: '' },
+  { src: '/images/panoramicas/Manta el Boiler 1.webp', alt: 'Giant manta ray gliding through crystal-clear waters at El Boiler', span: '' },
+  { src: '/images/panoramicas/Puntas blancas 1.webp', alt: 'Whitetip reef sharks resting on the ocean floor', span: '' },
+  { src: '/images/panoramicas/Puntas blancas 4.webp', alt: 'Whitetip reef sharks in crystal-clear Socorro waters', span: '' },
+  { src: '/images/panoramicas/Puntas blancas Balcón.webp', alt: 'Whitetip reef sharks from the balcony view', span: '' },
 ]
 
 export function MarineLifeSection() {
   const { t } = useLanguage()
+  const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set())
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    const observers = imageRefs.current.map((ref, index) => {
+      if (!ref) return null
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleImages((prev) => new Set(prev).add(index))
+            }
+          })
+        },
+        {
+          threshold: 0.2,
+          rootMargin: '0px 0px -50px 0px',
+        }
+      )
+
+      observer.observe(ref)
+      return observer
+    })
+
+    return () => {
+      observers.forEach((observer) => observer?.disconnect())
+    }
+  }, [])
+
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
@@ -40,13 +75,23 @@ export function MarineLifeSection() {
             </Button>
           </div>
 
-          {/* Right — Marine Life Gallery */}
+          {/* Right — Marine Life Gallery with fade-in animation */}
           <div className="relative">
-            <div className="grid grid-cols-2 gap-3 md:auto-rows-[200px]">
-              {marineImages.map((img) => (
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              {marineImages.map((img, index) => (
                 <div
                   key={img.src}
-                  className={`${img.span} relative overflow-hidden rounded-lg group aspect-[4/3] md:aspect-auto`}
+                  ref={(el) => {
+                    imageRefs.current[index] = el
+                  }}
+                  className={`${img.span} relative overflow-hidden rounded-lg group transition-all duration-700 ease-out aspect-[4/3] ${
+                    visibleImages.has(index)
+                      ? 'opacity-100 translate-y-0 scale-100'
+                      : 'opacity-0 translate-y-12 scale-95'
+                  }`}
+                  style={{
+                    transitionDelay: `${(index % 4) * 100}ms`,
+                  }}
                 >
                   <Image
                     src={img.src}

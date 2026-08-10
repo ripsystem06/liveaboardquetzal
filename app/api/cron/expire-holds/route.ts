@@ -9,10 +9,14 @@ import { sendExpiryEmail } from '@/lib/email'
  * Runs daily at midnight via vercel.json.
  */
 export async function GET(request: NextRequest) {
-  // Verify cron secret if configured
+  // CRON_SECRET is REQUIRED — refuse to run without it
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    console.error('CRON_SECRET not configured — refusing to run cron job')
+    return Response.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
+  }
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

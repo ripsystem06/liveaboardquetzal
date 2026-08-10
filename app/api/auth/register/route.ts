@@ -11,10 +11,18 @@ import { sendWelcomeEmail } from '@/lib/email'
  * Logout is handled by Auth.js's signOut().
  */
 export async function POST(request: NextRequest) {
-  // CSRF: verify same-origin request
+  // CSRF: verify same-origin request (strict host comparison)
   const origin = request.headers.get('origin')
   const host = request.headers.get('host')
-  if (origin && host && !origin.endsWith(host)) {
+  if (!origin || !host) {
+    return Response.json({ error: 'Invalid request' }, { status: 403 })
+  }
+  try {
+    const originHost = new URL(origin).host
+    if (originHost !== host) {
+      return Response.json({ error: 'Invalid origin' }, { status: 403 })
+    }
+  } catch {
     return Response.json({ error: 'Invalid origin' }, { status: 403 })
   }
 

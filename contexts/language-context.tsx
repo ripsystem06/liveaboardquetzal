@@ -35,7 +35,7 @@ const translations = {
     'experience.title': 'What Awaits You Onboard',
     'experience.subtitle': 'Every moment aboard the Quetzal is an invitation to the extraordinary.',
     'experience.cta': 'Discover more',
-    'experience.item1': 'Dive into the Unknown',
+    'experience.item1': 'Leave the Surface Behind',
     'experience.item1Desc': 'Descend into a world few ever see. Every dive in Revillagigedo reveals something new — from volcanic seamounts to endless blue. Our expert divemasters guide you through the most spectacular sites in the archipelago.',
     'experience.item2': 'Swim with Giants',
     'experience.item2Desc': 'Share the water with graceful giant mantas, curious dolphins, and migrating whales. These encounters are not just sightings — they are moments that stay with you forever.',
@@ -140,6 +140,10 @@ const translations = {
     // Deck Plans
     'boat.deck.title': 'Explore Your Space',
     'boat.deck.subtitle': 'From your cabin to the sun deck, every corner of the Quetzal is built for your comfort and your curiosity.',
+    'boat.deck.profile': 'Profile View',
+    'boat.deck.mainDeck': 'Main Deck',
+    'boat.deck.upperDeck': 'Upper Deck',
+    'boat.deck.bottomLayout': 'Bottom Layout',
 
     'boat.comfort.title': 'Life Onboard',
     'boat.comfort.subtitle': 'Everything you need to focus on what matters — your dives, your rest, and your connection with the sea.',
@@ -227,7 +231,7 @@ const translations = {
     'socorro.dayAtSea.evening': 'As the sun dips toward the Pacific, you might squeeze in a fourth dive — a twilight descent where the reef transforms and nocturnal creatures emerge. Then it\'s back on deck for a warm shower, a drink in hand, and a dinner that tastes like victory. You end the day on the bow, under a sky so full of stars it feels like you could touch them.',
     'socorro.dayAtSea.note': 'Schedules are flexible and weather-dependent — the captain and dive leader adjust each day to give you the best possible conditions.',
     'socorro.cta': 'Ready to Meet the Mantas?',
-    'socorro.ctaButton': 'Reserve Your Socorro Expedition',
+    'socorro.ctaButton': 'Reserve Your Expedition Now!',
     'socorro.socialProof': '+500 divers have experienced Revillagigedo with us',
     'socorro.areas.sanBenedicto': 'Your journey begins at San Benedicto — a volcanic island that hides the most famous manta encounters on the planet. Every dive here gives you the chance to meet giant oceanic mantas, sharks, and pelagic species that make this island an unmissable stop.',
     'socorro.areas.rocaPartida': 'In the middle of the open ocean rises Roca Partida — a towering volcanic monolith surrounded by deep water. Its underwater walls concentrate an extraordinary amount of marine life, and every dive here feels completely different from the last.',
@@ -309,7 +313,7 @@ const translations = {
     'cortez.areas.northernIslands': 'Further north, the islands grow wilder and the marine life more dramatic. This is where you\'ll find El Bajo — three seamounts rising from the deep that attract hundreds of hammerhead sharks in formation. The isolation means fewer boats and more intimate encounters, from Cortez angelfish that exist nowhere else on Earth to sea lions so relaxed they\'ll swim circles around you.',
     'cortez.areas.eastCape': 'The East Cape is liveaboard-only territory — pristine, powerful, and reserved for divers who want more. Stronger currents bring bigger pelagics: giant diamond stingrays, bull sharks, and massive schools of jacks. You\'ll earn every dive here, and every dive will earn a permanent place in your memory.',
     'cortez.cta': 'Ready to Dive the Aquarium of the World?',
-    'cortez.ctaButton': 'Reserve Your Sea of Cortez Expedition',
+    'cortez.ctaButton': 'Reserve Your Expedition Now!',
     'cortez.socialProof': '+500 divers have explored the Sea of Cortez with us',
 
     // Magdalena Bay
@@ -341,7 +345,7 @@ const translations = {
     'magbay.conservation.protectedArea': 'Bahía Magdalena Protected Lagoon',
     'magbay.conservation.designation': 'Part of the UNESCO World Heritage Site',
     'magbay.gallery.title': 'Gallery',
-    'magbay.gallery.images': '[{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"The protected lagoon of Bahía Magdalena at sunset"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Whitetip reef sharks resting on the sandy bottom"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curious whitetip sharks patrolling the reef"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Panoramic view from the Balcón dive site"}]',
+    'magbay.gallery.images': '[{"src":"/ballena1.jpeg","alt":"Gray whale breaching in the protected waters of Magdalena Bay"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Whitetip reef sharks resting on the sandy bottom"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curious whitetip sharks patrolling the reef"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Panoramic view from the Balcón dive site"}]',
     'magbay.dayInLagoon.heading': 'Your Day in the Lagoon',
     'magbay.dayInLagoon.lagoonHeading': 'The Lagoon',
     'magbay.dayInLagoon.archipelagoHeading': 'The Archipelago',
@@ -350,7 +354,7 @@ const translations = {
     'magbay.dayInLagoon.archipelagoPhase': 'The second half shifts entirely. You leave the lagoon behind and the Quetzal sails toward Revillagigedo. Your days become the classic liveaboard rhythm: early morning dives with mantas, afternoon drift dives through hammerhead schools, and evenings on deck watching the sunset paint the volcanic islands. Same boat, same crew — but now you\'re in the domain of giant pelagics.',
     'magbay.dayInLagoon.note': 'Schedules are flexible and weather-dependent — the captain and dive leader adjust each day to give you the best possible conditions.',
     'magbay.cta': 'Ready to Meet the Gray Whales?',
-    'magbay.ctaButton': 'Reserve Your Mag Bay Expedition',
+    'magbay.ctaButton': 'Reserve Your Expedition Now!',
     'magbay.socialProof': '+500 divers have lived this two-world expedition',
 
     // FAQ Page
@@ -493,6 +497,8 @@ const translations = {
     'booking.cruise.signIn': 'Sign in',
     'booking.cruise.selected': 'Selected',
     'booking.cruise.departure': 'Departure',
+    'booking.cruise.arrival': 'Return to Port',
+    'booking.cruise.returnToPort': 'Disembarkation day',
     'booking.cruise.route': 'Route',
     'booking.cruise.pricePerPerson': 'per person',
     'booking.cruise.boat': 'Ship',
@@ -732,7 +738,7 @@ const translations = {
     'experience.title': 'Lo Que Te Espera A Bordo',
     'experience.subtitle': 'Cada momento a bordo del Quetzal es una invitación a lo extraordinario.',
     'experience.cta': 'Descubre más',
-    'experience.item1': 'Sumérgete en lo Desconocido',
+    'experience.item1': 'Dejá la Superficie Atrás',
     'experience.item1Desc': 'Desciende a un mundo que pocos llegan a ver. Cada inmersión en Revillagigedo revela algo nuevo — desde montañas submarinas volcánicas hasta un azul infinito. Nuestros guías expertos te llevan por los sitios más espectaculares del archipiélago.',
     'experience.item2': 'Nada con Gigantes',
     'experience.item2Desc': 'Comparte el agua con majestuosas mantas gigantes, delfines curiosos y ballenas migratorias. Estos encuentros no son solo avistamientos — son momentos que se quedan contigo para siempre.',
@@ -837,6 +843,10 @@ const translations = {
     // Planos de Cubierta
     'boat.deck.title': 'Explorá Tu Espacio',
     'boat.deck.subtitle': 'Desde tu cabina hasta la cubierta superior, cada rincón del Quetzal está construido para tu comodidad y tu curiosidad.',
+    'boat.deck.profile': 'Vista de Perfil',
+    'boat.deck.mainDeck': 'Cubierta Principal',
+    'boat.deck.upperDeck': 'Cubierta Superior',
+    'boat.deck.bottomLayout': 'Distribución de Fondo',
 
     'boat.comfort.title': 'Vida a Bordo',
     'boat.comfort.subtitle': 'Todo lo que necesitás para concentrarte en lo que importa — tus inmersiones, tu descanso, y tu conexión con el mar.',
@@ -924,7 +934,7 @@ const translations = {
     'socorro.dayAtSea.evening': 'Cuando el sol empieza a caer sobre el Pacífico, capaz que hacés una cuarta inmersión — un descenso al atardecer donde el arrecife se transforma y las criaturas nocturnas emergen. Después volvés a cubierta para una ducha caliente, un trago en la mano, y una cena que sabe a victoria. Terminás el día en la proa, bajo un cielo tan lleno de estrellas que parece que podés tocarlas.',
     'socorro.dayAtSea.note': 'Los horarios son flexibles y dependen del clima — el capitán y el líder de buceo ajustan cada día para darte las mejores condiciones posibles.',
     'socorro.cta': '¿Listo para Conocer a las Mantas?',
-    'socorro.ctaButton': 'Reservá Tu Expedición a Socorro',
+    'socorro.ctaButton': '¡Reservá Tu Expedición Ahora!',
     'socorro.socialProof': '+500 buzos han vivido Revillagigedo con nosotros',
     'socorro.areas.sanBenedicto': 'Tu viaje empieza en San Benedicto — una isla volcánica que esconde los encuentros con mantas más famosos del planeta. Cada inmersión acá te da la oportunidad de encontrarte con mantas oceánicas gigantes, tiburones y especies pelágicas que hacen de esta isla una parada imprescindible.',
     'socorro.areas.rocaPartida': 'En medio del océano abierto emerge Roca Partida — un imponente monolito volcánico rodeado por aguas profundas. Sus paredes submarinas concentran una cantidad extraordinaria de vida marina, y cada inmersión acá se siente completamente distinta a la anterior.',
@@ -1006,7 +1016,7 @@ const translations = {
     'cortez.areas.northernIslands': 'Más al norte, las islas se vuelven más salvajes y la vida marina más dramática. Acá es donde encontrás El Bajo — tres montes marinos que emergen de las profundidades y atraen cientos de tiburones martillo en formación. El aislamiento significa menos barcos y encuentros más íntimos, desde peces ángel de Cortés que no existen en ningún otro lugar del mundo hasta lobos marinos tan relajados que van a nadar en círculos a tu alrededor.',
     'cortez.areas.eastCape': 'El East Cape es territorio solo para liveaboard — prístino, poderoso, y reservado para buzos que quieren más. Corrientes más fuertes traen pelágicos más grandes: rayas diamante gigantes, tiburones toro, y cardúmenes masivos de jureles. Te vas a ganar cada inmersión acá, y cada inmersión se va a ganar un lugar permanente en tu memoria.',
     'cortez.cta': '¿Listo para Bucear en el Acuario del Mundo?',
-    'cortez.ctaButton': 'Reservá Tu Expedición al Mar de Cortés',
+    'cortez.ctaButton': '¡Reservá Tu Expedición Ahora!',
     'cortez.socialProof': '+500 buzos han explorado el Mar de Cortés con nosotros',
 
     // Magdalena Bay
@@ -1038,7 +1048,7 @@ const translations = {
     'magbay.conservation.protectedArea': 'Laguna Protegida Bahía Magdalena',
     'magbay.conservation.designation': 'Parte del Patrimonio Mundial de la UNESCO',
     'magbay.gallery.title': 'Galería',
-    'magbay.gallery.images': '[{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"La laguna protegida de Bahía Magdalena al atardecer"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Tiburones punta blanca descansando en el fondo arenoso"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curiosos tiburones punta blanca patrullando el arrecife"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Vista panorámica desde el sitio de buceo El Balcón"}]',
+    'magbay.gallery.images': '[{"src":"/ballena1.jpeg","alt":"Ballena gris emergiendo en las aguas protegidas de Bahía Magdalena"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Tiburones punta blanca descansando en el fondo arenoso"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curiosos tiburones punta blanca patrullando el arrecife"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Vista panorámica desde el sitio de buceo El Balcón"}]',
     'magbay.dayInLagoon.heading': 'Tu Día en la Laguna',
     'magbay.dayInLagoon.lagoonHeading': 'La Laguna',
     'magbay.dayInLagoon.archipelagoHeading': 'El Archipiélago',
@@ -1047,7 +1057,7 @@ const translations = {
     'magbay.dayInLagoon.archipelagoPhase': 'La segunda mitad cambia por completo. Dejás la laguna atrás y el Quetzal navega hacia Revillagigedo. Tus días se vuelven el ritmo clásico del liveaboard: inmersiones al amanecer con mantas, derivas de la tarde entre cardúmenes de tiburones martillo, y atardeceres en cubierta viendo el sol pintar las islas volcánicas. El mismo barco, la misma tripulación — pero ahora estás en el dominio de los grandes pelágicos.',
     'magbay.dayInLagoon.note': 'Los horarios son flexibles y dependen del clima — el capitán y el líder de buceo ajustan cada día para darte las mejores condiciones posibles.',
     'magbay.cta': '¿Listo para Conocer a las Ballenas Grises?',
-    'magbay.ctaButton': 'Reservá Tu Expedición a Bahía Magdalena',
+    'magbay.ctaButton': '¡Reservá Tu Expedición Ahora!',
     'magbay.socialProof': '+500 buzos han vivido esta expedición de dos mundos',
 
     // FAQ Page
@@ -1190,6 +1200,8 @@ const translations = {
     'booking.cruise.signIn': 'Inicia sesión',
     'booking.cruise.selected': 'Seleccionado',
     'booking.cruise.departure': 'Salida',
+    'booking.cruise.arrival': 'Regreso a Puerto',
+    'booking.cruise.returnToPort': 'Día de desembarque',
     'booking.cruise.route': 'Ruta',
     'booking.cruise.pricePerPerson': 'por persona',
     'booking.cruise.boat': 'Barco',

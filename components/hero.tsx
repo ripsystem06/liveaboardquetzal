@@ -69,7 +69,7 @@ export function Hero() {
       {/* Content */}
       <div className="relative z-10 flex h-full items-end pb-16 md:pb-24">
         <div className="container mx-auto px-4 lg:px-8 text-left">
-          <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl font-normal text-white mb-4 tracking-tight leading-none whitespace-nowrap">
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-normal text-white mb-4 tracking-tight leading-none">
             MORE THAN A JOURNEY
           </h2>
           <p className="font-sans text-lg md:text-xl text-white/80 max-w-2xl">

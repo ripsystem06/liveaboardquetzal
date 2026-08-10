@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -31,31 +32,11 @@ const galleryImages = [
     category: "staterooms" as const,
   },
   {
-    src: "/images/Habitaciones/cuadruplepremium2.webp",
-    category: "staterooms" as const,
-  },
-  {
     src: "/images/Habitaciones/cuadruplesencilla.webp",
     category: "staterooms" as const,
   },
   {
-    src: "/images/Habitaciones/cuadruplesencilla2.webp",
-    category: "staterooms" as const,
-  },
-  {
-    src: "/images/Habitaciones/sencilladoble.webp",
-    category: "staterooms" as const,
-  },
-  {
-    src: "/images/Habitaciones/sencilladoble2.webp",
-    category: "staterooms" as const,
-  },
-  {
     src: "/images/Habitaciones/barrabebidas.webp",
-    category: "staterooms" as const,
-  },
-  {
-    src: "/images/Habitaciones/comedor.webp",
     category: "staterooms" as const,
   },
   {
@@ -100,6 +81,25 @@ const partners = ["p1", "p2", "p3", "p4"] as const;
 
 export default function AboutPage() {
   const { t } = useLanguage();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Fade transition when the "Your Journey Begins" video loops
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleEnded = () => {
+      video.style.opacity = "0";
+      setTimeout(() => {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+        video.style.opacity = "1";
+      }, 300);
+    };
+
+    video.addEventListener("ended", handleEnded);
+    return () => video.removeEventListener("ended", handleEnded);
+  }, []);
 
   return (
     <main className="min-h-screen">
@@ -157,13 +157,17 @@ export default function AboutPage() {
                 {t("about.storyText6")}
               </p>
             </div>
-            <div className="relative overflow-hidden rounded-lg aspect-[4/3]">
-              <Image
-                src="/images/Interior/interior-07.webp"
-                alt="Quetzal Crew"
-                fill
-                className="object-cover"
-              />
+            <div className="relative overflow-hidden rounded-2xl aspect-[4/3] shadow-[inset_0_0_80px_16px_var(--background)]">
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+              >
+                <source src="/experiencia1.mp4" type="video/mp4" />
+              </video>
             </div>
           </div>
         </div>
@@ -236,31 +240,31 @@ export default function AboutPage() {
             {[
               {
                 src: "/images/specsship/vistaperfil.png",
-                label: "Vista de Perfil",
+                labelKey: "boat.deck.profile",
               },
               {
                 src: "/images/specsship/cubiertaprincipal.png",
-                label: "Cubierta Principal",
+                labelKey: "boat.deck.mainDeck",
               },
               {
                 src: "/images/specsship/cubiertasuperior.png",
-                label: "Cubierta Superior",
+                labelKey: "boat.deck.upperDeck",
               },
               {
                 src: "/images/specsship/distribuciondefondo.png",
-                label: "Distribución de Fondo",
+                labelKey: "boat.deck.bottomLayout",
               },
             ].map((plan) => (
               <div key={plan.src} className="relative">
                 <Image
                   src={plan.src}
-                  alt={plan.label}
+                  alt={t(plan.labelKey)}
                   width={800}
                   height={350}
                   className="w-full h-auto border border-gray-300 rounded-lg"
                 />
                 <p className="text-center font-sans text-sm font-semibold text-foreground mt-3 uppercase tracking-wide">
-                  {plan.label}
+                  {t(plan.labelKey)}
                 </p>
               </div>
             ))}
@@ -336,20 +340,6 @@ export default function AboutPage() {
             <p className="font-sans text-lg text-muted-foreground max-w-2xl mx-auto">
               {t("boat.gallery.subtitle")}
             </p>
-          </div>
-
-          {/* Featured Video */}
-          <div className="mb-8 rounded-lg overflow-hidden shadow-lg">
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              className="w-full aspect-video object-cover"
-            >
-              <source src="/experiencia1.mp4" type="video/mp4" />
-            </video>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

@@ -185,7 +185,7 @@ export function BookingFlow({
           <div className="flex gap-1 p-1 bg-muted/50 rounded-full mb-8">
             <button
               onClick={() => setAuthTab('login')}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${
+              className={`flex-1 py-2.5 min-h-[44px] text-sm font-semibold rounded-full transition-all duration-200 ${
                 authTab === 'login'
                   ? 'bg-accent text-accent-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -195,7 +195,7 @@ export function BookingFlow({
             </button>
             <button
               onClick={() => setAuthTab('register')}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${
+              className={`flex-1 py-2.5 min-h-[44px] text-sm font-semibold rounded-full transition-all duration-200 ${
                 authTab === 'register'
                   ? 'bg-accent text-accent-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'

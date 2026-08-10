@@ -115,12 +115,15 @@ export function BookingPageClient({ oauthStep }: { oauthStep?: number }) {
     loginCompleted: isAuthenticated && oauthStep === 2,
   })
 
+  // Advance to step 2 when session becomes authenticated (race-condition fix)
   // Reset to login step when user logs out while on a later step
   useEffect(() => {
-    if (!isAuthenticated && state.step > 1) {
+    if (isAuthenticated && state.step === 1 && !state.loginCompleted) {
+      dispatch({ type: 'LOGIN_COMPLETED' })
+    } else if (!isAuthenticated && state.step > 1) {
       dispatch({ type: 'RESET_TO_LOGIN' })
     }
-  }, [isAuthenticated, state.step])
+  }, [isAuthenticated, state.step, state.loginCompleted])
 
   useEffect(() => {
     async function fetchCruises() {

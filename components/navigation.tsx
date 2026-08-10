@@ -231,19 +231,19 @@ export function Navigation() {
                     </p>
                     <Link
                       href="/destinos/islas-socorro"
-                      className="block text-foreground/80 hover:text-accent py-1 font-normal"
+                      className="block text-foreground/80 hover:text-accent py-3 min-h-[44px] font-normal"
                     >
                       {t("nav.socorro")}
                     </Link>
                     <Link
                       href="/destinos/mar-de-cortes"
-                      className="block text-foreground/80 hover:text-accent py-1 font-normal"
+                      className="block text-foreground/80 hover:text-accent py-3 min-h-[44px] font-normal"
                     >
                       {t("nav.cortez")}
                     </Link>
                     <Link
                       href="/destinos/bahia-magdalena"
-                      className="block text-foreground/80 hover:text-accent py-1 font-normal"
+                      className="block text-foreground/80 hover:text-accent py-3 min-h-[44px] font-normal"
                     >
                       {t("nav.magbay")}
                     </Link>
@@ -399,21 +399,21 @@ export function Navigation() {
               </p>
               <Link
                 href="/destinos/islas-socorro"
-                className="block text-foreground/80 hover:text-accent py-1 font-normal"
+                className="block text-foreground/80 hover:text-accent py-3 min-h-[44px] font-normal"
                 onClick={() => setIsOpen(false)}
               >
                 {t("nav.socorro")}
               </Link>
               <Link
                 href="/destinos/mar-de-cortes"
-                className="block text-foreground/80 hover:text-accent py-1 font-normal"
+                className="block text-foreground/80 hover:text-accent py-3 min-h-[44px] font-normal"
                 onClick={() => setIsOpen(false)}
               >
                 {t("nav.cortez")}
               </Link>
               <Link
                 href="/destinos/bahia-magdalena"
-                className="block text-foreground/80 hover:text-accent py-1 font-normal"
+                className="block text-foreground/80 hover:text-accent py-3 min-h-[44px] font-normal"
                 onClick={() => setIsOpen(false)}
               >
                 {t("nav.magbay")}

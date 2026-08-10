@@ -54,3 +54,11 @@ pnpm-workspace.yaml
 
 # CodeGraph index
 .codegraph/
+.playwright-mcp/
+*.MP4
+*.MP4
+Dia_de_buceo.md
+Informacion_del_area.md
+quetzal-home-top.png
+revisa.png
+mobile-*.png

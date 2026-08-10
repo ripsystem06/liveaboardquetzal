@@ -1,6 +1,6 @@
 'use client'
 
-import { ShipWheel, Anchor, CalendarArrowDown, Fish, Clock, Sunrise, Sun, Moon } from 'lucide-react'
+import { ShipWheel, Anchor, Fish, Clock, Sunrise, Sun, Moon } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import type { Cruise } from './booking-page-client'
@@ -47,13 +47,13 @@ export function TripDetailsModal({ cruise, embarkDate, onClose }: TripDetailsMod
 
             <div className="rounded-xl bg-muted/40 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <CalendarArrowDown size={14} className="text-accent" />
+                <Anchor size={14} className="text-accent" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t('booking.cruise.departure')}
+                  {t('booking.cruise.arrival')}
                 </span>
               </div>
-              <p className="text-sm font-semibold text-primary">{formatDate(cruise.departureDate)}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">→ {formatDate(cruise.returnDate)}</p>
+              <p className="text-sm font-semibold text-primary">{formatDate(cruise.returnDate)}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('booking.cruise.returnToPort')}</p>
             </div>
           </div>
 
@@ -123,25 +123,6 @@ export function TripDetailsModal({ cruise, embarkDate, onClose }: TripDetailsMod
             </p>
           </div>
 
-          {/* Duration bar */}
-          <div className="rounded-xl bg-accent/5 border border-accent/10 p-4">
-            <div className="flex items-center justify-between text-sm">
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Departure</p>
-                <p className="font-semibold text-primary">{cruise.departureDate}</p>
-              </div>
-              <div className="flex-1 mx-4">
-                <div className="h-1 rounded-full bg-accent/20 relative">
-                  <div className="absolute inset-0 rounded-full bg-accent/40" />
-                </div>
-                <p className="text-xs text-center text-muted-foreground mt-1">9 days · {cruise.dives} dive days</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Return</p>
-                <p className="font-semibold text-primary">{cruise.returnDate}</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
