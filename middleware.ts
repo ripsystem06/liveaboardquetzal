@@ -56,11 +56,11 @@ export default auth((request: NextRequest) => {
     )
   }
 
-  // CSP: hardened for production, relaxed for dev (Next.js requires unsafe-eval in dev)
+  // CSP: hardened for production, relaxed for dev (Next.js requires unsafe-inline for hydration)
   if (isProduction) {
     response.headers.set(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.vercel-insights.com; frame-ancestors 'none';"
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.vercel-insights.com; frame-ancestors 'none';"
     )
   } else {
     response.headers.set(
