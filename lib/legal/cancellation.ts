@@ -66,6 +66,14 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
         ],
       },
       {
+        heading: 'EU Right of Withdrawal',
+        content: [
+          'If you are a consumer residing in the European Union and you booked your expedition entirely online (distance contract), you may have a statutory right to withdraw from the contract within 14 days of booking without giving any reason, in accordance with EU consumer protection law (Directive 2011/83/EU).',
+          'However, this right does NOT apply if your expedition departure date falls within the 14-day withdrawal period, as travel services with a specific date are exempt. Additionally, once services have been fully performed, the right of withdrawal expires.',
+          'To exercise your right of withdrawal, contact us in writing at info@quetzalliveaboard.com within 14 days of your booking. If eligible, we will refund all payments within 14 days of receiving your withdrawal notice.',
+        ],
+      },
+      {
         heading: 'Contact',
         content: [
           'For cancellation requests or questions about this policy:',
@@ -140,6 +148,14 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
         content: [
           'Nos reservamos el derecho de cancelar cualquier viaje por razones de seguridad, participación insuficiente, problemas mecánicos o cualquier otra razón que comprometa la calidad o seguridad de la expedición. Si Quetzal cancela un viaje por razones distintas a fuerza mayor, los huéspedes recibirán un reembolso completo de todos los pagos realizados, o la opción de transferirse a otra salida sin costo adicional.',
           'Quetzal no es responsable por gastos incurridos en preparación de cualquier viaje cancelado, como boletos de avión, reservas de hotel, compras de equipo o tarifas de visa. Esta es otra razón por la que enfatizamos la importancia del seguro de viaje.',
+        ],
+      },
+      {
+        heading: 'Derecho de Desistimiento (UE)',
+        content: [
+          'Si sos un consumidor residente en la Unión Europea y reservaste tu expedición completamente en línea (contrato a distancia), podés tener el derecho legal de desistir del contrato dentro de los 14 días posteriores a la reserva sin necesidad de justificación, conforme a la legislación de protección al consumidor de la UE (Directiva 2011/83/UE).',
+          'Sin embargo, este derecho NO aplica si la fecha de salida de tu expedición cae dentro del período de desistimiento de 14 días, ya que los servicios de viaje con una fecha específica están exentos. Además, una vez que los servicios se hayan realizado completamente, el derecho de desistimiento expira.',
+          'Para ejercer tu derecho de desistimiento, contactanos por escrito en info@quetzalliveaboard.com dentro de los 14 días posteriores a tu reserva. Si corresponde, reembolsaremos todos los pagos dentro de los 14 días posteriores a la recepción de tu notificación de desistimiento.',
         ],
       },
       {

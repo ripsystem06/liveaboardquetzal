@@ -129,6 +129,13 @@ export const divingRisksContent: Record<'en' | 'es', LegalDocument> = {
         ],
       },
       {
+        heading: 'International Travel Advisory',
+        content: [
+          'Quetzal Liveaboard operates exclusively in Mexican waters. All diving activities are governed by Mexican maritime and safety regulations. Regardless of your country of residence — including the United States, Canada, and European Union member states — by booking an expedition with us, you acknowledge that the expedition takes place in Mexico and that Mexican safety standards and liability laws apply.',
+          'We strongly advise all international guests to consult their local government travel advisories before booking. The U.S. Department of State (travel.state.gov), the UK Foreign Office (gov.uk/foreign-travel-advice), and the European Union all provide updated travel information for Mexico.',
+        ],
+      },
+      {
         heading: 'Contact',
         content: [
           'If you have questions about diving safety, certification requirements, or any content on this page, please reach out:',
@@ -266,6 +273,13 @@ export const divingRisksContent: Record<'en' | 'es', LegalDocument> = {
         content: [
           'Antes de participar en cualquier actividad de buceo, cada huésped debe firmar un Acuerdo de Liberación de Responsabilidad y Asunción de Riesgos. Este documento reconoce los riesgos descritos anteriormente y libera a Quetzal Liveaboard, sus propietarios, empleados y agentes de responsabilidad por lesiones o daños derivados de los riesgos inherentes al buceo.',
           'Se puede solicitar una copia de este acuerdo por adelantado contactándonos.',
+        ],
+      },
+      {
+        heading: 'Aviso para Viajeros Internacionales',
+        content: [
+          'Quetzal Liveaboard opera exclusivamente en aguas mexicanas. Todas las actividades de buceo se rigen por las regulaciones marítimas y de seguridad mexicanas. Independientemente de tu país de residencia — incluyendo Estados Unidos, Canadá y los estados miembros de la Unión Europea — al reservar una expedición con nosotros, reconocés que la expedición se realiza en México y que aplican las leyes mexicanas de seguridad y responsabilidad civil.',
+          'Recomendamos encarecidamente a todos los huéspedes internacionales consultar los avisos de viaje de su gobierno local antes de reservar. El Departamento de Estado de EE.UU. (travel.state.gov), la Cancillería del Reino Unido (gov.uk/foreign-travel-advice) y la Unión Europea ofrecen información actualizada sobre viajes a México.',
         ],
       },
       {

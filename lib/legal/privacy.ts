@@ -13,7 +13,7 @@ export interface LegalDocument {
 export const privacyContent: Record<'en' | 'es', LegalDocument> = {
   en: {
     title: 'Privacy Policy',
-    lastUpdated: 'July 15, 2026',
+    lastUpdated: 'August 10, 2026',
     sections: [
       {
         heading: 'Who We Are',
@@ -131,6 +131,19 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
         ],
       },
       {
+        heading: 'Your CCPA Rights (California Residents)',
+        content: [
+          'If you are a resident of California, USA, the California Consumer Privacy Act (CCPA) grants you specific rights regarding your personal information. We collect the following categories of personal data: identifiers (name, email, phone, address), commercial information (booking records, transaction history), internet activity (browsing data, analytics), and geolocation data (IP-based country/city).',
+          'We do NOT sell your personal information to third parties. We do not share data with advertisers, data brokers, or analytics companies beyond what is strictly necessary to operate our services.',
+        ],
+        list: [
+          'Right to Know: Request disclosure of the categories and specific pieces of personal data we have collected about you over the past 12 months.',
+          'Right to Delete: Request deletion of your personal data, subject to legal exceptions (e.g., completing a transaction, complying with legal obligations).',
+          'Right to Opt-Out: You have the right to opt out of the sale of your personal data. Since we do not sell data, this right is automatically satisfied.',
+          'Right to Non-Discrimination: We will not discriminate against you for exercising any of your CCPA rights.',
+        ],
+      },
+      {
         heading: 'Data Retention',
         content: [
           'We retain your personal information only as long as necessary to fulfill the purposes for which it was collected, or as required by Mexican law. Booking and financial records are retained for a minimum of 5 years per tax and maritime regulations. Marketing consent data is retained until you withdraw consent. Server logs and analytics data are retained for up to 26 months.',
@@ -139,7 +152,7 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
       {
         heading: 'Contact Us',
         content: [
-          'To exercise your ARCO or GDPR rights, or if you have questions about this Privacy Policy, contact us at:',
+          'To exercise your ARCO, GDPR, or CCPA rights, or if you have questions about this Privacy Policy, contact us at:',
         ],
         list: [
           'Email: info@quetzalliveaboard.com',
@@ -269,6 +282,19 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
         ],
       },
       {
+        heading: 'Tus Derechos CCPA (Residentes de California)',
+        content: [
+          'Si resides en California, EE.UU., la Ley de Privacidad del Consumidor de California (CCPA) te otorga derechos específicos sobre tu información personal. Recopilamos las siguientes categorías de datos: identificadores (nombre, correo, teléfono, dirección), información comercial (registros de reservas, historial de transacciones), actividad en internet (datos de navegación, analítica) y datos de geolocalización (país/ciudad basados en IP).',
+          'NO vendemos tu información personal a terceros. No compartimos datos con anunciantes, corredores de datos ni empresas de analítica más allá de lo estrictamente necesario para operar nuestros servicios.',
+        ],
+        list: [
+          'Derecho a Saber: Solicitar la divulgación de las categorías y piezas específicas de datos personales que hemos recopilado sobre ti en los últimos 12 meses.',
+          'Derecho a Eliminar: Solicitar la eliminación de tus datos personales, sujeto a excepciones legales (por ejemplo, completar una transacción, cumplir con obligaciones legales).',
+          'Derecho de Exclusión: Tenés derecho a optar por no participar en la venta de tus datos personales. Dado que no vendemos datos, este derecho se cumple automáticamente.',
+          'Derecho a la No Discriminación: No te discriminaremos por ejercer cualquiera de tus derechos bajo la CCPA.',
+        ],
+      },
+      {
         heading: 'Retención de Datos',
         content: [
           'Conservamos tu información personal solo durante el tiempo necesario para cumplir con los fines para los que fue recopilada, o según lo exija la legislación mexicana. Los registros de reservas y financieros se conservan por un mínimo de 5 años según las regulaciones fiscales y marítimas. Los datos de consentimiento de marketing se conservan hasta que retires tu consentimiento. Los registros de servidor y datos de analítica se conservan hasta por 26 meses.',
@@ -277,7 +303,7 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
       {
         heading: 'Contacto',
         content: [
-          'Para ejercer tus derechos ARCO o GDPR, o si tienes preguntas sobre esta Política de Privacidad, contáctanos en:',
+          'Para ejercer tus derechos ARCO, GDPR o CCPA, o si tienes preguntas sobre esta Política de Privacidad, contáctanos en:',
         ],
         list: [
           'Correo: info@quetzalliveaboard.com',

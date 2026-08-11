@@ -86,6 +86,8 @@ export const termsContent: Record<'en' | 'es', LegalDocument> = {
         heading: 'Governing Law & Jurisdiction',
         content: [
           'These Terms & Conditions are governed by and construed in accordance with the laws of the United Mexican States, specifically the state of Baja California Sur. Any dispute arising from these terms or your use of our services shall be subject to the exclusive jurisdiction of the courts of La Paz, Baja California Sur, Mexico.',
+          'For users residing in the European Union: nothing in these terms affects your statutory rights under EU consumer protection law, including the right to bring a claim in your local courts. The European Commission provides an online dispute resolution platform at https://ec.europa.eu/consumers/odr.',
+          'For users residing in the United States: these terms do not limit any rights you may have under applicable US federal or state consumer protection laws. California residents are entitled to specific disclosures under the California Consumer Privacy Act — please refer to our Privacy Policy for details.',
         ],
       },
       {
@@ -186,6 +188,8 @@ export const termsContent: Record<'en' | 'es', LegalDocument> = {
         heading: 'Ley Aplicable y Jurisdicción',
         content: [
           'Estos Términos y Condiciones se rigen e interpretan de acuerdo con las leyes de los Estados Unidos Mexicanos, específicamente del estado de Baja California Sur. Cualquier controversia derivada de estos términos o del uso de nuestros servicios estará sujeta a la jurisdicción exclusiva de los tribunales de La Paz, Baja California Sur, México.',
+          'Para usuarios residentes en la Unión Europea: nada en estos términos afecta tus derechos legales bajo la legislación de protección al consumidor de la UE, incluido el derecho a presentar una reclamación en tus tribunales locales. La Comisión Europea proporciona una plataforma de resolución de disputas en línea en https://ec.europa.eu/consumers/odr.',
+          'Para usuarios residentes en los Estados Unidos: estos términos no limitan ningún derecho que puedas tener bajo las leyes federales o estatales de protección al consumidor de EE.UU. Los residentes de California tienen derecho a divulgaciones específicas bajo la Ley de Privacidad del Consumidor de California — consultá nuestra Política de Privacidad para más detalles.',
         ],
       },
       {
