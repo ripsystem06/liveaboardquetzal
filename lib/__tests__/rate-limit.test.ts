@@ -1,81 +1,91 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { checkRateLimit } from '../rate-limit'
 
-// The rate-limiter module uses a module-level Map and a setInterval.
-// We need to work with its internal state carefully.
-// checkRateLimit is a pure function wrt the Map, but we need to reset between tests.
+// checkRateLimit is now DB-backed: mock the prisma.rateLimit delegates so the
+// window/reset semantics can be tested against deterministic rows.
+const { mockFindUnique, mockUpsert, mockUpdate, mockDeleteMany } = vi.hoisted(() => ({
+  mockFindUnique: vi.fn(),
+  mockUpsert: vi.fn(),
+  mockUpdate: vi.fn(),
+  mockDeleteMany: vi.fn(),
+}))
+
+vi.mock('@/lib/db', () => ({
+  prisma: {
+    rateLimit: {
+      findUnique: mockFindUnique,
+      upsert: mockUpsert,
+      update: mockUpdate,
+      deleteMany: mockDeleteMany,
+    },
+  },
+}))
+
+import { checkRateLimit, cleanupExpiredRateLimits } from '../rate-limit'
 
 describe('checkRateLimit', () => {
-  // We access the module-level Map by using the same IP prefix to scope tests
-  // and test the behavior functionally.
-
   beforeEach(() => {
-    vi.useFakeTimers()
+    vi.clearAllMocks()
+    mockUpsert.mockResolvedValue({})
+    mockUpdate.mockResolvedValue({})
   })
 
-  afterEach(() => {
-    vi.useRealTimers()
+  it('allows the first hit and creates a row with count 1', async () => {
+    mockFindUnique.mockResolvedValue(null)
+
+    const result = await checkRateLimit('otp:req:1.1.1.1', 5, 60_000)
+
+    expect(result.allowed).toBe(true)
+    expect(mockUpsert).toHaveBeenCalledWith({
+      where: { key: 'otp:req:1.1.1.1' },
+      create: { key: 'otp:req:1.1.1.1', count: 1, resetAt: expect.any(Date) },
+      update: { count: 1, resetAt: expect.any(Date) },
+    })
   })
 
-  function makeIP(prefix: string) {
-    return `${prefix}.0.0.1`
-  }
+  it('increments the count while under the limit', async () => {
+    const resetAt = new Date(Date.now() + 60_000)
+    mockFindUnique.mockResolvedValue({ key: 'k', count: 2, resetAt })
 
-  it('allows first 5 attempts', () => {
-    const ip = makeIP('10')
-    for (let i = 0; i < 5; i++) {
-      const result = checkRateLimit(ip, 5, 60_000)
-      expect(result.allowed).toBe(true)
-    }
+    const result = await checkRateLimit('k', 5, 60_000)
+
+    expect(result.allowed).toBe(true)
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { key: 'k' },
+      data: { count: { increment: 1 } },
+    })
+    expect(mockUpsert).not.toHaveBeenCalled()
   })
 
-  it('blocks 6th attempt within window', () => {
-    const ip = makeIP('11')
-    for (let i = 0; i < 5; i++) {
-      checkRateLimit(ip, 5, 60_000)
-    }
-    const result = checkRateLimit(ip, 5, 60_000)
-    expect(result.allowed).toBe(false)
-  })
+  it('blocks when count is at the limit and returns retryAfter in seconds', async () => {
+    const resetAt = new Date(Date.now() + 30_000)
+    mockFindUnique.mockResolvedValue({ key: 'k', count: 5, resetAt })
 
-  it('returns retryAfter in seconds', () => {
-    const ip = makeIP('12')
-    for (let i = 0; i < 5; i++) {
-      checkRateLimit(ip, 5, 60_000)
-    }
-    const result = checkRateLimit(ip, 5, 60_000)
+    const result = await checkRateLimit('k', 5, 60_000)
+
     expect(result.allowed).toBe(false)
     expect(result.retryAfter).toBeGreaterThan(0)
-    expect(result.retryAfter).toBeLessThanOrEqual(60)
+    expect(result.retryAfter).toBeLessThanOrEqual(30)
+    expect(mockUpdate).not.toHaveBeenCalled()
   })
 
-  it('resets after window expires', () => {
-    const ip = makeIP('13')
-    for (let i = 0; i < 5; i++) {
-      checkRateLimit(ip, 5, 60_000)
-    }
-    // 6th should be blocked
-    expect(checkRateLimit(ip, 5, 60_000).allowed).toBe(false)
+  it('resets the window once it has elapsed', async () => {
+    mockFindUnique.mockResolvedValue({ key: 'k', count: 5, resetAt: new Date(Date.now() - 1000) })
 
-    // Advance time past the window
-    vi.advanceTimersByTime(61_000)
+    const result = await checkRateLimit('k', 5, 60_000)
 
-    // Now it should be allowed again
-    const result = checkRateLimit(ip, 5, 60_000)
     expect(result.allowed).toBe(true)
+    expect(mockUpsert).toHaveBeenCalled()
   })
+})
 
-  it('different IPs are tracked separately', () => {
-    const ip1 = makeIP('14')
-    const ip2 = makeIP('15')
+describe('cleanupExpiredRateLimits', () => {
+  it('deletes rows whose resetAt has passed', async () => {
+    mockDeleteMany.mockResolvedValue({ count: 3 })
 
-    // Exhaust ip1
-    for (let i = 0; i < 5; i++) {
-      checkRateLimit(ip1, 5, 60_000)
-    }
-    expect(checkRateLimit(ip1, 5, 60_000).allowed).toBe(false)
+    await cleanupExpiredRateLimits()
 
-    // ip2 should still be allowed
-    expect(checkRateLimit(ip2, 5, 60_000).allowed).toBe(true)
+    expect(mockDeleteMany).toHaveBeenCalledWith({
+      where: { resetAt: { lt: expect.any(Date) } },
+    })
   })
 })

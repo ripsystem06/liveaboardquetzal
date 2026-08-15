@@ -26,7 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Rate limit: 5 verify attempts per minute per IP
         const ip = getClientIP(request as unknown as Request)
-        const rl = checkRateLimit(`otp:verify:${ip}`, 5, 60_000)
+        const rl = await checkRateLimit(`otp:verify:${ip}`, 5, 60_000)
         if (!rl.allowed) {
           prisma.auditLog.create({
             data: {

@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
   const { email } = parsed.data
 
   // Rate limit: two separate keys (per-IP and per-email), no new rate-limit helper.
-  const ipLimit = checkRateLimit(`otp:req:${ip}`, 5, 60_000)
-  const emailLimit = checkRateLimit(`otp:req:${email}`, 5, 60_000)
+  const ipLimit = await checkRateLimit(`otp:req:${ip}`, 5, 60_000)
+  const emailLimit = await checkRateLimit(`otp:req:${email}`, 5, 60_000)
   if (!ipLimit.allowed || !emailLimit.allowed) {
     const retryAfter = ipLimit.retryAfter ?? emailLimit.retryAfter
     return Response.json(

@@ -41,6 +41,13 @@ vi.mock('@/lib/email', () => ({
   sendWelcomeEmail: vi.fn(() => Promise.resolve()),
 }))
 
+const mockCheckRateLimit = vi.fn()
+const mockGetClientIP = vi.fn()
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: mockCheckRateLimit,
+  getClientIP: mockGetClientIP,
+}))
+
 vi.mock('@/lib/pdf-generator', () => ({
   generateBankTransferPDF: vi.fn(() => Promise.resolve(Buffer.from('%PDF-1.4 mock'))),
 }))
@@ -69,6 +76,8 @@ describe('Reservation API Routes', () => {
     vi.clearAllMocks()
     // Default: authenticated as user_123
     mockAuthFn.mockResolvedValue({ user: { id: 'user_123', name: 'Test', email: 'test@test.com', isAdmin: false } })
+    mockCheckRateLimit.mockReturnValue({ allowed: true })
+    mockGetClientIP.mockReturnValue('1.2.3.4')
   })
 
   describe('POST /api/reservations', () => {

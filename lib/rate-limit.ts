@@ -1,40 +1,41 @@
-const MAX_ENTRIES = 10_000
-const attempts = new Map<string, { count: number; resetTime: number }>()
+import { prisma } from './db'
 
-export function checkRateLimit(
-  ip: string,
+/**
+ * DB-backed rate limiter. Each key maps to a RateLimit row with a reset
+ * timestamp; the count is incremented per attempt and reset when the window
+ * elapses. Shared across instances (unlike an in-memory Map), so limits hold
+ * in multi-replica deployments.
+ */
+export async function checkRateLimit(
+  key: string,
   maxAttempts = 5,
   windowMs = 60_000,
-): { allowed: boolean; retryAfter?: number } {
-  const now = Date.now()
-  const entry = attempts.get(ip)
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const now = new Date()
 
-  if (!entry || now > entry.resetTime) {
-    // Prevent unbounded memory growth: evict oldest if at capacity
-    if (attempts.size >= MAX_ENTRIES) {
-      const firstKey = attempts.keys().next().value
-      if (firstKey !== undefined) attempts.delete(firstKey)
-    }
-    attempts.set(ip, { count: 1, resetTime: now + windowMs })
+  const existing = await prisma.rateLimit.findUnique({ where: { key } })
+
+  if (!existing || existing.resetAt < now) {
+    await prisma.rateLimit.upsert({
+      where: { key },
+      create: { key, count: 1, resetAt: new Date(now.getTime() + windowMs) },
+      update: { count: 1, resetAt: new Date(now.getTime() + windowMs) },
+    })
     return { allowed: true }
   }
 
-  if (entry.count >= maxAttempts) {
-    return { allowed: false, retryAfter: Math.ceil((entry.resetTime - now) / 1000) }
+  if (existing.count >= maxAttempts) {
+    return {
+      allowed: false,
+      retryAfter: Math.ceil((existing.resetAt.getTime() - now.getTime()) / 1000),
+    }
   }
 
-  entry.count++
+  await prisma.rateLimit.update({
+    where: { key },
+    data: { count: { increment: 1 } },
+  })
   return { allowed: true }
-}
-
-// Clean up expired entries every 5 minutes
-if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now()
-    for (const [ip, entry] of attempts) {
-      if (now > entry.resetTime) attempts.delete(ip)
-    }
-  }, 5 * 60 * 1000)
 }
 
 export function getClientIP(request: Request): string {
@@ -43,4 +44,12 @@ export function getClientIP(request: Request): string {
     request.headers.get('x-real-ip') ||
     '127.0.0.1'
   )
+}
+
+/**
+ * Removes rate-limit rows whose window has elapsed. Called on a schedule or
+ * opportunistically to keep the table small.
+ */
+export async function cleanupExpiredRateLimits(): Promise<void> {
+  await prisma.rateLimit.deleteMany({ where: { resetAt: { lt: new Date() } } })
 }
