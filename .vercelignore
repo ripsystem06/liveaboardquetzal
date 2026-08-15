@@ -1,0 +1,32 @@
+# dependencies
+/node_modules
+
+# next.js build output
+/.next/
+/out/
+
+# env files (secrets)
+.env*
+.vercel
+
+# SDD artifacts
+.atl/
+openspec/specs/
+
+# source assets (raw, unprocessed — processed versions live in public/)
+/images/
+/logosquetzal/
+/logosquetzal.zip
+/video-originals/
+
+# CodeGraph + tooling
+.codegraph/
+.playwright-mcp/
+
+# raw video originals (compressed lowercase .mp4 versions are committed)
+*.MP4
+
+# documents
+*.docx
+*.pdf
+REGISTRO REVILLA RANGO.xlsx
