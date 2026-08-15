@@ -3,7 +3,7 @@ import Google from 'next-auth/providers/google'
 import Credentials from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/db'
-import { verifyPassword } from '@/lib/auth'
+import { verifyOtpCode } from '@/lib/otp'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -14,22 +14,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
+        otp: { label: 'Code', type: 'text' },
+        name: { label: 'Name', type: 'text' },
       },
       authorize: async (credentials, request) => {
-        const email = String(credentials.email)
-        const password = String(credentials.password)
+        const email = String(credentials?.email ?? '')
+        const otp = String(credentials?.otp ?? '')
+        const name = credentials?.name ? String(credentials.name) : undefined
 
-        if (!email || !password) return null
+        if (!email || !otp) return null
 
-        // Rate limit: 5 login attempts per minute per IP
+        // Rate limit: 5 verify attempts per minute per IP
         const ip = getClientIP(request as unknown as Request)
-        const rl = checkRateLimit(`login:${ip}`, 5, 60_000)
+        const rl = checkRateLimit(`otp:verify:${ip}`, 5, 60_000)
         if (!rl.allowed) {
-          // Log rate-limited attempt
           prisma.auditLog.create({
             data: {
-              action: 'auth.login_rate_limited',
+              action: 'auth.otp_rate_limited',
               entityType: 'user',
               entityId: email,
               actorEmail: email,
@@ -39,60 +40,47 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null
         }
 
-        const user = await prisma.user.findUnique({ where: { email } })
-        if (!user?.passwordHash) {
-          // Log failed attempt — user not found
+        const result = await verifyOtpCode(email, otp)
+        if (!result.ok) {
+          const action = result.reason === 'locked' ? 'auth.otp_locked_out' : 'auth.otp_failed'
           prisma.auditLog.create({
             data: {
-              action: 'auth.login_failed',
+              action,
               entityType: 'user',
               entityId: email,
               actorEmail: email,
-              details: JSON.stringify({ reason: 'user_not_found', ip }),
+              details: JSON.stringify({ reason: result.reason, ip }),
             },
           }).catch(() => {})
           return null
         }
 
-        // Account lockout: check failed attempts in last 15 minutes
-        const LOCKOUT_WINDOW_MS = 15 * 60 * 1000
-        const LOCKOUT_MAX_ATTEMPTS = 5
-        const lockoutThreshold = new Date(Date.now() - LOCKOUT_WINDOW_MS)
-        const recentFailures = await prisma.auditLog.count({
-          where: {
-            action: 'auth.login_failed',
+        // Upsert user: create the account on first successful OTP login.
+        // User.name is non-nullable, so derive a fallback from the email local-part.
+        let user = await prisma.user.findUnique({ where: { email } })
+        if (!user) {
+          const fallbackName = name || email.split('@')[0] || 'Guest'
+          user = await prisma.user.create({
+            data: { email, name: fallbackName, phone: '' },
+          })
+          prisma.auditLog.create({
+            data: {
+              action: 'user.registered',
+              entityType: 'user',
+              entityId: user.id,
+              actorEmail: email,
+            },
+          }).catch(() => {})
+        }
+
+        prisma.auditLog.create({
+          data: {
+            action: 'auth.otp_consumed',
+            entityType: 'user',
             entityId: email,
-            createdAt: { gte: lockoutThreshold },
+            actorEmail: email,
           },
-        })
-
-        if (recentFailures >= LOCKOUT_MAX_ATTEMPTS) {
-          prisma.auditLog.create({
-            data: {
-              action: 'auth.login_locked_out',
-              entityType: 'user',
-              entityId: email,
-              actorEmail: email,
-              details: JSON.stringify({ recentFailures, ip }),
-            },
-          }).catch(() => {})
-          return null
-        }
-
-        const valid = await verifyPassword(password, user.passwordHash)
-        if (!valid) {
-          // Log failed attempt — wrong password
-          prisma.auditLog.create({
-            data: {
-              action: 'auth.login_failed',
-              entityType: 'user',
-              entityId: email,
-              actorEmail: email,
-              details: JSON.stringify({ reason: 'wrong_password', ip }),
-            },
-          }).catch(() => {})
-          return null
-        }
+        }).catch(() => {})
 
         return {
           id: user.id,
