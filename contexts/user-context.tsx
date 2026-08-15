@@ -10,8 +10,8 @@ interface UserContextType {
   isAuthenticated: boolean
   isAdmin: boolean
   sessionReady: boolean
-  login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string) => Promise<User>
+  requestOtp: (email: string) => Promise<void>
+  verifyOtp: (email: string, otp: string, name?: string) => Promise<boolean>
   logout: () => void
   updateProfile: (data: { name?: string; phone?: string }) => void
 }
@@ -39,36 +39,26 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [session, sessionReady])
 
-  const register = async (name: string, email: string, password: string): Promise<User> => {
-    const response = await fetch('/api/auth/register', {
+  const requestOtp = async (email: string): Promise<void> => {
+    const response = await fetch('/api/auth/otp/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email }),
     })
 
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}))
-      if (response.status === 409) {
-        throw new Error(data.error || 'Email already registered')
+      if (response.status === 429) {
+        throw new Error('Too many requests')
       }
-      throw new Error('Registration failed')
+      throw new Error('Failed to send code')
     }
-
-    const data = await response.json()
-    const newUser = data.user as User
-    // After registration, sign in with credentials to create Auth.js session
-    await nextAuthSignIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
-    return newUser
   }
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const verifyOtp = async (email: string, otp: string, name?: string): Promise<boolean> => {
     const result = await nextAuthSignIn('credentials', {
       email,
-      password,
+      otp,
+      ...(name ? { name } : {}),
       redirect: false,
     })
 
@@ -91,8 +81,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isAuthenticated: localUser !== null && !!session,
         isAdmin: localUser?.isAdmin ?? false,
         sessionReady,
-        login,
-        register,
+        requestOtp,
+        verifyOtp,
         logout,
         updateProfile,
       }}

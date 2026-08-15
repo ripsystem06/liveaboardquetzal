@@ -27,7 +27,7 @@ vi.mock('next-auth/react', () => {
   }
 })
 
-// Mock fetch for register (which still uses direct fetch)
+// Mock fetch for requestOtp (direct fetch to /api/auth/otp/request)
 const fetchMock = vi.fn()
 global.fetch = fetchMock
 
@@ -56,97 +56,85 @@ describe('useUser', () => {
     })
   })
 
-  describe('login', () => {
-    it('updates state when valid credentials are provided', async () => {
-      signInMock.mockResolvedValue({ ok: true, error: null })
+  describe('requestOtp', () => {
+    it('POSTs the email to /api/auth/otp/request and resolves on success', async () => {
+      fetchMock.mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true }) })
 
-      useSessionMock.mockReturnValue({
-        data: {
-          user: {
-            id: '1',
-            name: 'Demo User',
-            email: 'demo@quetzal.com',
-            image: null,
-          },
-          expires: '',
-        },
-        status: 'authenticated' as const,
-        update: vi.fn(),
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      await act(async () => {
+        await result.current.requestOtp('demo@quetzal.com')
+      })
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/auth/otp/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'demo@quetzal.com' }),
+      })
+    })
+
+    it('throws on a 429 rate-limit response', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        json: async () => ({ error: 'Too many requests' }),
       })
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
-      let loginSuccess: boolean | undefined
       await act(async () => {
-        loginSuccess = await result.current.login('demo@quetzal.com', '123456')
+        await expect(result.current.requestOtp('demo@quetzal.com')).rejects.toThrow('Too many requests')
+      })
+    })
+  })
+
+  describe('verifyOtp', () => {
+    it('signs in with credentials using email + otp and returns true on success', async () => {
+      signInMock.mockResolvedValue({ ok: true, error: null })
+
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      let ok: boolean | undefined
+      await act(async () => {
+        ok = await result.current.verifyOtp('demo@quetzal.com', '123456')
       })
 
-      expect(loginSuccess).toBe(true)
+      expect(ok).toBe(true)
       expect(signInMock).toHaveBeenCalledWith('credentials', {
         email: 'demo@quetzal.com',
-        password: '123456',
+        otp: '123456',
         redirect: false,
       })
     })
 
-    it('returns false when invalid credentials are provided', async () => {
+    it('passes the optional name to signIn when provided', async () => {
+      signInMock.mockResolvedValue({ ok: true, error: null })
+
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      await act(async () => {
+        await result.current.verifyOtp('jane@example.com', '123456', 'Jane Doe')
+      })
+
+      expect(signInMock).toHaveBeenCalledWith('credentials', {
+        email: 'jane@example.com',
+        otp: '123456',
+        name: 'Jane Doe',
+        redirect: false,
+      })
+    })
+
+    it('returns false on an invalid code', async () => {
       signInMock.mockResolvedValue({ ok: false, error: 'CredentialsSignin' })
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
-      let loginSuccess: boolean | undefined
+      let ok: boolean | undefined
       await act(async () => {
-        loginSuccess = await result.current.login('demo@quetzal.com', 'wrongpassword')
+        ok = await result.current.verifyOtp('demo@quetzal.com', '000000')
       })
 
-      expect(loginSuccess).toBe(false)
-      expect(result.current.isAuthenticated).toBe(false)
-    })
-  })
-
-  describe('register', () => {
-    it('creates a new user and sets authenticated state', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ok: true,
-          user: { id: 'user-amFuZUBle', name: 'Jane Doe', email: 'jane@example.com', phone: '', isAdmin: false },
-        }),
-      })
-      signInMock.mockResolvedValue({ ok: true, error: null })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      let newUser: Awaited<ReturnType<typeof result.current.register>> | undefined
-      await act(async () => {
-        newUser = await result.current.register('Jane Doe', 'jane@example.com', 'password123')
-      })
-
-      expect(newUser).toBeDefined()
-      expect(newUser!.name).toBe('Jane Doe')
-      expect(newUser!.email).toBe('jane@example.com')
-      expect(signInMock).toHaveBeenCalledWith('credentials', {
-        email: 'jane@example.com',
-        password: 'password123',
-        redirect: false,
-      })
-    })
-
-    it('throws error when email is already registered', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: false,
-        status: 409,
-        json: async () => ({ error: 'Email already registered' }),
-      })
-
-      const { result } = renderHook(() => useUser(), { wrapper })
-
-      await act(async () => {
-        await expect(result.current.register('Demo User', 'demo@quetzal.com', '123456')).rejects.toThrow(
-          'Email already registered',
-        )
-      })
-
+      expect(ok).toBe(false)
       expect(result.current.isAuthenticated).toBe(false)
     })
   })

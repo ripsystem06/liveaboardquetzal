@@ -14,26 +14,76 @@ interface LoginFormProps {
 
 export function LoginForm({ dispatch }: LoginFormProps) {
   const { t } = useLanguage()
-  const { login } = useUser()
+  const { requestOtp, verifyOtp } = useUser()
+  const [step, setStep] = useState<'email' | 'code'>('email')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
+  const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
+  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRequestCode = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setInfo('')
 
     if (!email) {
       setError(t('booking.login.invalid'))
       return
     }
 
-    const ok = await login(email, password)
-    if (ok) {
-      dispatch({ type: 'LOGIN_COMPLETED' })
-    } else {
+    setLoading(true)
+    try {
+      await requestOtp(email)
+      setInfo(t('booking.login.sent'))
+      setStep('code')
+    } catch {
+      setError(t('booking.login.requestError'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (!otp) {
+      setError(t('booking.login.invalidCode'))
+      return
+    }
+
+    setLoading(true)
+    try {
+      const ok = await verifyOtp(email, otp, name || undefined)
+      if (ok) {
+        dispatch({ type: 'LOGIN_COMPLETED' })
+      } else {
+        setError(t('booking.login.error'))
+      }
+    } catch {
       setError(t('booking.login.error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleBack = () => {
+    setStep('email')
+    setError('')
+    setInfo('')
+  }
+
+  const handleResend = async () => {
+    setError('')
+    setInfo('')
+    try {
+      await requestOtp(email)
+      setInfo(t('booking.login.sent'))
+    } catch {
+      setError(t('booking.login.requestError'))
     }
   }
 
@@ -53,8 +103,11 @@ export function LoginForm({ dispatch }: LoginFormProps) {
     }
   }
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value)
+  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOtp(e.target.value)
+    if (error === t('booking.login.invalidCode')) {
+      setError('')
+    }
   }
 
   return (
@@ -95,50 +148,99 @@ export function LoginForm({ dispatch }: LoginFormProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="space-y-2">
-          <label htmlFor="login-email" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            {t('booking.login.email')}
-          </label>
-          <Input
-            id="login-email"
-            type="email"
-            value={email}
-            onChange={handleEmailChange}
-            placeholder="demo@quetzal.com"
-            aria-label={t('booking.login.email')}
-            className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="login-password" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            {t('booking.login.password')}
-          </label>
-          <Input
-            id="login-password"
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-            placeholder="******"
-            aria-label={t('booking.login.password')}
-            className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
-          />
-        </div>
-
-        {error && (
-          <div className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10" role="alert">
-            <svg className="mt-0.5 size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-            </svg>
-            <span>{error}</span>
+      {step === 'email' ? (
+        <form onSubmit={handleRequestCode} className="space-y-5">
+          <div className="space-y-2">
+            <label htmlFor="login-email" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t('booking.login.email')}
+            </label>
+            <Input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={handleEmailChange}
+              placeholder="demo@quetzal.com"
+              aria-label={t('booking.login.email')}
+              className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
+            />
           </div>
-        )}
 
-        <Button type="submit" className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform">
-          {t('booking.login.submit')}
-        </Button>
-      </form>
+          {error && (
+            <div className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10" role="alert">
+              <svg className="mt-0.5 size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform">
+            {t('booking.login.requestCode')}
+          </Button>
+        </form>
+      ) : (
+        <form onSubmit={handleVerify} className="space-y-5">
+          {info && (
+            <div className="flex items-start gap-2 rounded-xl bg-accent/10 px-4 py-3 text-sm text-accent border border-accent/20" role="status">
+              <span>{info}</span>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <label htmlFor="login-otp" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t('booking.login.code')}
+            </label>
+            <Input
+              id="login-otp"
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={otp}
+              onChange={handleOtpChange}
+              placeholder="123456"
+              aria-label={t('booking.login.code')}
+              className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="login-name" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t('booking.login.name')}
+            </label>
+            <Input
+              id="login-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+              aria-label={t('booking.login.name')}
+              className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
+            />
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10" role="alert">
+              <svg className="mt-0.5 size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform">
+            {t('booking.login.verify')}
+          </Button>
+
+          <div className="flex items-center justify-between text-sm">
+            <button type="button" onClick={handleBack} className="text-muted-foreground hover:text-foreground transition-colors">
+              {t('booking.login.back')}
+            </button>
+            <button type="button" onClick={handleResend} className="text-accent hover:text-accent/80 font-semibold transition-colors">
+              {t('booking.login.resend')}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   )
 }

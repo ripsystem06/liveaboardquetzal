@@ -8,29 +8,50 @@ import { useUser } from '@/contexts/user-context'
 
 export default function AdventurePage() {
   const router = useRouter()
-  const { login } = useUser()
+  const { requestOtp, verifyOtp } = useUser()
+  const [step, setStep] = useState<'email' | 'code'>('email')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRequestCode = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
-      const ok = await login(email, password)
-      if (ok) {
-        router.push('/admin')
-      } else {
-        setError('Invalid credentials')
-      }
+      await requestOtp(email)
+      setStep('code')
     } catch {
-      setError('Invalid credentials')
+      setError('Could not send the code')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      const ok = await verifyOtp(email, otp)
+      if (ok) {
+        router.push('/admin')
+      } else {
+        setError('Invalid or expired code')
+      }
+    } catch {
+      setError('Invalid or expired code')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleBack = () => {
+    setStep('email')
+    setError('')
   }
 
   return (
@@ -47,73 +68,91 @@ export default function AdventurePage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <label
-                htmlFor="adventure-email"
-                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-              >
-                Email
-              </label>
-              <Input
-                id="adventure-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@quetzal.com"
-                className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="adventure-password"
-                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-              >
-                Password
-              </label>
-              <Input
-                id="adventure-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••"
-                className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
-                required
-              />
-            </div>
-
-            {error && (
-              <div
-                className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10"
-                role="alert"
-              >
-                <svg
-                  className="mt-0.5 size-4 shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+          {step === 'email' ? (
+            <form onSubmit={handleRequestCode} className="space-y-5">
+              <div className="space-y-2">
+                <label
+                  htmlFor="adventure-email"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                  />
-                </svg>
-                <span>{error}</span>
+                  Email
+                </label>
+                <Input
+                  id="adventure-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@quetzal.com"
+                  className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
+                  required
+                />
               </div>
-            )}
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform"
-            >
-              {loading ? 'Entering...' : 'Enter'}
-            </Button>
-          </form>
+              {error && (
+                <div
+                  className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10"
+                  role="alert"
+                >
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform"
+              >
+                {loading ? 'Sending...' : 'Send Code'}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerify} className="space-y-5">
+              <div className="space-y-2">
+                <label
+                  htmlFor="adventure-otp"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Code
+                </label>
+                <Input
+                  id="adventure-otp"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="123456"
+                  className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
+                  required
+                />
+              </div>
+
+              {error && (
+                <div
+                  className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10"
+                  role="alert"
+                >
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform"
+              >
+                {loading ? 'Verifying...' : 'Verify'}
+              </Button>
+
+              <button
+                type="button"
+                onClick={handleBack}
+                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Change email
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </main>

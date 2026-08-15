@@ -15,8 +15,23 @@ vi.mock('@/contexts/user-context', async (importOriginal) => {
 })
 
 // next-auth/react is mocked globally via vitest-setup.ts.
-// Import signIn for assertions after the global mock is applied.
 const { signIn: mockSignIn } = await import('next-auth/react')
+
+type UseUserMock = ReturnType<typeof useUser>
+
+function mockUseUser(overrides: Partial<UseUserMock> = {}) {
+  vi.mocked(useUser).mockReturnValue({
+    user: null,
+    isAuthenticated: false,
+    isAdmin: false,
+    sessionReady: true,
+    requestOtp: vi.fn(),
+    verifyOtp: vi.fn(),
+    logout: vi.fn(),
+    updateProfile: vi.fn(),
+    ...overrides,
+  } as UseUserMock)
+}
 
 describe('LoginForm', () => {
   const mockDispatch = vi.fn()
@@ -25,143 +40,126 @@ describe('LoginForm', () => {
     vi.clearAllMocks()
   })
 
-  const mockUseUserDefaults = () => {
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isAdmin: false,
-      sessionReady: true,
-      login: vi.fn(),
-      register: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
-  }
-
-  it('renders email and password inputs', () => {
-    mockUseUserDefaults()
+  it('renders email input and a "Send Code" button on step 1', () => {
+    mockUseUser()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /send code/i })).toBeInTheDocument()
   })
 
-  it('renders a submit button', () => {
-    mockUseUserDefaults()
-    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
-  })
-
-  it('calls login with valid credentials and dispatches LOGIN_COMPLETED on success', async () => {
-    const loginMock = vi.fn().mockResolvedValue(true)
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isAdmin: false,
-      sessionReady: true,
-      login: loginMock,
-      register: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
+  it('requests a code and advances to the code step', async () => {
+    const requestOtp = vi.fn().mockResolvedValue(undefined)
+    mockUseUser({ requestOtp })
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
-    const emailInput = screen.getByLabelText(/email/i)
-    const passwordInput = screen.getByLabelText(/password/i)
+    await user.type(screen.getByLabelText(/email/i), 'demo@quetzal.com')
+    await user.click(screen.getByRole('button', { name: /send code/i }))
 
-    await user.type(emailInput, 'demo@quetzal.com')
-    await user.type(passwordInput, '123456')
+    await waitFor(() => {
+      expect(requestOtp).toHaveBeenCalledWith('demo@quetzal.com')
+    })
+    expect(screen.getByLabelText(/code/i)).toBeInTheDocument()
+  })
 
-    await user.click(screen.getByRole('button', { name: /login/i }))
+  it('verifies a code and dispatches LOGIN_COMPLETED on success', async () => {
+    const requestOtp = vi.fn().mockResolvedValue(undefined)
+    const verifyOtp = vi.fn().mockResolvedValue(true)
+    mockUseUser({ requestOtp, verifyOtp })
+    const user = userEvent.setup()
+    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
-    expect(loginMock).toHaveBeenCalledWith('demo@quetzal.com', '123456')
+    await user.type(screen.getByLabelText(/email/i), 'demo@quetzal.com')
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
+
+    await user.type(screen.getByLabelText(/code/i), '123456')
+    await user.click(screen.getByRole('button', { name: /verify/i }))
+
+    expect(verifyOtp).toHaveBeenCalledWith('demo@quetzal.com', '123456', undefined)
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOGIN_COMPLETED' })
   })
 
-  it('shows error message on invalid password', async () => {
-    const loginMock = vi.fn().mockResolvedValue(false)
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isAdmin: false,
-      sessionReady: true,
-      login: loginMock,
-      register: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
+  it('passes the optional name to verifyOtp when provided', async () => {
+    const requestOtp = vi.fn().mockResolvedValue(undefined)
+    const verifyOtp = vi.fn().mockResolvedValue(true)
+    mockUseUser({ requestOtp, verifyOtp })
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
-    const emailInput = screen.getByLabelText(/email/i)
-    const passwordInput = screen.getByLabelText(/password/i)
+    await user.type(screen.getByLabelText(/email/i), 'jane@example.com')
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
 
-    await user.type(emailInput, 'demo@quetzal.com')
-    await user.type(passwordInput, 'wrongpassword')
+    await user.type(screen.getByLabelText(/code/i), '123456')
+    await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
+    await user.click(screen.getByRole('button', { name: /verify/i }))
 
-    await user.click(screen.getByRole('button', { name: /login/i }))
+    expect(verifyOtp).toHaveBeenCalledWith('jane@example.com', '123456', 'Jane Doe')
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOGIN_COMPLETED' })
+  })
 
-    expect(loginMock).toHaveBeenCalled()
+  it('shows an error and does not dispatch on an invalid code', async () => {
+    const requestOtp = vi.fn().mockResolvedValue(undefined)
+    const verifyOtp = vi.fn().mockResolvedValue(false)
+    mockUseUser({ requestOtp, verifyOtp })
+    const user = userEvent.setup()
+    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
+
+    await user.type(screen.getByLabelText(/email/i), 'demo@quetzal.com')
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
+
+    await user.type(screen.getByLabelText(/code/i), '000000')
+    await user.click(screen.getByRole('button', { name: /verify/i }))
+
     await waitFor(() => {
-      expect(screen.getByText(/invalid email or password/i)).toBeInTheDocument()
+      expect(screen.getByText(/invalid or expired code/i)).toBeInTheDocument()
     })
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'LOGIN_COMPLETED' })
   })
 
-  it('shows error message on invalid email (empty)', async () => {
-    mockUseUserDefaults()
+  it('shows an error when the email is empty', async () => {
+    mockUseUser()
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
-    await user.click(screen.getByRole('button', { name: /login/i }))
+    await user.click(screen.getByRole('button', { name: /send code/i }))
 
     await waitFor(() => {
       expect(screen.getByText(/please enter a valid email/i)).toBeInTheDocument()
     })
   })
 
-  it('shows error message on invalid email (non-empty)', async () => {
-    const loginMock = vi.fn().mockResolvedValue(false)
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isAdmin: false,
-      sessionReady: true,
-      login: loginMock,
-      register: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
+  it('returns to the email step when "Change email" is clicked', async () => {
+    const requestOtp = vi.fn().mockResolvedValue(undefined)
+    mockUseUser({ requestOtp })
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
-    const emailInput = screen.getByLabelText(/email/i)
-    const passwordInput = screen.getByLabelText(/password/i)
+    await user.type(screen.getByLabelText(/email/i), 'demo@quetzal.com')
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
 
-    await user.type(emailInput, 'wrong@test.com')
-    await user.type(passwordInput, '123456')
+    await user.click(screen.getByRole('button', { name: /change email/i }))
 
-    await user.click(screen.getByRole('button', { name: /login/i }))
-
-    await waitFor(() => {
-      expect(screen.getByText(/invalid email or password/i)).toBeInTheDocument()
-    })
+    expect(screen.getByRole('button', { name: /send code/i })).toBeInTheDocument()
   })
 
-  it('clears error message when user starts typing', async () => {
-    mockUseUserDefaults()
+  it('resends the code without losing the email', async () => {
+    const requestOtp = vi.fn().mockResolvedValue(undefined)
+    mockUseUser({ requestOtp })
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    await user.type(screen.getByLabelText(/email/i), 'demo@quetzal.com')
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
 
-    await user.click(screen.getByRole('button', { name: /login/i }))
-    await waitFor(() => {
-      expect(screen.getByText(/please enter a valid email/i)).toBeInTheDocument()
-    })
+    await user.click(screen.getByRole('button', { name: /resend code/i }))
 
-    await user.type(emailInput, 'u')
-    expect(screen.queryByText(/please enter a valid email/i)).not.toBeInTheDocument()
+    expect(requestOtp).toHaveBeenCalledTimes(2)
+    expect(requestOtp).toHaveBeenLastCalledWith('demo@quetzal.com')
   })
 })
 
@@ -170,16 +168,7 @@ describe('Google OAuth button', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(useUser).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isAdmin: false,
-      sessionReady: true,
-      login: vi.fn(),
-      register: vi.fn(),
-      logout: vi.fn(),
-      updateProfile: vi.fn(),
-    })
+    mockUseUser()
   })
 
   it('renders a "Sign in with Google" button', () => {
