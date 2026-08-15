@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLanguage } from '@/contexts/language-context'
 
 const videos = [
-  { src: '/images/videoactividades/manta-divers.mp4', type: 'video/mp4' },
-  { src: '/images/videoactividades/sharks-divers.mp4', type: 'video/mp4' },
-  { src: '/images/videoactividades/reef-sharks.mp4', type: 'video/mp4' },
+  { src: '/images/videoactividades/manta-divers.mp4', type: 'video/mp4', poster: '/images/videoactividades/manta-divers-poster.jpg' },
+  { src: '/images/videoactividades/sharks-divers.mp4', type: 'video/mp4', poster: '/images/videoactividades/sharks-divers-poster.jpg' },
+  { src: '/images/videoactividades/reef-sharks.mp4', type: 'video/mp4', poster: '/images/videoactividades/reef-sharks-poster.jpg' },
 ]
 
 export function Hero() {
@@ -55,6 +55,7 @@ export function Hero() {
             ref={(el) => setVideoRef(el, i)}
             muted
             playsInline
+            poster={video.poster}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
               i === currentVideoIndex ? 'opacity-100' : 'opacity-0'
             }`}
