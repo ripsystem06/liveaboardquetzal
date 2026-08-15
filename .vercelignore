@@ -23,8 +23,9 @@ openspec/specs/
 .codegraph/
 .playwright-mcp/
 
-# raw video originals (compressed lowercase .mp4 versions are committed)
-*.MP4
+# raw video originals live in /video-originals (ignored above);
+# *.MP4 was removed here because Vercel's ignore matcher is case-insensitive
+# and it was stripping every committed lowercase .mp4 from production.
 
 # documents
 *.docx
