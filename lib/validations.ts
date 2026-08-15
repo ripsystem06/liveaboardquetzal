@@ -52,13 +52,13 @@ export const CreateBlogPostSchema = z.object({
 
 export const UpdateBlogPostSchema = CreateBlogPostSchema.partial()
 
-export const SessionBodySchema = z.object({
+export const OtpRequestSchema = z.object({
   email: z.string().email(),
-  password: z.string()
-    .min(12, 'Password must be at least 12 characters')
-    .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Must contain at least one digit'),
+})
+
+export const OtpVerifySchema = z.object({
+  email: z.string().email(),
+  otp: z.string().regex(/^\d{6}$/),
   name: z.string().optional(),
 })
 

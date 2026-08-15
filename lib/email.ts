@@ -153,3 +153,22 @@ export async function sendWelcomeEmail(email: string, name: string): Promise<voi
     html,
   })
 }
+
+export async function sendOtpEmail(email: string, code: string): Promise<void> {
+  const client = getEmailClient()
+  const subject = `Your Quetzal Liveaboard login code`
+
+  const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #2563eb;">Your login code</h1>
+  <p>Use the code below to sign in to Quetzal Liveaboard. It expires in 10 minutes.</p>
+  <p style="font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #2563eb;">${code}</p>
+  <p style="color: #6b7280;">If you did not request this code, you can safely ignore this email.</p>
+</div>`
+
+  await client.emails.send({
+    from: process.env.FROM_EMAIL || 'reservations@quetzal.com',
+    to: email,
+    subject,
+    html,
+  })
+}

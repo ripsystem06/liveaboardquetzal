@@ -111,6 +111,19 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model OtpCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
 model AuditLog {
   id          String   @id @default(cuid())
   action      String

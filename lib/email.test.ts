@@ -4,6 +4,7 @@ import {
   sendReservationCreatedEmail,
   sendReservationConfirmedEmail,
   sendWelcomeEmail,
+  sendOtpEmail,
   type ReservationEmailData,
 } from './email'
 
@@ -112,6 +113,21 @@ describe('email', () => {
       expect(allLoggedContent).toContain('To: newuser@example.com')
       expect(allLoggedContent).toContain('Subject: Welcome to Quetzal Liveaboard')
       expect(allLoggedContent).toContain('Welcome aboard, Alice!')
+    })
+  })
+
+  describe('sendOtpEmail', () => {
+    it('should log the OTP email with the code and expiry notice (mock fallback)', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+      await sendOtpEmail('demo@quetzal.com', '123456')
+
+      const allLoggedContent = getAllLoggedContent(consoleSpy)
+      expect(allLoggedContent).toContain('--- EMAIL MOCK ---')
+      expect(allLoggedContent).toContain('To: demo@quetzal.com')
+      expect(allLoggedContent).toContain('Subject: Your Quetzal Liveaboard login code')
+      expect(allLoggedContent).toContain('123456')
+      expect(allLoggedContent).toContain('10 minutes')
     })
   })
 })
