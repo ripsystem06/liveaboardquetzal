@@ -115,7 +115,7 @@ function HeroSection({ prefix }: { prefix: DestinationPrefix }) {
   const { t } = useLanguage()
   return (
     <section className="min-h-screen md:h-screen w-full flex items-center justify-center relative">
-      <Image src={heroImageMap[prefix]} alt={t(`${prefix}.title`)} fill className="object-cover" priority unoptimized sizes="100vw" />
+      <Image src={heroImageMap[prefix]} alt={t(`${prefix}.title`)} fill className="object-cover" priority sizes="100vw" />
       {/* Elegant layered overlay — soft vignette */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 from-0% via-transparent via-35% via-transparent via-65% to-primary/60 to-100%" />
       {/* Subtle radial vignette at edges */}
@@ -230,7 +230,7 @@ function DiveSitesSection({ prefix }: { prefix: DestinationPrefix }) {
   return (
     <PageSection className="min-h-[60vh] md:min-h-[70vh]">
       {/* Background image */}
-      <Image src={heroImageMap[prefix]} alt="" fill className="object-cover" unoptimized sizes="100vw" />
+      <Image src={heroImageMap[prefix]} alt="" fill className="object-cover" sizes="100vw" />
       <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm" />
       <div className="relative z-10 container mx-auto px-6 lg:px-12">
         <FadeIn>

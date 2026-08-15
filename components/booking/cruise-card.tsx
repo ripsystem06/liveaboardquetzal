@@ -107,7 +107,7 @@ export function CruiseCard({ cruise, onSelect, onSelectTier, isSelected = false,
               alt={cruise.name}
               fill
               className="object-cover"
-              unoptimized
+              sizes="96px"
             />
           </div>
 

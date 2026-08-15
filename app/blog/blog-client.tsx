@@ -61,6 +61,8 @@ export function BlogClient({ posts }: BlogClientProps) {
                         <img 
                           src={post.imageUrl} 
                           alt={post.title}
+                          loading="lazy"
+                          decoding="async"
                           className="object-cover w-full h-full"
                         />
                       </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { MessageCircle } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
@@ -10,15 +11,16 @@ export function DestinationSection() {
   return (
     <section className="relative h-[500px] w-full overflow-hidden">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{
-          backgroundImage: 'url(/images/Exterior/quetzal-costado.webp)',
-        }}
-      >
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-primary/30" />
-      </div>
+      <Image
+        src="/images/Exterior/quetzal-costado.webp"
+        alt=""
+        fill
+        className="object-cover"
+        sizes="100vw"
+        priority
+      />
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-primary/30" />
 
       {/* Content */}
       <div className="relative z-10 flex h-full items-center">
