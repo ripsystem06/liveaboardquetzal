@@ -8,13 +8,13 @@ import { ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 
 const marineImages = [
-  { src: '/images/panoramicas/Manta Clariones.webp', alt: 'Giant manta ray in crystal-clear waters', span: 'md:col-span-2 md:row-span-2' },
-  { src: '/images/panoramicas/Puntas blancas .webp', alt: 'Whitetip reef sharks in Socorro', span: '' },
-  { src: '/images/panoramicas/Delfin Kike.webp', alt: 'Dolphins swimming alongside the Quetzal', span: '' },
-  { src: '/images/panoramicas/Manta el Boiler 1.webp', alt: 'Giant manta ray gliding through crystal-clear waters at El Boiler', span: '' },
-  { src: '/images/panoramicas/Puntas blancas 1.webp', alt: 'Whitetip reef sharks resting on the ocean floor', span: '' },
-  { src: '/images/panoramicas/Puntas blancas 4.webp', alt: 'Whitetip reef sharks in crystal-clear Socorro waters', span: '' },
-  { src: '/images/panoramicas/Puntas blancas Balcón.webp', alt: 'Whitetip reef sharks from the balcony view', span: '' },
+  { src: '/images/panoramicas/Manta Clariones.webp', alt: 'Giant manta ray in crystal-clear waters', span: 'md:col-span-2 md:row-span-2', sizes: '(max-width: 1024px) 100vw, 50vw' },
+  { src: '/images/panoramicas/Puntas blancas .webp', alt: 'Whitetip reef sharks in Socorro', span: '', sizes: '(max-width: 1024px) 50vw, 25vw' },
+  { src: '/images/panoramicas/Delfin Kike.webp', alt: 'Dolphins swimming alongside the Quetzal', span: '', sizes: '(max-width: 1024px) 50vw, 25vw' },
+  { src: '/images/panoramicas/Manta el Boiler 1.webp', alt: 'Giant manta ray gliding through crystal-clear waters at El Boiler', span: '', sizes: '(max-width: 1024px) 50vw, 25vw' },
+  { src: '/images/panoramicas/Puntas blancas 1.webp', alt: 'Whitetip reef sharks resting on the ocean floor', span: '', sizes: '(max-width: 1024px) 50vw, 25vw' },
+  { src: '/images/panoramicas/Puntas blancas 4.webp', alt: 'Whitetip reef sharks in crystal-clear Socorro waters', span: '', sizes: '(max-width: 1024px) 50vw, 25vw' },
+  { src: '/images/panoramicas/Puntas blancas Balcón.webp', alt: 'Whitetip reef sharks from the balcony view', span: '', sizes: '(max-width: 1024px) 50vw, 25vw' },
 ]
 
 export function MarineLifeSection() {
@@ -97,7 +97,7 @@ export function MarineLifeSection() {
                     src={img.src}
                     alt={img.alt}
                     fill
-                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    sizes={img.sizes}
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
