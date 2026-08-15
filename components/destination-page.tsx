@@ -756,22 +756,29 @@ function DayAtSeaSection({ prefix }: { prefix: DestinationPrefix }) {
 }
 
 // ── Water Temperature ───────────────────────────────────────────────────────
+const WATER_TEMP_MONTHS: Record<DestinationPrefix, string[]> = {
+  socorro: ['nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may'],
+  cortez: ['aug', 'sep', 'oct', 'nov'],
+  magbay: ['oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr'],
+}
+
+const MONTH_LABELS: Record<string, string> = {
+  jan: 'Jan', feb: 'Feb', mar: 'Mar', apr: 'Apr', may: 'May',
+  jun: 'Jun', jul: 'Jul', aug: 'Aug', sep: 'Sep', oct: 'Oct', nov: 'Nov', dec: 'Dec',
+}
+
 function WaterTempSection({ prefix }: { prefix: DestinationPrefix }) {
   const { t } = useLanguage()
 
   const title = t(`${prefix}.waterTemp.title`)
   if (title === `${prefix}.waterTemp.title`) return null
 
-  const WATER_TEMP_MONTHS = ['nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may'] as const
-  const monthNames = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May']
-  const monthLabels = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May']
-
-  // Get temperature data for each month
-  const months = WATER_TEMP_MONTHS
-    .map((m, i) => {
+  // Get temperature data for each month (order differs per destination)
+  const months = (WATER_TEMP_MONTHS[prefix] ?? [])
+    .map((m) => {
       const temp = t(`${prefix}.waterTemp.${m}`)
       if (temp === `${prefix}.waterTemp.${m}`) return null
-      return { key: m, label: monthLabels[i], temp }
+      return { key: m, label: MONTH_LABELS[m] ?? m, temp }
     })
     .filter((m): m is NonNullable<typeof m> => m !== null)
 

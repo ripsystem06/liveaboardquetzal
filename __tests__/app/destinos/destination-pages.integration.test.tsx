@@ -205,6 +205,12 @@ const fullCortezTranslations: Record<string, string> = {
   'cortez.calendar.sep': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.oct': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.nov': 'Sea lions, hammerheads',
+  // Water temp keys
+  'cortez.waterTemp.title': 'Water Temperature',
+  'cortez.waterTemp.aug': '28–30°C (82–86°F)',
+  'cortez.waterTemp.sep': '28–30°C (82–86°F)',
+  'cortez.waterTemp.oct': '28–30°C (82–86°F)',
+  'cortez.waterTemp.nov': '26–28°C (79–82°F)',
   // Day at Sea keys
   'cortez.dayAtSea.heading': 'Your Day at Sea',
   'cortez.dayAtSea.intro': 'Your days in the Sea of Cortez follow a rhythm.',
@@ -255,6 +261,15 @@ const fullMagbayTranslations: Record<string, string> = {
   'magbay.calendar.oct': 'Sardine run begins',
   'magbay.calendar.nov': 'Sardine run (peak)',
   'magbay.calendar.dec': 'Sardine run, bait balls',
+  // Water temp keys
+  'magbay.waterTemp.title': 'Water Temperature',
+  'magbay.waterTemp.oct': '25–27°C (77–81°F)',
+  'magbay.waterTemp.nov': '23–26°C (73–79°F)',
+  'magbay.waterTemp.dec': '22–24°C (72–75°F)',
+  'magbay.waterTemp.jan': '20–22°C (68–72°F)',
+  'magbay.waterTemp.feb': '19–21°C (66–70°F)',
+  'magbay.waterTemp.mar': '18–20°C (64–68°F)',
+  'magbay.waterTemp.apr': '17–19°C (63–66°F)',
   // Day in Lagoon keys
   'magbay.dayInLagoon.heading': 'Your Day in the Lagoon',
   'magbay.dayInLagoon.intro': 'Your expedition unfolds in two distinct phases.',

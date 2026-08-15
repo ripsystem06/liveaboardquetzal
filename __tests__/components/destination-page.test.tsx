@@ -196,6 +196,12 @@ const fullCortezTranslations: Record<string, string> = {
   'cortez.calendar.sep': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.oct': 'Whale sharks, mobula rays (peak)',
   'cortez.calendar.nov': 'Sea lions, hammerheads',
+  // Water temp keys
+  'cortez.waterTemp.title': 'Water Temperature',
+  'cortez.waterTemp.aug': '28–30°C (82–86°F)',
+  'cortez.waterTemp.sep': '28–30°C (82–86°F)',
+  'cortez.waterTemp.oct': '28–30°C (82–86°F)',
+  'cortez.waterTemp.nov': '26–28°C (79–82°F)',
   // Day at Sea keys
   'cortez.dayAtSea.heading': 'Your Day at Sea',
   'cortez.dayAtSea.intro': 'Your days in the Sea of Cortez follow a rhythm shaped by the desert sun.',
@@ -246,6 +252,15 @@ const fullMagbayTranslations: Record<string, string> = {
   'magbay.calendar.oct': 'Sardine run begins',
   'magbay.calendar.nov': 'Sardine run (peak)',
   'magbay.calendar.dec': 'Sardine run, bait balls',
+  // Water temp keys
+  'magbay.waterTemp.title': 'Water Temperature',
+  'magbay.waterTemp.oct': '25–27°C (77–81°F)',
+  'magbay.waterTemp.nov': '23–26°C (73–79°F)',
+  'magbay.waterTemp.dec': '22–24°C (72–75°F)',
+  'magbay.waterTemp.jan': '20–22°C (68–72°F)',
+  'magbay.waterTemp.feb': '19–21°C (66–70°F)',
+  'magbay.waterTemp.mar': '18–20°C (64–68°F)',
+  'magbay.waterTemp.apr': '17–19°C (63–66°F)',
   // Day in Lagoon keys
   'magbay.dayInLagoon.heading': 'Your Day in the Lagoon',
   'magbay.dayInLagoon.intro': 'Your expedition unfolds in two distinct phases.',
@@ -544,17 +559,41 @@ describe('DestinationPage', () => {
     expect(screen.getByText('23–27°C (73–81°F)')).toBeInTheDocument()
   })
 
-  // ── Test 15: Cortez WaterTempSection returns null ──────────────────────
-  it('hides WaterTempSection for Cortez when waterTemp keys are missing', () => {
+  // ── Test 15: Cortez WaterTempSection renders Aug–Nov data ──────────────
+  it('renders WaterTempSection with Cortez Aug–Nov temperature data', () => {
     translationStore = { ...fullCortezTranslations }
     render(<DestinationPage prefix="cortez" />)
 
-    // Water Temperature should NOT appear (no waterTemp keys in Cortez mock)
-    expect(screen.queryByText('Water Temperature')).not.toBeInTheDocument()
+    // Section heading
+    expect(screen.getByText('Water Temperature')).toBeInTheDocument()
+    // aug, sep and oct all share the 28–30°C range
+    expect(screen.getAllByText('28–30°C (82–86°F)').length).toBe(3)
+    expect(screen.getByText('26–28°C (79–82°F)')).toBeInTheDocument()
 
-    // But Day at Sea and Dive Sites still render
+    // Day at Sea and Dive Sites still render
     expect(screen.getByText('Your Day at Sea')).toBeInTheDocument()
     expect(screen.getByText('Dive Sites')).toBeInTheDocument()
+  })
+
+  // ── Test 15b: MagBay WaterTempSection renders Oct–Apr data ─────────────
+  it('renders WaterTempSection with MagBay Oct–Apr temperature data', () => {
+    translationStore = { ...fullMagbayTranslations }
+    render(<DestinationPage prefix="magbay" />)
+
+    expect(screen.getByText('Water Temperature')).toBeInTheDocument()
+    expect(screen.getByText('25–27°C (77–81°F)')).toBeInTheDocument() // oct
+    expect(screen.getByText('20–22°C (68–72°F)')).toBeInTheDocument() // jan
+    expect(screen.getByText('17–19°C (63–66°F)')).toBeInTheDocument() // apr
+  })
+
+  // ── Test 15c: WaterTempSection gracefully hides when keys are missing ──
+  it('hides WaterTempSection when waterTemp keys are missing', () => {
+    const stripped = { ...fullSocorroTranslations }
+    delete stripped['socorro.waterTemp.title']
+    translationStore = stripped
+    render(<DestinationPage prefix="socorro" />)
+
+    expect(screen.queryByText('Water Temperature')).not.toBeInTheDocument()
   })
 
   // ── Test 16: MagBay reads dayInLagoon keys not dayAtSea ────────────────
