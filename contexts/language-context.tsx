@@ -60,7 +60,7 @@ const translations = {
     'boat.gallery.altInterior': 'Shared interior space aboard the Quetzal',
     
     // Marine Life Section
-    'marine.title': 'This Is What You will See With Us',
+    'marine.title': 'What you will see',
     'marine.description': 'Join Quetzal\'s liveaboard adventure and witness breathtaking marine life—exactly what our guests see on this unforgettable underwater experience.',
     'marine.cta': 'Book Your Expedition',
     
