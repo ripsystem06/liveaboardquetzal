@@ -442,17 +442,17 @@ describe('DestinationPage', () => {
     translationStore = { ...fullCortezTranslations }
     const { unmount: unmountCortez } = render(<DestinationPage prefix="cortez" />)
     const cortezHero = screen.getAllByRole('img').find(
-      (img) => (img as HTMLImageElement).src.includes('images.unsplash.com')
+      (img) => (img as HTMLImageElement).src.includes('seacortes.webp')
     ) as HTMLImageElement
-    expect(cortezHero.src).toContain('photo-1507525428034')
+    expect(cortezHero).toBeDefined()
     unmountCortez()
 
     translationStore = { ...fullMagbayTranslations }
     render(<DestinationPage prefix="magbay" />)
     const magbayHero = screen.getAllByRole('img').find(
-      (img) => (img as HTMLImageElement).src.includes('images.unsplash.com')
+      (img) => (img as HTMLImageElement).src.includes('balllenahero.webp')
     ) as HTMLImageElement
-    expect(magbayHero.src).toContain('photo-1568430462989')
+    expect(magbayHero).toBeDefined()
   })
 
   // ── Test 9: CTA button links to /contacto ─────────────────────────────

@@ -184,7 +184,7 @@ describe('Destination translations — Cortez (EN)', () => {
 
   // Gallery
   it('cortez.gallery.title', () => testKey('en', 'cortez.gallery.title', 'Gallery'))
-  it('cortez.gallery.images', () => testKey('en', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Rugged coastline of Punta Tosca, Baja California Sur"},{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"Pristine waters of Loreto and Magdalena Bay"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"The iconic pinnacle of Roca Partida in open ocean"},{"src":"/images/panoramicas/Quetzal San Bene.webp","alt":"The Quetzal anchored off San Benedicto Island"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta ray gliding through crystal-clear waters"}]'))
+  it('cortez.gallery.images', () => testKey('en', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Rugged coastline of Punta Tosca, Baja California Sur"},{"src":"/seacortes.webp","alt":"Sea of Cortez"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"The iconic pinnacle of Roca Partida in open ocean"},{"src":"/images/panoramicas/Quetzal San Bene.webp","alt":"The Quetzal anchored off San Benedicto Island"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta ray gliding through crystal-clear waters"}]'))
 })
 
 describe('Destination translations — Cortez (ES)', () => {
@@ -258,7 +258,7 @@ describe('Destination translations — Cortez (ES)', () => {
 
   // Gallery
   it('cortez.gallery.title', () => testKey('es', 'cortez.gallery.title', 'Galería'))
-  it('cortez.gallery.images', () => testKey('es', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Escarpada costa de Punta Tosca, Baja California Sur"},{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"Aguas prístinas de Loreto y Bahía Magdalena"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"El icónico pináculo de Roca Partida en mar abierto"},{"src":"/images/panoramicas/Quetzal San Bene.webp","alt":"El Quetzal anclado frente a la Isla San Benedicto"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta raya deslizándose en aguas cristalinas"}]'))
+  it('cortez.gallery.images', () => testKey('es', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Escarpada costa de Punta Tosca, Baja California Sur"},{"src":"/seacortes.webp","alt":"Mar de Cortés"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"El icónico pináculo de Roca Partida en mar abierto"},{"src":"/images/panoramicas/Quetzal San Bene.webp","alt":"El Quetzal anclado frente a la Isla San Benedicto"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta raya deslizándose en aguas cristalinas"}]'))
 })
 
 describe('Destination translations — Magbay (EN)', () => {
@@ -283,7 +283,7 @@ describe('Destination translations — Magbay (EN)', () => {
 
   // Gallery
   it('magbay.gallery.title', () => testKey('en', 'magbay.gallery.title', 'Gallery'))
-  it('magbay.gallery.images', () => testKey('en', 'magbay.gallery.images', '[{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"The protected lagoon of Bahía Magdalena at sunset"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Whitetip reef sharks resting on the sandy bottom"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curious whitetip sharks patrolling the reef"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Panoramic view from the Balcón dive site"}]'))
+  it('magbay.gallery.images', () => testKey('en', 'magbay.gallery.images', '[{"src":"/balllenahero.webp","alt":"Gray whale breaching in the protected waters of Magdalena Bay"},{"src":"/espada.webp","alt":"Swordfish in the sardine run"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curious whitetip sharks patrolling the reef"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Panoramic view from the Balcón dive site"}]'))
 })
 
 describe('Destination translations — Magbay (ES)', () => {
@@ -308,5 +308,5 @@ describe('Destination translations — Magbay (ES)', () => {
 
   // Gallery
   it('magbay.gallery.title', () => testKey('es', 'magbay.gallery.title', 'Galería'))
-  it('magbay.gallery.images', () => testKey('es', 'magbay.gallery.images', '[{"src":"/images/panoramicas/loreto-magdalena-bay.webp","alt":"La laguna protegida de Bahía Magdalena al atardecer"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Tiburones punta blanca descansando en el fondo arenoso"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curiosos tiburones punta blanca patrullando el arrecife"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Vista panorámica desde el sitio de buceo El Balcón"}]'))
+  it('magbay.gallery.images', () => testKey('es', 'magbay.gallery.images', '[{"src":"/balllenahero.webp","alt":"Ballena gris emergiendo en las aguas protegidas de Bahía Magdalena"},{"src":"/espada.webp","alt":"Pez espada en la corrida de sardinas"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curiosos tiburones punta blanca patrullando el arrecife"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Vista panorámica desde el sitio de buceo El Balcón"}]'))
 })

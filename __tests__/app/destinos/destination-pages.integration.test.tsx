@@ -416,10 +416,9 @@ describe('Destination Pages Integration', () => {
 
       const images = screen.getAllByRole('img')
       const heroImg = images.find(
-        (img) => (img as HTMLImageElement).src.includes('images.unsplash.com')
+        (img) => (img as HTMLImageElement).src.includes('seacortes.webp')
       ) as HTMLImageElement
       expect(heroImg).toBeDefined()
-      expect(heroImg.src).toContain('photo-1507525428034')
     })
   })
 
@@ -448,10 +447,9 @@ describe('Destination Pages Integration', () => {
 
       const images = screen.getAllByRole('img')
       const heroImg = images.find(
-        (img) => (img as HTMLImageElement).src.includes('images.unsplash.com')
+        (img) => (img as HTMLImageElement).src.includes('balllenahero.webp')
       ) as HTMLImageElement
       expect(heroImg).toBeDefined()
-      expect(heroImg.src).toContain('photo-1568430462989')
     })
   })
 })

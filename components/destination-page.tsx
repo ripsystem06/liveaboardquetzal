@@ -15,15 +15,15 @@ interface DestinationPageProps { prefix: DestinationPrefix }
 // ── Hero image mapping ─────────────────────────────────────────────────────
 const heroImageMap: Record<DestinationPrefix, string> = {
   socorro: 'https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=1200&q=80',
-  cortez: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
-  magbay: '/ballena2.jpeg',
+  cortez: '/seacortes.webp',
+  magbay: '/balllenahero.webp',
 }
 
 // ── Description section images ──────────────────────────────────────────────
 const descImageMap: Record<DestinationPrefix, string> = {
   socorro: '/images/panoramicas/Manta el Boiler 1.webp',
   cortez: '/images/panoramicas/burritos galapagos 1.webp',
-  magbay: '/images/panoramicas/loreto-magdalena-bay.webp',
+  magbay: '/panoramica.webp',
 }
 
 // ── Zone definitions ────────────────────────────────────────────────────────
