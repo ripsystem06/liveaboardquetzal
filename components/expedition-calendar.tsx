@@ -25,12 +25,12 @@ interface Expedition {
 }
 
 const ROUTE_IMAGES: Record<string, string> = {
-  'Socorro Islands': '/images/panoramicas/Manta el Boiler 1.webp',
-  'Sea of Cortez': '/images/panoramicas/Delfin Kike.webp',
-  'Magdalena Bay': '/images/panoramicas/loreto-magdalena-bay.webp',
+  'Socorro Islands': '/images/panoramicas/thumb-lg/Manta el Boiler 1.webp',
+  'Sea of Cortez': '/images/panoramicas/thumb-lg/Delfin Kike.webp',
+  'Magdalena Bay': '/images/panoramicas/thumb-lg/loreto-magdalena-bay.webp',
 }
 
-const DEFAULT_IMAGE = '/images/panoramicas/ROca Partida .webp'
+const DEFAULT_IMAGE = '/images/panoramicas/thumb-lg/ROca Partida .webp'
 
 const MONTHS_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',

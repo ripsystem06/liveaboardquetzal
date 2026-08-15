@@ -1,7 +1,11 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/db'
 
-export async function GET() {
-  try {
+// Public expedition calendar changes rarely (a few rows). Cache it in the Data
+// Cache for 60s so repeat visits (and warm instances) avoid a Supabase round-trip
+// on every request.
+const getCalendarData = unstable_cache(
+  async () => {
     const today = new Date().toISOString().split('T')[0]
 
     const cruises = await prisma.cruise.findMany({
@@ -39,7 +43,16 @@ export async function GET() {
       byDate[exp.departureDate].push(exp)
     }
 
-    return Response.json({ expeditions, byDate })
+    return { expeditions, byDate }
+  },
+  ['cruises-calendar'],
+  { revalidate: 60 },
+)
+
+export async function GET() {
+  try {
+    const data = await getCalendarData()
+    return Response.json(data)
   } catch (error) {
     console.error('GET /api/cruises/calendar error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })

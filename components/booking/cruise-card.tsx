@@ -24,10 +24,10 @@ const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep'
 
 function getRouteImage(route: string): string {
   const lower = route.toLowerCase()
-  if (lower.includes('socorro') || lower.includes('revillagigedo')) return '/images/panoramicas/Isla Socorro.webp'
-  if (lower.includes('cortez') || lower.includes('cortés')) return '/images/panoramicas/burritos galapagos 1.webp'
-  if (lower.includes('magdalena') || lower.includes('magbay')) return '/images/panoramicas/loreto-magdalena-bay.webp'
-  return '/images/panoramicas/Isla Socorro.webp'
+  if (lower.includes('socorro') || lower.includes('revillagigedo')) return '/images/panoramicas/thumb/Isla Socorro.webp'
+  if (lower.includes('cortez') || lower.includes('cortés')) return '/images/panoramicas/thumb/burritos galapagos 1.webp'
+  if (lower.includes('magdalena') || lower.includes('magbay')) return '/images/panoramicas/thumb/loreto-magdalena-bay.webp'
+  return '/images/panoramicas/thumb/Isla Socorro.webp'
 }
 
 function parseDate(dateStr: string) {
