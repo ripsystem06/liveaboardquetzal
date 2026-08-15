@@ -61,19 +61,20 @@ model BlogPost {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  name          String
-  email         String        @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  phone         String        @default("")
-  isAdmin       Boolean       @default(false)
-  reservations  Reservation[]
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  name           String
+  email          String        @unique
+  secondaryEmail String?
+  emailVerified  DateTime?
+  image          String?
+  passwordHash   String?
+  phone          String        @default("")
+  isAdmin        Boolean       @default(false)
+  reservations   Reservation[]
+  accounts       Account[]
+  sessions       Session[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Account {

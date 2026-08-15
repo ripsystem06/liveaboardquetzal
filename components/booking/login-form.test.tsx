@@ -27,6 +27,7 @@ function mockUseUser(overrides: Partial<UseUserMock> = {}) {
     sessionReady: true,
     requestOtp: vi.fn(),
     verifyOtp: vi.fn(),
+    verifyTwoFactor: vi.fn(),
     logout: vi.fn(),
     updateProfile: vi.fn(),
     ...overrides,
@@ -64,7 +65,7 @@ describe('LoginForm', () => {
 
   it('verifies a code and dispatches LOGIN_COMPLETED on success', async () => {
     const requestOtp = vi.fn().mockResolvedValue(undefined)
-    const verifyOtp = vi.fn().mockResolvedValue(true)
+    const verifyOtp = vi.fn().mockResolvedValue({ kind: 'success' })
     mockUseUser({ requestOtp, verifyOtp })
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
@@ -82,7 +83,7 @@ describe('LoginForm', () => {
 
   it('passes the optional name to verifyOtp when provided', async () => {
     const requestOtp = vi.fn().mockResolvedValue(undefined)
-    const verifyOtp = vi.fn().mockResolvedValue(true)
+    const verifyOtp = vi.fn().mockResolvedValue({ kind: 'success' })
     mockUseUser({ requestOtp, verifyOtp })
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
@@ -101,7 +102,7 @@ describe('LoginForm', () => {
 
   it('shows an error and does not dispatch on an invalid code', async () => {
     const requestOtp = vi.fn().mockResolvedValue(undefined)
-    const verifyOtp = vi.fn().mockResolvedValue(false)
+    const verifyOtp = vi.fn().mockResolvedValue({ kind: 'error' })
     mockUseUser({ requestOtp, verifyOtp })
     const user = userEvent.setup()
     renderWithProviders(<LoginForm dispatch={mockDispatch} />)
@@ -117,6 +118,33 @@ describe('LoginForm', () => {
       expect(screen.getByText(/invalid or expired code/i)).toBeInTheDocument()
     })
     expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'LOGIN_COMPLETED' })
+  })
+
+  it('advances to the two-factor step and completes on a valid second code', async () => {
+    const requestOtp = vi.fn().mockResolvedValue(undefined)
+    const verifyOtp = vi.fn().mockResolvedValue({ kind: 'twoFactorRequired', maskedEmail: 'r***@quetzal.com' })
+    const verifyTwoFactor = vi.fn().mockResolvedValue(true)
+    mockUseUser({ requestOtp, verifyOtp, verifyTwoFactor })
+    const user = userEvent.setup()
+    renderWithProviders(<LoginForm dispatch={mockDispatch} />)
+
+    await user.type(screen.getByLabelText(/email/i), 'admin@quetzal.com')
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
+
+    await user.type(screen.getByLabelText(/code/i), '123456')
+    await user.click(screen.getByRole('button', { name: /verify/i }))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/second code/i)).toBeInTheDocument()
+    })
+    expect(screen.getByText('r***@quetzal.com')).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(/second code/i), '654321')
+    await user.click(screen.getByRole('button', { name: /verify/i }))
+
+    expect(verifyTwoFactor).toHaveBeenCalledWith('admin@quetzal.com', '123456', '654321', undefined)
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOGIN_COMPLETED' })
   })
 
   it('shows an error when the email is empty', async () => {

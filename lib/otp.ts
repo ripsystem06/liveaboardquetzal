@@ -79,3 +79,24 @@ export async function verifyOtpCode(email: string, code: string): Promise<OtpVer
 
   return { ok: true }
 }
+
+/**
+ * Read-only validator: checks a submitted code against the latest OTP for the
+ * email WITHOUT consuming it or incrementing the attempt counter. Used by the
+ * 2FA challenge endpoint to confirm the primary code before issuing the admin's
+ * second factor. The actual consume still happens later in verifyOtpCode.
+ */
+export async function validateOtpCode(email: string, code: string): Promise<OtpVerifyResult> {
+  const otp = await prisma.otpCode.findFirst({
+    where: { email },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  if (!otp) return { ok: false, reason: 'invalid' }
+  if (otp.consumedAt) return { ok: false, reason: 'reused' }
+  if (otp.expiresAt < new Date()) return { ok: false, reason: 'expired' }
+  if (otp.attempts >= OTP_MAX_ATTEMPTS) return { ok: false, reason: 'locked' }
+
+  const valid = await verifyPassword(code, otp.codeHash)
+  return valid ? { ok: true } : { ok: false, reason: 'invalid' }
+}

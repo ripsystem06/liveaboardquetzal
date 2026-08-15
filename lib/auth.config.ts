@@ -16,11 +16,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email', type: 'email' },
         otp: { label: 'Code', type: 'text' },
         name: { label: 'Name', type: 'text' },
+        twoFactorCode: { label: 'Second Code', type: 'text' },
       },
       authorize: async (credentials, request) => {
         const email = String(credentials?.email ?? '')
         const otp = String(credentials?.otp ?? '')
         const name = credentials?.name ? String(credentials.name) : undefined
+        const twoFactorCode = credentials?.twoFactorCode ? String(credentials.twoFactorCode) : undefined
 
         if (!email || !otp) return null
 
@@ -71,6 +73,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               actorEmail: email,
             },
           }).catch(() => {})
+        }
+
+        // Admin 2FA: when an admin has a recovery email set, a second code is
+        // required before the session is issued.
+        if (user.isAdmin && user.secondaryEmail) {
+          if (!twoFactorCode) {
+            prisma.auditLog.create({
+              data: {
+                action: 'auth.otp_2fa_missing',
+                entityType: 'user',
+                entityId: email,
+                actorEmail: email,
+                details: JSON.stringify({ ip }),
+              },
+            }).catch(() => {})
+            return null
+          }
+
+          const secondFactor = await verifyOtpCode(user.secondaryEmail, twoFactorCode)
+          if (!secondFactor.ok) {
+            prisma.auditLog.create({
+              data: {
+                action: 'auth.otp_2fa_failed',
+                entityType: 'user',
+                entityId: email,
+                actorEmail: email,
+                details: JSON.stringify({ reason: secondFactor.reason, ip }),
+              },
+            }).catch(() => {})
+            return null
+          }
         }
 
         prisma.auditLog.create({

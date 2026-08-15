@@ -37,7 +37,7 @@ export default function AdventurePage() {
 
     try {
       const ok = await verifyOtp(email, otp)
-      if (ok) {
+      if (ok.kind === 'success') {
         router.push('/admin')
       } else {
         setError('Invalid or expired code')

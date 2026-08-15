@@ -85,9 +85,9 @@ describe('Credentials provider OTP authorize', () => {
     h.mockAuditCreate.mockResolvedValue({})
   })
 
-  it('exposes { email, otp, name } credentials (no password)', () => {
+  it('exposes { email, otp, name, twoFactorCode } credentials (no password)', () => {
     const config = h.capture.config!
-    expect(Object.keys(config.credentials)).toEqual(['email', 'otp', 'name'])
+    expect(Object.keys(config.credentials)).toEqual(['email', 'otp', 'name', 'twoFactorCode'])
     expect(config.credentials).not.toHaveProperty('password')
   })
 
@@ -195,6 +195,63 @@ describe('Credentials provider OTP authorize', () => {
   it('returns null when email or otp is missing', async () => {
     expect(await authorize()({ email: '', otp: '' }, {})).toBeNull()
     expect(h.mockVerifyOtpCode).not.toHaveBeenCalled()
+  })
+
+  it('returns null and logs auth.otp_2fa_missing when an admin omits the second factor', async () => {
+    h.mockVerifyOtpCode.mockResolvedValue({ ok: true })
+    h.mockUserFindUnique.mockResolvedValue({
+      id: 'admin-1',
+      name: 'Admin',
+      email: 'admin@quetzal.com',
+      isAdmin: true,
+      secondaryEmail: 'recovery@quetzal.com',
+    })
+
+    const result = await authorize()(creds({ email: 'admin@quetzal.com' }), {})
+
+    expect(result).toBeNull()
+    expect(h.mockAuditCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'auth.otp_2fa_missing' }),
+    })
+  })
+
+  it('returns the user when an admin provides a valid second factor', async () => {
+    h.mockVerifyOtpCode
+      .mockResolvedValueOnce({ ok: true })
+      .mockResolvedValueOnce({ ok: true })
+    h.mockUserFindUnique.mockResolvedValue({
+      id: 'admin-1',
+      name: 'Admin',
+      email: 'admin@quetzal.com',
+      isAdmin: true,
+      secondaryEmail: 'recovery@quetzal.com',
+    })
+
+    const result = await authorize()(creds({ email: 'admin@quetzal.com', twoFactorCode: '654321' }), {})
+
+    expect(result).toEqual({ id: 'admin-1', name: 'Admin', email: 'admin@quetzal.com' })
+    expect(h.mockVerifyOtpCode).toHaveBeenNthCalledWith(1, 'admin@quetzal.com', '123456')
+    expect(h.mockVerifyOtpCode).toHaveBeenNthCalledWith(2, 'recovery@quetzal.com', '654321')
+  })
+
+  it('returns null and logs auth.otp_2fa_failed for a wrong second factor', async () => {
+    h.mockVerifyOtpCode
+      .mockResolvedValueOnce({ ok: true })
+      .mockResolvedValueOnce({ ok: false, reason: 'invalid' })
+    h.mockUserFindUnique.mockResolvedValue({
+      id: 'admin-1',
+      name: 'Admin',
+      email: 'admin@quetzal.com',
+      isAdmin: true,
+      secondaryEmail: 'recovery@quetzal.com',
+    })
+
+    const result = await authorize()(creds({ email: 'admin@quetzal.com', twoFactorCode: '000000' }), {})
+
+    expect(result).toBeNull()
+    expect(h.mockAuditCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'auth.otp_2fa_failed' }),
+    })
   })
 })
 

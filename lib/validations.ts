@@ -62,6 +62,11 @@ export const OtpVerifySchema = z.object({
   name: z.string().optional(),
 })
 
+export const OtpChallengeSchema = z.object({
+  email: z.string().min(1),
+  otp: z.string().min(1),
+})
+
 export const AvailabilityQuerySchema = z.object({
   cruiseId: z.string().min(1),
   departureDate: z.string().min(1),

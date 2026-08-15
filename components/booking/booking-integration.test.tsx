@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import React from 'react'
+import { flushSync } from 'react-dom'
 import { renderWithProviders, screen, waitFor } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { BookingPageClient } from './booking-page-client'
@@ -19,7 +20,12 @@ const sessionListeners = new Set<() => void>()
 
 function emitSessionChange(next: typeof currentSession) {
   currentSession = next
-  sessionListeners.forEach((listener) => listener())
+  // Flush synchronously so isAuthenticated reflects the new session BEFORE the
+  // login form's optimistic LOGIN_COMPLETED dispatch runs (mirrors next-auth's
+  // session event → useSession update ordering).
+  flushSync(() => {
+    sessionListeners.forEach((listener) => listener())
+  })
 }
 
 mockUseSession.mockImplementation(() => {
@@ -110,6 +116,9 @@ describe('BookingPageClient integration', () => {
 
       if (url.includes('/api/auth/otp/request') && isPost) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) })
+      }
+      if (url.includes('/api/auth/otp/challenge') && isPost) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ twoFactorRequired: false }) })
       }
       if (url.includes('/api/cruises/calendar')) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ expeditions: mockCruises }) })

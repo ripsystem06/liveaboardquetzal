@@ -89,17 +89,26 @@ describe('useUser', () => {
   })
 
   describe('verifyOtp', () => {
-    it('signs in with credentials using email + otp and returns true on success', async () => {
+    it('returns success when the challenge requires no second factor and signIn succeeds', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ twoFactorRequired: false }),
+      })
       signInMock.mockResolvedValue({ ok: true, error: null })
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
-      let ok: boolean | undefined
+      let outcome: Awaited<ReturnType<typeof result.current.verifyOtp>> | undefined
       await act(async () => {
-        ok = await result.current.verifyOtp('demo@quetzal.com', '123456')
+        outcome = await result.current.verifyOtp('demo@quetzal.com', '123456')
       })
 
-      expect(ok).toBe(true)
+      expect(outcome).toEqual({ kind: 'success' })
+      expect(fetchMock).toHaveBeenCalledWith('/api/auth/otp/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'demo@quetzal.com', otp: '123456' }),
+      })
       expect(signInMock).toHaveBeenCalledWith('credentials', {
         email: 'demo@quetzal.com',
         otp: '123456',
@@ -107,7 +116,11 @@ describe('useUser', () => {
       })
     })
 
-    it('passes the optional name to signIn when provided', async () => {
+    it('passes the optional name through to the challenge and signIn', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ twoFactorRequired: false }),
+      })
       signInMock.mockResolvedValue({ ok: true, error: null })
 
       const { result } = renderHook(() => useUser(), { wrapper })
@@ -116,6 +129,11 @@ describe('useUser', () => {
         await result.current.verifyOtp('jane@example.com', '123456', 'Jane Doe')
       })
 
+      expect(fetchMock).toHaveBeenCalledWith('/api/auth/otp/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'jane@example.com', otp: '123456' }),
+      })
       expect(signInMock).toHaveBeenCalledWith('credentials', {
         email: 'jane@example.com',
         otp: '123456',
@@ -124,18 +142,74 @@ describe('useUser', () => {
       })
     })
 
-    it('returns false on an invalid code', async () => {
+    it('returns twoFactorRequired with the masked email and skips signIn', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ twoFactorRequired: true, maskedEmail: 'r***@quetzal.com' }),
+      })
+
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      let outcome: Awaited<ReturnType<typeof result.current.verifyOtp>> | undefined
+      await act(async () => {
+        outcome = await result.current.verifyOtp('admin@quetzal.com', '123456')
+      })
+
+      expect(outcome).toEqual({ kind: 'twoFactorRequired', maskedEmail: 'r***@quetzal.com' })
+      expect(signInMock).not.toHaveBeenCalled()
+    })
+
+    it('returns error when the challenge rejects the code', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({ twoFactorRequired: false }),
+      })
+
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      let outcome: Awaited<ReturnType<typeof result.current.verifyOtp>> | undefined
+      await act(async () => {
+        outcome = await result.current.verifyOtp('demo@quetzal.com', '000000')
+      })
+
+      expect(outcome).toEqual({ kind: 'error' })
+      expect(signInMock).not.toHaveBeenCalled()
+      expect(result.current.isAuthenticated).toBe(false)
+    })
+  })
+
+  describe('verifyTwoFactor', () => {
+    it('signs in with credentials including the twoFactorCode and returns true on success', async () => {
+      signInMock.mockResolvedValue({ ok: true, error: null })
+
+      const { result } = renderHook(() => useUser(), { wrapper })
+
+      let ok: boolean | undefined
+      await act(async () => {
+        ok = await result.current.verifyTwoFactor('admin@quetzal.com', '123456', '654321')
+      })
+
+      expect(ok).toBe(true)
+      expect(signInMock).toHaveBeenCalledWith('credentials', {
+        email: 'admin@quetzal.com',
+        otp: '123456',
+        twoFactorCode: '654321',
+        redirect: false,
+      })
+    })
+
+    it('returns false when the second factor is rejected', async () => {
       signInMock.mockResolvedValue({ ok: false, error: 'CredentialsSignin' })
 
       const { result } = renderHook(() => useUser(), { wrapper })
 
       let ok: boolean | undefined
       await act(async () => {
-        ok = await result.current.verifyOtp('demo@quetzal.com', '000000')
+        ok = await result.current.verifyTwoFactor('admin@quetzal.com', '123456', '000000')
       })
 
       expect(ok).toBe(false)
-      expect(result.current.isAuthenticated).toBe(false)
     })
   })
 

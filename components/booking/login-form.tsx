@@ -14,10 +14,12 @@ interface LoginFormProps {
 
 export function LoginForm({ dispatch }: LoginFormProps) {
   const { t } = useLanguage()
-  const { requestOtp, verifyOtp } = useUser()
-  const [step, setStep] = useState<'email' | 'code'>('email')
+  const { requestOtp, verifyOtp, verifyTwoFactor } = useUser()
+  const [step, setStep] = useState<'email' | 'code' | 'twoFactor'>('email')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
+  const [twoFactorCode, setTwoFactorCode] = useState('')
+  const [maskedEmail, setMaskedEmail] = useState('')
   const [name, setName] = useState('')
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
@@ -57,7 +59,34 @@ export function LoginForm({ dispatch }: LoginFormProps) {
 
     setLoading(true)
     try {
-      const ok = await verifyOtp(email, otp, name || undefined)
+      const outcome = await verifyOtp(email, otp, name || undefined)
+      if (outcome.kind === 'success') {
+        dispatch({ type: 'LOGIN_COMPLETED' })
+      } else if (outcome.kind === 'twoFactorRequired') {
+        setMaskedEmail(outcome.maskedEmail)
+        setStep('twoFactor')
+      } else {
+        setError(t('booking.login.error'))
+      }
+    } catch {
+      setError(t('booking.login.error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleTwoFactorVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (!twoFactorCode) {
+      setError(t('booking.login.invalidCode'))
+      return
+    }
+
+    setLoading(true)
+    try {
+      const ok = await verifyTwoFactor(email, otp, twoFactorCode, name || undefined)
       if (ok) {
         dispatch({ type: 'LOGIN_COMPLETED' })
       } else {
@@ -68,6 +97,12 @@ export function LoginForm({ dispatch }: LoginFormProps) {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleBackToCode = () => {
+    setStep('code')
+    setError('')
+    setTwoFactorCode('')
   }
 
   const handleBack = () => {
@@ -118,7 +153,7 @@ export function LoginForm({ dispatch }: LoginFormProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
           </svg>
         </div>
-        <h2 className="text-2xl font-serif text-primary text-balance">{t('booking.login.title')}</h2>
+        <h2 className="text-2xl font-serif text-primary text-balance">{step === 'twoFactor' ? t('booking.login.twoFactorTitle') : t('booking.login.title')}</h2>
       </div>
 
       {/* Google Sign-In Button */}
@@ -178,7 +213,7 @@ export function LoginForm({ dispatch }: LoginFormProps) {
             {t('booking.login.requestCode')}
           </Button>
         </form>
-      ) : (
+      ) : step === 'code' ? (
         <form onSubmit={handleVerify} className="space-y-5">
           {info && (
             <div className="flex items-start gap-2 rounded-xl bg-accent/10 px-4 py-3 text-sm text-accent border border-accent/20" role="status">
@@ -239,6 +274,56 @@ export function LoginForm({ dispatch }: LoginFormProps) {
               {t('booking.login.resend')}
             </button>
           </div>
+        </form>
+      ) : (
+        <form onSubmit={handleTwoFactorVerify} className="space-y-5">
+          <div className="flex items-start gap-2 rounded-xl bg-accent/10 px-4 py-3 text-sm text-accent border border-accent/20" role="status">
+            <div>
+              <span>{t('booking.login.twoFactorInfo')}</span>
+              {maskedEmail && (
+                <div className="mt-1 font-semibold text-foreground">{maskedEmail}</div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="login-2fa" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t('booking.login.twoFactorLabel')}
+            </label>
+            <Input
+              id="login-2fa"
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={twoFactorCode}
+              onChange={(e) => {
+                setTwoFactorCode(e.target.value)
+                if (error === t('booking.login.invalidCode')) {
+                  setError('')
+                }
+              }}
+              placeholder="123456"
+              aria-label={t('booking.login.twoFactorLabel')}
+              className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
+            />
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive border border-destructive/10" role="alert">
+              <svg className="mt-0.5 size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-secondary hover:bg-secondary/90 font-semibold active:scale-[0.96] transition-transform">
+            {t('booking.login.twoFactorVerify')}
+          </Button>
+
+          <button type="button" onClick={handleBackToCode} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
+            {t('booking.login.back')}
+          </button>
         </form>
       )}
     </div>

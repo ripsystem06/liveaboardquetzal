@@ -26,7 +26,7 @@ vi.mock('@/lib/db', () => ({
 // of `auth` pulls @/lib/auth.config → next-auth. The global vitest-setup already
 // mocks @/lib/auth.config, so no next-auth cascade occurs here.
 
-import { generateOtpCode, issueOtpCode, verifyOtpCode } from '../otp'
+import { generateOtpCode, issueOtpCode, verifyOtpCode, validateOtpCode } from '../otp'
 import { hashPassword } from '../auth'
 
 interface FakeOtpCode {
@@ -211,5 +211,70 @@ describe('verifyOtpCode', () => {
     const locked = await verifyOtpCode('test@example.com', '999999')
     expect(locked.ok).toBe(false)
     expect(locked.reason).toBe('locked')
+  })
+})
+
+describe('validateOtpCode', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns ok:true for a valid code without consuming it or incrementing attempts', async () => {
+    const code = '123456'
+    const codeHash = await hashPassword(code)
+    mockFindFirst.mockResolvedValue(makeCode({ codeHash }))
+
+    const result = await validateOtpCode('test@example.com', code)
+
+    expect(result.ok).toBe(true)
+    expect(mockUpdateMany).not.toHaveBeenCalled()
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('returns reason expired when the code has passed its expiry', async () => {
+    mockFindFirst.mockResolvedValue(makeCode({ expiresAt: new Date(Date.now() - 1000) }))
+
+    const result = await validateOtpCode('test@example.com', '123456')
+
+    expect(result.ok).toBe(false)
+    expect(result.reason).toBe('expired')
+  })
+
+  it('returns reason reused when the code was already consumed', async () => {
+    mockFindFirst.mockResolvedValue(makeCode({ consumedAt: new Date() }))
+
+    const result = await validateOtpCode('test@example.com', '123456')
+
+    expect(result.ok).toBe(false)
+    expect(result.reason).toBe('reused')
+  })
+
+  it('returns reason locked when max attempts reached', async () => {
+    mockFindFirst.mockResolvedValue(makeCode({ attempts: 5 }))
+
+    const result = await validateOtpCode('test@example.com', '123456')
+
+    expect(result.ok).toBe(false)
+    expect(result.reason).toBe('locked')
+  })
+
+  it('returns reason invalid for a wrong code without incrementing attempts', async () => {
+    const codeHash = await hashPassword('999999')
+    mockFindFirst.mockResolvedValue(makeCode({ codeHash }))
+
+    const result = await validateOtpCode('test@example.com', '123456')
+
+    expect(result.ok).toBe(false)
+    expect(result.reason).toBe('invalid')
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('returns reason invalid when no code exists for the email', async () => {
+    mockFindFirst.mockResolvedValue(null)
+
+    const result = await validateOtpCode('unknown@example.com', '123456')
+
+    expect(result.ok).toBe(false)
+    expect(result.reason).toBe('invalid')
   })
 })

@@ -5,13 +5,19 @@ import { useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from
 
 type User = { id: string; name?: string | null; email?: string | null; phone?: string; isAdmin?: boolean }
 
+export type OtpVerifyOutcome =
+  | { kind: 'success' }
+  | { kind: 'twoFactorRequired'; maskedEmail: string }
+  | { kind: 'error' }
+
 interface UserContextType {
   user: User | null
   isAuthenticated: boolean
   isAdmin: boolean
   sessionReady: boolean
   requestOtp: (email: string) => Promise<void>
-  verifyOtp: (email: string, otp: string, name?: string) => Promise<boolean>
+  verifyOtp: (email: string, otp: string, name?: string) => Promise<OtpVerifyOutcome>
+  verifyTwoFactor: (email: string, otp: string, twoFactorCode: string, name?: string) => Promise<boolean>
   logout: () => void
   updateProfile: (data: { name?: string; phone?: string }) => void
 }
@@ -54,10 +60,42 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const verifyOtp = async (email: string, otp: string, name?: string): Promise<boolean> => {
+  const verifyOtp = async (email: string, otp: string, name?: string): Promise<OtpVerifyOutcome> => {
+    const challenge = await fetch('/api/auth/otp/challenge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp }),
+    })
+
+    if (!challenge.ok) {
+      return { kind: 'error' }
+    }
+
+    const data = (await challenge.json()) as { twoFactorRequired?: boolean; maskedEmail?: string }
+    if (data.twoFactorRequired) {
+      return { kind: 'twoFactorRequired', maskedEmail: data.maskedEmail ?? '' }
+    }
+
     const result = await nextAuthSignIn('credentials', {
       email,
       otp,
+      ...(name ? { name } : {}),
+      redirect: false,
+    })
+
+    return result?.error ? { kind: 'error' } : { kind: 'success' }
+  }
+
+  const verifyTwoFactor = async (
+    email: string,
+    otp: string,
+    twoFactorCode: string,
+    name?: string,
+  ): Promise<boolean> => {
+    const result = await nextAuthSignIn('credentials', {
+      email,
+      otp,
+      twoFactorCode,
       ...(name ? { name } : {}),
       redirect: false,
     })
@@ -83,6 +121,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         sessionReady,
         requestOtp,
         verifyOtp,
+        verifyTwoFactor,
         logout,
         updateProfile,
       }}
