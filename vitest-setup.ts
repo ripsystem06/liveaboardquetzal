@@ -45,6 +45,14 @@ class MockIntersectionObserver {
 }
 window.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver
 
+// Mock ResizeObserver (not available in jsdom) — used by Radix UI Select/Popover
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+window.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver
+
 // Mock fetch globally for the OTP request endpoint.
 // POST /api/auth/otp/request always returns 200 { ok: true } (no-enumeration).
 // Client tests that need richer behavior stub their own fetch.

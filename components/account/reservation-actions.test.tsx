@@ -95,4 +95,25 @@ describe('ReservationActions', () => {
       expect(screen.queryByText('Send via WhatsApp')).not.toBeInTheDocument()
     })
   })
+
+  describe('crew registration CTA', () => {
+    it('renders the CTA when the reservation is confirmed', () => {
+      const confirmedReservation: ReservationData = {
+        ...mockReservationBase,
+        status: 'confirmed',
+      }
+
+      renderWithProviders(<ReservationActions reservation={confirmedReservation} />)
+      expect(
+        screen.getByRole('link', { name: 'Complete Crew Registration' })
+      ).toBeInTheDocument()
+    })
+
+    it('does not render the CTA for pending_approval reservations', () => {
+      renderWithProviders(<ReservationActions reservation={mockReservationBase} />)
+      expect(
+        screen.queryByRole('link', { name: 'Complete Crew Registration' })
+      ).not.toBeInTheDocument()
+    })
+  })
 })

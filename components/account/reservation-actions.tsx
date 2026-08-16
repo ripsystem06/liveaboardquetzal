@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { useLanguage } from '@/contexts/language-context'
-import { FileDown, Mail, MessageCircle } from 'lucide-react'
+import { FileDown, Mail, MessageCircle, ClipboardList } from 'lucide-react'
 import type { ReservationData } from '@/lib/db'
 
 interface ReservationActionsProps {
@@ -19,6 +20,18 @@ export function ReservationActions({ reservation }: ReservationActionsProps) {
       <p className="text-sm text-muted-foreground italic">
         {t('reservation.actions.expiredMessage')}
       </p>
+    )
+  }
+
+  if (reservation.status === 'confirmed') {
+    return (
+      <Link
+        href={`/account/crew-registration/${reservation.id}`}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/20 transition-colors"
+      >
+        <ClipboardList className="size-3.5" />
+        {t('crew.cta')}
+      </Link>
     )
   }
 
