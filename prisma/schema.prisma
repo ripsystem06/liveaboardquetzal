@@ -25,6 +25,7 @@ model Reservation {
   paymentMethod String   // "paypal" | "bank_transfer"
   status        String   @default("pending_approval") // pending_approval, confirmed, expired, cancelled
   notes         String?
+  crewRegistration CrewRegistration?
   holdExpiry    DateTime
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -148,4 +149,128 @@ model AuditLog {
   @@index([actorId])
   @@index([createdAt])
   @@index([action])
+}
+
+enum CrewRegistrationStatus {
+  draft
+  submitted
+  approved
+  rejected
+}
+
+enum CrewDocumentKind {
+  passport_ine
+  dive_cert
+  dive_insurance
+  nitrox_cert
+}
+
+enum CertificationLevel {
+  open_water
+  advanced
+  rescue
+  divemaster
+  instructor
+}
+
+enum EquipmentSize {
+  xs
+  s
+  m
+  l
+  xl
+  xxl
+}
+
+enum BloodType {
+  a_positive
+  a_negative
+  b_positive
+  b_negative
+  ab_positive
+  ab_negative
+  o_positive
+  o_negative
+}
+
+model CrewRegistration {
+  id            String               @id @default(cuid())
+  reservationId String               @unique
+  reservation   Reservation          @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  status        CrewRegistrationStatus @default(draft)
+  rejectReason  String?
+  submittedAt   DateTime?
+  // Section 6 (once, reservation-level)
+  arrivalFlight   String
+  arrivalDate     String
+  arrivalTime     String
+  departureFlight String
+  departureDate   String
+  departureTime   String
+  hotelName       String
+  hotelAddress    String
+  guests          CrewRegistrationGuest[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([status])
+}
+
+model CrewRegistrationGuest {
+  id             String               @id @default(cuid())
+  registrationId String
+  registration   CrewRegistration     @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  guestIndex     Int
+  // 1 personal
+  fullName       String
+  dateOfBirth    String
+  nationality    String
+  passportNumber String
+  contactPhone   String
+  contactEmail   String?
+  // 2 diving
+  certificationLevel    CertificationLevel
+  logbookDives          Int?
+  diveInsurancePolicyNo String
+  isNitroxCertified     Boolean              @default(false)
+  // 3 ballast/photo
+  weightKg        Int?
+  ballastKg       Int?
+  photoEquipment  String?
+  // 4 rental sizes
+  bcdSize     EquipmentSize?
+  wetsuitSize EquipmentSize?
+  finsSize    String?
+  maskSize    String?
+  bootiesSize String?
+  // 5 medical
+  medicalLimitations  String?
+  allergies           String?
+  bloodType           BloodType?
+  dietaryRestrictions String?
+  // 7 emergency (2 contacts, required)
+  ec1Name     String
+  ec1Relation String
+  ec1Phone    String
+  ec2Name     String
+  ec2Relation String
+  ec2Phone    String
+  documents   CrewRegistrationDocument[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@unique([registrationId, guestIndex])
+}
+
+model CrewRegistrationDocument {
+  id          String               @id @default(cuid())
+  guestId     String
+  guest       CrewRegistrationGuest @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  kind        CrewDocumentKind
+  storagePath String // object key; server-generated, never user input
+  mimeType    String // application/pdf | image/jpeg | image/png
+  sizeBytes   Int
+  uploadedAt  DateTime             @default(now())
+
+  @@unique([guestId, kind]) // one doc per kind → replace = upsert
 }
