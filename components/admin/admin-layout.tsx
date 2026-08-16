@@ -2,15 +2,16 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LayoutDashboard, CalendarDays, Ship, FileText, LogOut } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, Ship, FileText, ClipboardList, LogOut } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import { useUser } from '@/contexts/user-context'
 import { AdminDashboard } from '@/components/admin/admin-dashboard'
 import { AdminReservations } from '@/components/admin/admin-reservations'
 import { AdminCruises } from '@/components/admin/admin-cruises'
 import { AdminBlog } from '@/components/admin/admin-blog'
+import { AdminCrewReview } from '@/components/admin/admin-crew-review'
 
-type AdminTab = 'dashboard' | 'reservations' | 'cruises' | 'blog'
+type AdminTab = 'dashboard' | 'reservations' | 'cruises' | 'blog' | 'crew'
 
 export function AdminLayout() {
   const { t } = useLanguage()
@@ -28,6 +29,7 @@ export function AdminLayout() {
     { id: 'reservations', icon: CalendarDays, label: t('admin.reservations') },
     { id: 'cruises', icon: Ship, label: t('admin.cruises') },
     { id: 'blog', icon: FileText, label: t('admin.blog') },
+    { id: 'crew', icon: ClipboardList, label: t('admin.crewReview') },
   ]
 
   return (
@@ -80,6 +82,7 @@ export function AdminLayout() {
             {activeTab === 'reservations' && <AdminReservations />}
             {activeTab === 'cruises' && <AdminCruises />}
             {activeTab === 'blog' && <AdminBlog />}
+            {activeTab === 'crew' && <AdminCrewReview />}
           </div>
         </main>
       </div>

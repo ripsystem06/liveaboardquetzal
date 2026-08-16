@@ -7,6 +7,8 @@ import { BlogDetailClient } from './blog-detail-client'
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 interface BlogDetailPageProps {
   params: Promise<{ id: string }>
 }
