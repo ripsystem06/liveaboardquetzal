@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (conflicting) {
-      return Response.json({ available: false })
+      return Response.json({ available: false, blockedBy: conflicting.id })
     }
 
     return Response.json({ available: true })

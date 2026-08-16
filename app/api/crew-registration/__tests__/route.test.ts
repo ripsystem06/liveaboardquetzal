@@ -189,6 +189,17 @@ describe('PUT /api/crew-registration/[reservationId]', () => {
     expect(response.status).toBe(400)
   })
 
+  it('returns 400 when the payload fails Zod validation', async () => {
+    mockReservationFindUnique.mockResolvedValue(confirmedReservation)
+    mockCrewRegFindUnique.mockResolvedValue(null)
+
+    const badPayload = payload(2)
+    ;(badPayload.guests[0] as Record<string, unknown>).certificationLevel = 'not_a_level'
+
+    const response = await PUT(newRequest(badPayload), params)
+    expect(response.status).toBe(400)
+  })
+
   it('returns 400 with missing docs when submitting without mandatory documents', async () => {
     mockReservationFindUnique.mockResolvedValue({ ...confirmedReservation, guestCount: 1 })
     mockCrewRegFindUnique.mockResolvedValue({

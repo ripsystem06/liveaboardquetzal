@@ -37,7 +37,7 @@ async function sendCrewRegistrationInvite(reservation: {
  * Storage objects are removed first, then the registration row is deleted
  * (guests and document rows cascade at the database level).
  */
-async function cleanupCrewRegistration(reservationId: string): Promise<void> {
+export async function cleanupCrewRegistration(reservationId: string): Promise<void> {
   const registration = await prisma.crewRegistration.findUnique({
     where: { reservationId },
     include: { guests: { include: { documents: true } } },
