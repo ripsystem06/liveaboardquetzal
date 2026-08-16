@@ -9,6 +9,7 @@ const mockDocFindUnique = vi.fn()
 const mockDocCount = vi.fn()
 const mockDocUpsert = vi.fn()
 const mockDocDelete = vi.fn()
+const mockAuditLogCreate = vi.fn()
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -21,6 +22,7 @@ vi.mock('@/lib/db', () => ({
       upsert: mockDocUpsert,
       delete: mockDocDelete,
     },
+    auditLog: { create: mockAuditLogCreate },
   },
 }))
 
@@ -102,6 +104,7 @@ describe('POST /api/crew-registration/[reservationId]/documents', () => {
     mockDocFindUnique.mockResolvedValue(null)
     mockUpload.mockResolvedValue({ data: { path: 'res_1/guest_0/passport_ine-x.pdf' }, error: null })
     mockDocUpsert.mockResolvedValue({ id: 'doc_1', guestId: 'guest_0', kind: 'passport_ine', storagePath: 'res_1/guest_0/passport_ine-x.pdf' })
+    mockAuditLogCreate.mockResolvedValue(undefined)
   })
 
   it('uploads a valid pdf and persists a document row with a server-generated key', async () => {
@@ -116,6 +119,11 @@ describe('POST /api/crew-registration/[reservationId]/documents', () => {
     )
     expect(mockDocUpsert).toHaveBeenCalledWith(
       expect.objectContaining({ where: { guestId_kind: { guestId: 'guest_0', kind: 'passport_ine' } } })
+    )
+    expect(mockAuditLogCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ action: 'crew_registration.document_uploaded', entityId: 'doc_1' }),
+      })
     )
   })
 
@@ -200,6 +208,7 @@ describe('DELETE /api/crew-registration/[reservationId]/documents/[documentId]',
       guest: { registrationId: 'reg_1' },
     })
     mockRemove.mockResolvedValue({ data: null, error: null })
+    mockAuditLogCreate.mockResolvedValue(undefined)
   })
 
   it('deletes the row and removes the storage object for the owner', async () => {
@@ -209,6 +218,11 @@ describe('DELETE /api/crew-registration/[reservationId]/documents/[documentId]',
     expect(response.status).toBe(200)
     expect(mockRemove).toHaveBeenCalledWith(['res_1/guest_0/passport_ine-x.pdf'])
     expect(mockDocDelete).toHaveBeenCalledWith({ where: { id: 'doc_1' } })
+    expect(mockAuditLogCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ action: 'crew_registration.document_deleted', entityId: 'doc_1' }),
+      })
+    )
   })
 
   it('returns 403 when delete is attempted for an approved registration', async () => {

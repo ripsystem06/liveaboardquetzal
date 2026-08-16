@@ -110,6 +110,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     await prisma.crewRegistrationDocument.delete({ where: { id: documentId } })
 
+    // Audit the document deletion (fire-and-forget; must not fail the delete)
+    void prisma.auditLog.create({
+      data: {
+        action: 'crew_registration.document_deleted',
+        entityType: 'CrewRegistrationDocument',
+        entityId: documentId,
+        actorId: userId,
+        actorEmail: session.user.email ?? null,
+        details: JSON.stringify({ reservationId, storagePath: document.storagePath }),
+      },
+    }).catch(() => {})
+
     return Response.json({ ok: true })
   } catch (error) {
     if (error instanceof ForbiddenError) {

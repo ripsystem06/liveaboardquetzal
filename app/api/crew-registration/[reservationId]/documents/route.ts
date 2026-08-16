@@ -169,6 +169,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       await supabase.storage.from(CREW_DOCS_BUCKET).remove([existing.storagePath])
     }
 
+    // Audit the document mutation (fire-and-forget; must not fail the upload)
+    void prisma.auditLog.create({
+      data: {
+        action: existing ? 'crew_registration.document_replaced' : 'crew_registration.document_uploaded',
+        entityType: 'CrewRegistrationDocument',
+        entityId: document.id,
+        actorId: userId,
+        actorEmail: session.user.email ?? null,
+        details: JSON.stringify({ reservationId, guestId, kind }),
+      },
+    }).catch(() => {})
+
     return Response.json(document, { status: 201 })
   } catch (error) {
     if (error instanceof ForbiddenError) {
