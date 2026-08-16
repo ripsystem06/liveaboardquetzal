@@ -7,6 +7,8 @@ import { Footer } from '@/components/footer'
 import { CrewRegistrationForm } from '@/components/crew-registration/crew-registration-form'
 import type { CrewRegistrationData } from '@/components/crew-registration/schema'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Crew Registration — Quetzal Liveaboard',
   description:
