@@ -145,7 +145,7 @@ export async function sendCrewRegistrationInviteEmail(data: CrewInviteEmailData)
   const client = getEmailClient()
   const subject = `Complete your crew registration — Quetzal Liveaboard`
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://quetzal.com'
+  const baseUrl = process.env.SITE_URL || 'https://www.liveaboardquetzal.com'
   const crewUrl = `${baseUrl}/account/crew-registration/${data.reservationId}`
 
   const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
