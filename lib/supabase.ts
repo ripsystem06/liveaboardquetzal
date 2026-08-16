@@ -5,7 +5,8 @@ export const CREW_DOCS_BUCKET = 'crew-docs'
 let adminClient: SupabaseClient | null = null
 
 /**
- * Returns a lazily-initialized Supabase client using the SERVICE-ROLE key.
+ * Returns a lazily-initialized Supabase client using the SECRET key
+ * (`SUPABASE_SECRET_KEY`, the `sb_secret_...` API key).
  *
  * This client bypasses RLS and must NEVER be exposed to the browser. It is
  * used exclusively server-side (route handlers / server components) to upload,
@@ -16,7 +17,7 @@ let adminClient: SupabaseClient | null = null
  */
 export function getSupabaseAdmin(): SupabaseClient {
   const url = process.env.SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const secretKey = process.env.SUPABASE_SECRET_KEY
 
   if (!url) {
     throw new Error(
@@ -24,15 +25,15 @@ export function getSupabaseAdmin(): SupabaseClient {
         'Set it in your environment before using crew-registration storage.'
     )
   }
-  if (!serviceRoleKey) {
+  if (!secretKey) {
     throw new Error(
-      'Supabase is not configured: SUPABASE_SERVICE_ROLE_KEY is missing. ' +
+      'Supabase is not configured: SUPABASE_SECRET_KEY is missing. ' +
         'Set it in your environment before using crew-registration storage.'
     )
   }
 
   if (!adminClient) {
-    adminClient = createClient(url, serviceRoleKey, {
+    adminClient = createClient(url, secretKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
