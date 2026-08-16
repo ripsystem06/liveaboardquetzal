@@ -3,6 +3,7 @@ import {
   sendExpiryEmail,
   sendReservationCreatedEmail,
   sendReservationConfirmedEmail,
+  sendCrewRegistrationInviteEmail,
   sendWelcomeEmail,
   sendOtpEmail,
   type ReservationEmailData,
@@ -99,6 +100,27 @@ describe('email', () => {
       expect(allLoggedContent).toContain('Subject: Reservation confirmed — Quetzal Liveaboard')
       expect(allLoggedContent).toContain('Reservation Confirmed')
       expect(allLoggedContent).toContain(mockReservation.cruiseName)
+    })
+  })
+
+  describe('sendCrewRegistrationInviteEmail', () => {
+    it('should log the invite email with a crew-registration link', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+      await sendCrewRegistrationInviteEmail({
+        userEmail: 'test@example.com',
+        reservationId: 'res_test_123',
+        cruiseName: 'Socorro Islands',
+        departureDate: '2026-03-15',
+      })
+
+      const allLoggedContent = getAllLoggedContent(consoleSpy)
+      expect(allLoggedContent).toContain('--- EMAIL MOCK ---')
+      expect(allLoggedContent).toContain('To: test@example.com')
+      expect(allLoggedContent).toContain('Subject: Complete your crew registration — Quetzal Liveaboard')
+      expect(allLoggedContent).toContain('Complete Your Crew Registration')
+      expect(allLoggedContent).toContain('Socorro Islands')
+      expect(allLoggedContent).toContain('/account/crew-registration/res_test_123')
     })
   })
 

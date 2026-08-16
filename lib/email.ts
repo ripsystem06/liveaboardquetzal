@@ -134,6 +134,39 @@ export async function sendReservationConfirmedEmail(reservation: ReservationEmai
   })
 }
 
+export interface CrewInviteEmailData {
+  userEmail: string
+  reservationId: string
+  cruiseName: string
+  departureDate: string
+}
+
+export async function sendCrewRegistrationInviteEmail(data: CrewInviteEmailData): Promise<void> {
+  const client = getEmailClient()
+  const subject = `Complete your crew registration — Quetzal Liveaboard`
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://quetzal.com'
+  const crewUrl = `${baseUrl}/account/crew-registration/${data.reservationId}`
+
+  const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #2563eb;">Complete Your Crew Registration</h1>
+  <p>Great news — your reservation for <strong>${data.cruiseName}</strong> (departing ${data.departureDate}) has been confirmed.</p>
+  <p>Before you board, every guest must complete their crew registration: personal details, diving experience, rental sizes, medical information, emergency contacts, and the required documents.</p>
+  <p style="margin-top: 24px;">
+    <a href="${crewUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">Complete Crew Registration</a>
+  </p>
+  <p style="color: #6b7280; font-size: 12px;">If the button doesn't work, copy this link into your browser: ${crewUrl}</p>
+  <p style="color: #6b7280;">We look forward to having you aboard the Quetzal!</p>
+</div>`
+
+  await client.emails.send({
+    from: process.env.FROM_EMAIL || 'reservations@quetzal.com',
+    to: data.userEmail,
+    subject,
+    html,
+  })
+}
+
 export async function sendWelcomeEmail(email: string, name: string): Promise<void> {
   const client = getEmailClient()
   const subject = `Welcome to Quetzal Liveaboard`

@@ -3,8 +3,57 @@ import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { AuthError, ForbiddenError } from '@/lib/auth'
 import { ReservationStatusUpdateSchema } from '@/lib/validations'
+import { sendCrewRegistrationInviteEmail } from '@/lib/email'
+import { getSupabaseAdmin, CREW_DOCS_BUCKET } from '@/lib/supabase'
 
 interface RouteParams { params: Promise<{ id: string }> }
+
+/**
+ * Sends the crew-registration invite email when a reservation is confirmed.
+ * Fetches the owner's email, then dispatches a link to the crew form.
+ */
+async function sendCrewRegistrationInvite(reservation: {
+  id: string
+  userId: string
+  cruiseName: string
+  departureDate: string
+}): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: reservation.userId },
+    select: { email: true },
+  })
+  if (user?.email) {
+    await sendCrewRegistrationInviteEmail({
+      userEmail: user.email,
+      reservationId: reservation.id,
+      cruiseName: reservation.cruiseName,
+      departureDate: reservation.departureDate,
+    })
+  }
+}
+
+/**
+ * Deletes a reservation's crew registration and its stored documents.
+ * Storage objects are removed first, then the registration row is deleted
+ * (guests and document rows cascade at the database level).
+ */
+async function cleanupCrewRegistration(reservationId: string): Promise<void> {
+  const registration = await prisma.crewRegistration.findUnique({
+    where: { reservationId },
+    include: { guests: { include: { documents: true } } },
+  })
+  if (!registration) return
+
+  const storagePaths = registration.guests.flatMap((guest) =>
+    guest.documents.map((doc) => doc.storagePath)
+  )
+  if (storagePaths.length > 0) {
+    const supabase = getSupabaseAdmin()
+    await supabase.storage.from(CREW_DOCS_BUCKET).remove(storagePaths)
+  }
+
+  await prisma.crewRegistration.delete({ where: { id: registration.id } })
+}
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
@@ -89,6 +138,21 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           details: JSON.stringify({ oldStatus, newStatus: status, reason }),
         },
       })
+    }
+
+    // Crew-registration side-effects (fire-and-forget; failures must not fail
+    // the reservation update, which is already committed).
+    if (status !== undefined) {
+      if (status === 'confirmed' && oldStatus !== 'confirmed') {
+        void sendCrewRegistrationInvite(updated).catch((err) =>
+          console.error('Failed to send crew registration invite:', err)
+        )
+      }
+      if (status === 'cancelled') {
+        void cleanupCrewRegistration(id).catch((err) =>
+          console.error('Failed to clean up crew registration on cancel:', err)
+        )
+      }
     }
 
     return Response.json(updated)
