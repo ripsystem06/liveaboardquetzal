@@ -37,7 +37,6 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/lib/email', () => ({
   sendExpiryEmail: vi.fn(() => Promise.resolve()),
   sendReservationCreatedEmail: vi.fn(() => Promise.resolve()),
-  sendReservationConfirmedEmail: vi.fn(() => Promise.resolve()),
   sendWelcomeEmail: vi.fn(() => Promise.resolve()),
 }))
 
@@ -67,7 +66,6 @@ vi.mock('@/lib/auth', () => ({
 // Import route handlers after mocking
 const { POST, GET } = await import('@/app/api/reservations/route')
 const { GET: GET_SINGLE } = await import('@/app/api/reservations/[id]/route')
-const { POST: POST_CONFIRM } = await import('@/app/api/reservations/[id]/confirm/route')
 const { GET: GET_PDF } = await import('@/app/api/reservations/[id]/pdf/route')
 const { GET: GET_AVAILABILITY } = await import('@/app/api/reservations/check-availability/route')
 
@@ -281,92 +279,6 @@ describe('Reservation API Routes', () => {
 
       const request = new NextRequest('http://localhost/api/reservations/res_123')
       const response = await GET_SINGLE(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(401)
-    })
-  })
-
-  describe('POST /api/reservations/[id]/confirm', () => {
-    it('records payment receipt without changing status', async () => {
-      const mockReservation = {
-        id: 'res_123',
-        userId: 'user_123',
-        status: 'pending_approval',
-        paymentMethod: 'paypal',
-      }
-
-      const updatedReservation = { ...mockReservation, status: 'confirmed' }
-
-      mockFindUnique.mockResolvedValue(mockReservation)
-      mockUpdate.mockResolvedValue(updatedReservation)
-      mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
-        method: 'POST',
-      })
-
-      const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(200)
-      const body = await response.json()
-      expect(body.status).toBe('pending_approval')
-      expect(body.message).toBe('Payment confirmed. Your reservation is pending admin approval.')
-    })
-
-    it('returns 400 for non-pending_approval reservation', async () => {
-      mockFindUnique.mockResolvedValue({
-        id: 'res_123',
-        userId: 'user_123',
-        status: 'expired',
-      })
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
-        method: 'POST',
-      })
-
-      const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(400)
-      const body = await response.json()
-      expect(body.error).toBe('INVALID_TRANSITION')
-    })
-
-    it('returns 404 when reservation not found', async () => {
-      mockFindUnique.mockResolvedValue(null)
-
-      const request = new NextRequest('http://localhost/api/reservations/nonexistent/confirm', {
-        method: 'POST',
-      })
-
-      const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'nonexistent' }) })
-
-      expect(response.status).toBe(404)
-    })
-
-    it('returns 403 when confirming another user\'s reservation', async () => {
-      mockFindUnique.mockResolvedValue({
-        id: 'res_123',
-        userId: 'other_user',
-        status: 'pending_approval',
-      })
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
-        method: 'POST',
-      })
-
-      const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(403)
-    })
-
-    it('returns 401 when no session cookie', async () => {
-      mockAuthFn.mockResolvedValue(null)
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/confirm', {
-        method: 'POST',
-      })
-
-      const response = await POST_CONFIRM(request, { params: Promise.resolve({ id: 'res_123' }) })
 
       expect(response.status).toBe(401)
     })

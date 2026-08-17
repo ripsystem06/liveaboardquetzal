@@ -40,11 +40,24 @@ mockUseSession.mockImplementation(() => {
   return { ...currentSession, update: vi.fn() }
 })
 
-// Mock PayPalSimulator to auto-complete
-vi.mock('./paypal-simulator', () => ({
-  PayPalSimulator: ({ onComplete }: { onComplete: () => void }) => {
-    setTimeout(() => onComplete(), 0)
-    return null
+// Mock the PayPal SDK: provider renders children, buttons auto-complete (createOrder → onApprove).
+vi.mock('@paypal/react-paypal-js', () => ({
+  PayPalScriptProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  PayPalButtons: ({
+    createOrder,
+    onApprove,
+  }: {
+    createOrder: () => Promise<string>
+    onApprove: (data: { orderID: string }) => Promise<void>
+  }) => {
+    React.useEffect(() => {
+      void (async () => {
+        const orderId = await createOrder()
+        await onApprove({ orderID: orderId })
+      })()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    return <div>PayPal Checkout</div>
   },
 }))
 
@@ -123,8 +136,11 @@ describe('BookingPageClient integration', () => {
       if (url.includes('/api/cruises/calendar')) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ expeditions: mockCruises }) })
       }
-      if (url.includes('/api/reservations/') && url.includes('/confirm') && isPost) {
-        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ id: 'res-1', status: 'confirmed' }) })
+      if (url.includes('/api/paypal/create-order') && isPost) {
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ orderId: 'ORDER-1' }) })
+      }
+      if (url.includes('/api/paypal/capture-order') && isPost) {
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ id: 'pay-1', status: 'completed', reservationStatus: 'pending_approval' }) })
       }
       if (url.includes('/api/reservations') && isPost) {
         return Promise.resolve({ ok: true, status: 201, json: () => Promise.resolve({ id: 'res-1', status: 'pending_approval' }) })
@@ -136,7 +152,7 @@ describe('BookingPageClient integration', () => {
   describe('Full 3-step flow', () => {
     it('completes the booking flow: OTP login → select cruise → payment → confirmation', async () => {
       const user = userEvent.setup()
-      renderWithProviders(<BookingPageClient />)
+      renderWithProviders(<BookingPageClient paypalClientId="test-paypal-client-id" />)
 
       await completeLogin(user)
 

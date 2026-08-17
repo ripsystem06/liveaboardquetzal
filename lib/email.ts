@@ -105,13 +105,14 @@ export async function sendReservationCreatedEmail(reservation: ReservationEmailD
   })
 }
 
-export async function sendReservationConfirmedEmail(reservation: ReservationEmailData): Promise<void> {
+export async function sendPaymentReceivedEmail(reservation: ReservationEmailData): Promise<void> {
   const client = getEmailClient()
-  const subject = `Reservation confirmed — Quetzal Liveaboard`
+  const subject = `Payment received — Quetzal Liveaboard`
 
   const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-  <h1 style="color: #16a34a;">Reservation Confirmed</h1>
-  <p>Great news! Your reservation for <strong>${reservation.cruiseName}</strong> has been confirmed.</p>
+  <h1 style="color: #2563eb;">Payment Received</h1>
+  <p>Thank you! We received your payment for <strong>${reservation.cruiseName}</strong>.</p>
+  <p>Your reservation is now pending review by our team. We will notify you once it is approved.</p>
   <hr style="border: 0; border-top: 1px solid #e5e7eb;" />
   <h3>Reservation Details</h3>
   <table style="width: 100%; border-collapse: collapse;">
@@ -119,11 +120,9 @@ export async function sendReservationConfirmedEmail(reservation: ReservationEmai
     <tr><td style="padding: 4px 0; color: #6b7280;">Cruise</td><td>${reservation.cruiseName}</td></tr>
     <tr><td style="padding: 4px 0; color: #6b7280;">Departure Date</td><td>${reservation.departureDate}</td></tr>
     <tr><td style="padding: 4px 0; color: #6b7280;">Route</td><td>${reservation.route}</td></tr>
-    <tr><td style="padding: 4px 0; color: #6b7280;">Tier</td><td>${reservation.tier}</td></tr>
-    <tr><td style="padding: 4px 0; color: #6b7280;">Guests</td><td>${reservation.guestCount}</td></tr>
     <tr><td style="padding: 4px 0; color: #6b7280;">Total</td><td><strong>${formatCurrency(reservation.totalAmount)}</strong></td></tr>
   </table>
-  <p style="margin-top: 16px;">We look forward to having you aboard the Quetzal!</p>
+  <p style="margin-top: 16px;">We will contact you once your reservation has been reviewed by our team.</p>
 </div>`
 
   await client.emails.send({
