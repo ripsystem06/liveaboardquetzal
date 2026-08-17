@@ -26,6 +26,7 @@ model Reservation {
   status        String   @default("pending_approval") // pending_approval, confirmed, expired, cancelled
   notes         String?
   crewRegistration CrewRegistration?
+  paymentRecords PaymentRecord[]
   holdExpiry    DateTime
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -33,6 +34,21 @@ model Reservation {
   @@index([cruiseId, departureDate])  // for date blocking queries
   @@index([holdExpiry])               // for expiry checks
   @@index([userId])                   // for user reservation list
+}
+
+model PaymentRecord {
+  id              String          @id @default(cuid())
+  reservationId   String
+  reservation     Reservation     @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  provider        PaymentProvider @default(paypal)
+  providerOrderId String          @unique
+  status          PaymentStatus
+  amountUsd       Int
+  rawPayload      Json?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([reservationId])
 }
 
 model Cruise {
@@ -191,6 +207,16 @@ enum BloodType {
   ab_negative
   o_positive
   o_negative
+}
+
+enum PaymentProvider {
+  paypal
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
 }
 
 model CrewRegistration {
