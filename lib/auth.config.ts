@@ -9,12 +9,13 @@ import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt', maxAge: 24 * 60 * 60 },
-  // Harden the session cookie against CSRF: SameSite=Strict, httpOnly, secure in prod.
+  // Harden the session cookie against CSRF while keeping OAuth callbacks working:
+  // SameSite=Lax (Strict breaks the cross-site Google redirect), httpOnly, secure in prod.
   cookies: {
     sessionToken: {
       options: {
         httpOnly: true,
-        sameSite: 'strict',
+        sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
       },

@@ -194,7 +194,7 @@ export function LoginForm({ dispatch }: LoginFormProps) {
               type="email"
               value={email}
               onChange={handleEmailChange}
-              placeholder="demo@quetzal.com"
+              placeholder={t('booking.login.emailPlaceholder')}
               aria-label={t('booking.login.email')}
               className="h-11 rounded-xl bg-muted/40 border-transparent focus:bg-background focus:border-accent/40 transition-colors"
             />
