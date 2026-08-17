@@ -26,6 +26,7 @@ interface BookingFlowProps {
   state: BookingState
   dispatch: Dispatch<BookingAction>
   paypalClientId?: string
+  paypalEnvironment?: 'sandbox' | 'production'
 }
 
 function calculatePayment(tierPrice: number, guestCount: number) {
@@ -47,6 +48,7 @@ export function BookingFlow({
   state,
   dispatch,
   paypalClientId,
+  paypalEnvironment,
 }: BookingFlowProps) {
   const { t } = useLanguage()
   const { user } = useUser()
@@ -287,6 +289,7 @@ export function BookingFlow({
             totalAmount={total}
             userId={user?.id || 'demo-user'}
             paypalClientId={paypalClientId}
+            paypalEnvironment={paypalEnvironment}
             onPaymentComplete={handlePaymentComplete}
           />
 

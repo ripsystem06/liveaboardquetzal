@@ -19,6 +19,7 @@ interface PaymentSectionProps {
   totalAmount: number
   userId: string
   paypalClientId?: string
+  paypalEnvironment?: 'sandbox' | 'production'
   onPaymentComplete: (reservationId: string, paymentMethod: 'paypal' | 'bank_transfer') => void
 }
 
@@ -34,6 +35,7 @@ export function PaymentSection({
   paidSpaces,
   totalAmount,
   paypalClientId,
+  paypalEnvironment,
   onPaymentComplete,
 }: PaymentSectionProps) {
   const { t } = useLanguage()
@@ -243,7 +245,7 @@ export function PaymentSection({
             {t('booking.payment.completePaypal')}
           </p>
           <PayPalScriptProvider
-            options={{ clientId: paypalClientId, currency: 'USD', intent: 'capture' }}
+            options={{ clientId: paypalClientId, currency: 'USD', intent: 'capture', environment: paypalEnvironment || 'sandbox' }}
           >
             <PayPalButtons
               style={{ layout: 'vertical' }}
