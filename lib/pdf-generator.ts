@@ -1,3 +1,6 @@
+import type { jsPDF } from 'jspdf'
+import type { LegalDocument } from './legal/privacy'
+
 export interface ReservationPDFData {
   id: string
   userId: string
@@ -18,21 +21,173 @@ export interface ReservationPDFData {
   updatedAt: Date
 }
 
-const BANK_DETAILS = {
-  bankName: 'Banco Internacional de Mexico',
-  swift: 'BIMEMXMMXXX',
-  iban: 'MX1234567890123456789012',
-  account: '00123456789',
-  beneficiary: 'Quetzal Liveaboard S.A. de C.V.',
+export interface BankTransferPDFParams {
+  reservation: ReservationPDFData
+  cruise: { returnDate: string; boat: string; dives: number }
+  bankDetails: { bankName: string; beneficiary: string; clabe: string; swift: string }
+  contactInfo: { email: string; phone: string; address: string }
+  termsContent: Record<'en' | 'es', LegalDocument>
+  cancellationContent: Record<'en' | 'es', LegalDocument>
+  lang?: 'en' | 'es'
+}
+
+type Labels = {
+  title: string
+  reservationDetails: string
+  reservationId: string
+  cruise: string
+  departure: string
+  return: string
+  route: string
+  boat: string
+  tier: string
+  guests: string
+  dives: string
+  total: string
+  bankingDetails: string
+  bank: string
+  clabe: string
+  swift: string
+  beneficiary: string
+  reference: string
+  contact: string
+  email: string
+  phone: string
+  warning: string
+  footer: string
+}
+
+const EN_LABELS: Labels = {
+  title: 'Bank Transfer Instructions',
+  reservationDetails: 'Reservation Details',
+  reservationId: 'Reservation ID',
+  cruise: 'Cruise',
+  departure: 'Departure',
+  return: 'Return',
+  route: 'Route',
+  boat: 'Boat',
+  tier: 'Tier',
+  guests: 'Guests',
+  dives: 'Dives',
+  total: 'Total',
+  bankingDetails: 'Banking Details',
+  bank: 'Bank',
+  clabe: 'CLABE',
+  swift: 'SWIFT',
+  beneficiary: 'Beneficiary',
+  reference: 'Reference',
+  contact: 'Contact',
+  email: 'Email',
+  phone: 'Phone',
+  warning: 'Please include your Reservation ID as the transfer reference',
+  footer: 'Quetzal Liveaboard — Your Adventure Awaits',
+}
+
+const ES_LABELS: Labels = {
+  title: 'Instrucciones de Transferencia Bancaria',
+  reservationDetails: 'Detalles de la Reserva',
+  reservationId: 'ID de Reserva',
+  cruise: 'Crucero',
+  departure: 'Salida',
+  return: 'Regreso',
+  route: 'Ruta',
+  boat: 'Embarcación',
+  tier: 'Categoría',
+  guests: 'Huéspedes',
+  dives: 'Inmersiones',
+  total: 'Total',
+  bankingDetails: 'Detalles Bancarios',
+  bank: 'Banco',
+  clabe: 'CLABE',
+  swift: 'SWIFT',
+  beneficiary: 'Beneficiario',
+  reference: 'Referencia',
+  contact: 'Contacto',
+  email: 'Correo',
+  phone: 'Teléfono',
+  warning: 'Por favor incluye tu ID de Reserva como referencia de la transferencia',
+  footer: 'Quetzal Liveaboard — Tu Aventura te Espera',
+}
+
+const PAGE_BREAK_Y = 272
+const PAGE_WIDTH = 210
+
+/**
+ * Draws pre-wrapped lines at a fixed x, advancing y and adding pages as needed.
+ * Returns the next y position after the final line.
+ */
+function renderLines(doc: jsPDF, lines: string[], x: number, y: number, lineHeight: number): number {
+  for (const line of lines) {
+    if (y > PAGE_BREAK_Y) {
+      doc.addPage()
+      y = 20
+    }
+    doc.text(line, x, y)
+    y += lineHeight
+  }
+  return y
+}
+
+/**
+ * Renders a full legal document (title + sections: headings, paragraphs, lists)
+ * with wrapping and automatic page breaks.
+ */
+function renderLegalDocument(doc: jsPDF, document: LegalDocument, startY: number): number {
+  let y = startY
+
+  if (y > PAGE_BREAK_Y - 20) {
+    doc.addPage()
+    y = 20
+  }
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(14)
+  y = renderLines(doc, doc.splitTextToSize(document.title, PAGE_WIDTH - 40), 20, y, 8)
+  y += 4
+
+  for (const section of document.sections) {
+    if (y > PAGE_BREAK_Y - 20) {
+      doc.addPage()
+      y = 20
+    }
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(12)
+    y = renderLines(doc, doc.splitTextToSize(section.heading, PAGE_WIDTH - 40), 20, y, 7)
+    y += 2
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    for (const paragraph of section.content) {
+      y = renderLines(doc, doc.splitTextToSize(paragraph, PAGE_WIDTH - 40), 20, y, 5)
+      y += 2
+    }
+
+    if (section.list) {
+      for (const item of section.list) {
+        y = renderLines(doc, doc.splitTextToSize(`• ${item}`, PAGE_WIDTH - 48), 22, y, 5)
+      }
+      y += 2
+    }
+
+    y += 3
+  }
+
+  return y
 }
 
 /**
  * Generates a bank transfer PDF for a reservation using jspdf.
+ * Bank details, contact info, and legal content are injected by the caller
+ * (config/legal sources), rendered in the requested language (default `en`).
  * Returns a Buffer containing the PDF data.
  */
-export async function generateBankTransferPDF(reservation: ReservationPDFData): Promise<Buffer> {
-  const { jsPDF } = await import('jspdf')
+export async function generateBankTransferPDF(params: BankTransferPDFParams): Promise<Buffer> {
+  const { reservation, cruise, bankDetails, contactInfo, termsContent, cancellationContent } = params
+  const lang: 'en' | 'es' = params.lang === 'es' ? 'es' : 'en'
+  const labels = lang === 'es' ? ES_LABELS : EN_LABELS
 
+  const { jsPDF } = await import('jspdf')
   const doc = new jsPDF()
 
   // Header
@@ -42,72 +197,93 @@ export async function generateBankTransferPDF(reservation: ReservationPDFData): 
 
   doc.setFontSize(14)
   doc.setFont('helvetica', 'normal')
-  doc.text('Bank Transfer Instructions', 105, 30, { align: 'center' })
+  doc.text(labels.title, 105, 30, { align: 'center' })
 
   // Divider line
   doc.setLineWidth(0.5)
   doc.line(20, 35, 190, 35)
 
   // Reservation details section
+  let y = 50
   doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
-  doc.text('Reservation Details', 20, 50)
+  doc.text(labels.reservationDetails, 20, y)
+  y += 8
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
+  const tierLabel = reservation.tier.charAt(0).toUpperCase() + reservation.tier.slice(1)
   const details = [
-    `Reservation ID: ${reservation.id}`,
-    `Cruise: ${reservation.cruiseName}`,
-    `Departure: ${reservation.departureDate}`,
-    `Tier: ${reservation.tier.charAt(0).toUpperCase() + reservation.tier.slice(1)}`,
-    `Guests: ${reservation.guestCount}`,
-    `Total: $${reservation.totalAmount.toLocaleString('en-US')} USD`,
+    `${labels.reservationId}: ${reservation.id}`,
+    `${labels.cruise}: ${reservation.cruiseName}`,
+    `${labels.departure}: ${reservation.departureDate}`,
+    `${labels.return}: ${cruise.returnDate}`,
+    `${labels.route}: ${reservation.route}`,
+    `${labels.boat}: ${cruise.boat}`,
+    `${labels.tier}: ${tierLabel}`,
+    `${labels.guests}: ${reservation.guestCount}`,
+    `${labels.dives}: ${cruise.dives}`,
+    `${labels.total}: $${reservation.totalAmount.toLocaleString('en-US')} USD`,
   ]
-
-  let y = 60
-  for (const line of details) {
-    doc.text(line, 20, y)
-    y += 8
-  }
+  y = renderLines(doc, details, 20, y, 8)
 
   // Banking details section
+  y += 8
   doc.setLineWidth(0.5)
-  doc.line(20, y + 5, 190, y + 5)
+  doc.line(20, y, 190, y)
+  y += 8
 
-  y += 15
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
-  doc.text('Banking Details', 20, y)
+  doc.text(labels.bankingDetails, 20, y)
+  y += 8
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
   const bankingDetails = [
-    `Bank: ${BANK_DETAILS.bankName}`,
-    `SWIFT: ${BANK_DETAILS.swift}`,
-    `IBAN: ${BANK_DETAILS.iban}`,
-    `Account: ${BANK_DETAILS.account}`,
-    `Beneficiary: ${BANK_DETAILS.beneficiary}`,
-    `Reference: ${reservation.id}`,
+    `${labels.bank}: ${bankDetails.bankName}`,
+    `${labels.clabe}: ${bankDetails.clabe}`,
+    `${labels.swift}: ${bankDetails.swift}`,
+    `${labels.beneficiary}: ${bankDetails.beneficiary}`,
+    `${labels.reference}: ${reservation.id}`,
   ]
+  y = renderLines(doc, bankingDetails, 20, y, 8)
 
-  y += 10
-  for (const line of bankingDetails) {
-    doc.text(line, 20, y)
-    y += 8
-  }
+  // Contact section
+  y += 8
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.text(labels.contact, 20, y)
+  y += 8
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(11)
+  y = renderLines(
+    doc,
+    [`${labels.email}: ${contactInfo.email}`, `${labels.phone}: ${contactInfo.phone}`],
+    20,
+    y,
+    8
+  )
 
   // Warning box
-  y += 10
+  y += 8
   doc.setDrawColor(200, 150, 0)
   doc.setFillColor(255, 250, 230)
-  doc.rect(20, y - 5, 170, 20, 'FD')
+  doc.rect(20, y - 4, 170, 16, 'FD')
   doc.setFont('helvetica', 'bold')
-  doc.text('Please include your Reservation ID as the transfer reference', 105, y + 5, { align: 'center' })
+  doc.setFontSize(10)
+  doc.text(labels.warning, 105, y + 4, { align: 'center' })
+  y += 20
 
-  // Footer
+  // Legal sections (terms + cancellation) in the requested language
+  y = renderLegalDocument(doc, termsContent[lang], y)
+  y = renderLegalDocument(doc, cancellationContent[lang], y)
+
+  // Footer (on the final page)
   doc.setFontSize(9)
   doc.setFont('helvetica', 'italic')
-  doc.text('Quetzal Liveaboard — Your Adventure Awaits', 105, 285, { align: 'center' })
+  doc.text(labels.footer, 105, 285, { align: 'center' })
 
   // Get PDF as buffer
   const pdfOutput = doc.output('arraybuffer')
