@@ -238,19 +238,24 @@ export function PaymentSection({
 
       {/* Real PayPal checkout — amount is derived server-side from the reservation */}
       {paypalReservationId && paypalClientId && (
-        <PayPalScriptProvider
-          options={{ clientId: paypalClientId, currency: 'USD', intent: 'capture' }}
-        >
-          <PayPalButtons
-            style={{ layout: 'vertical' }}
-            createOrder={createPayPalOrder}
-            onApprove={async (data) => {
-              await approvePayPalOrder(data.orderID)
-            }}
-            onCancel={() => setPaypalReservationId(null)}
-            onError={() => setError(t('booking.payment.error'))}
-          />
-        </PayPalScriptProvider>
+        <div className="rounded-2xl border-2 border-accent/40 bg-accent/5 p-5">
+          <p className="text-sm font-semibold text-primary mb-4 text-balance">
+            {t('booking.payment.completePaypal')}
+          </p>
+          <PayPalScriptProvider
+            options={{ clientId: paypalClientId, currency: 'USD', intent: 'capture' }}
+          >
+            <PayPalButtons
+              style={{ layout: 'vertical' }}
+              createOrder={createPayPalOrder}
+              onApprove={async (data) => {
+                await approvePayPalOrder(data.orderID)
+              }}
+              onCancel={() => setPaypalReservationId(null)}
+              onError={() => setError(t('booking.payment.error'))}
+            />
+          </PayPalScriptProvider>
+        </div>
       )}
     </div>
   )
