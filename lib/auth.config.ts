@@ -22,7 +22,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   providers: [
-    Google,
+    Google({
+      // Trust Google's verified email to link with the existing OTP user,
+      // instead of throwing OAuthAccountNotLinked.
+      allowDangerousEmailAccountLinking: true,
+    }),
     Credentials({
       credentials: {
         email: { label: 'Email', type: 'email' },
