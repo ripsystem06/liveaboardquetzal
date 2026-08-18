@@ -1,5 +1,6 @@
 import type { jsPDF } from 'jspdf'
 import type { LegalDocument } from './legal/privacy'
+import type { BankAccount } from './payment-config'
 
 export interface ReservationPDFData {
   id: string
@@ -24,8 +25,8 @@ export interface ReservationPDFData {
 export interface BankTransferPDFParams {
   reservation: ReservationPDFData
   cruise: { returnDate: string; boat: string; dives: number }
-  bankDetails: { bankName: string; beneficiary: string; clabe: string; swift: string }
-  contactInfo: { email: string; phone: string; address: string }
+  bankAccounts: BankAccount[]
+  contactInfo: { email: string; phones: readonly string[]; address: string }
   termsContent: Record<'en' | 'es', LegalDocument>
   cancellationContent: Record<'en' | 'es', LegalDocument>
   lang?: 'en' | 'es'
@@ -47,7 +48,9 @@ type Labels = {
   bankingDetails: string
   bank: string
   clabe: string
-  swift: string
+  accountNumber: string
+  routingNumber: string
+  zelle: string
   beneficiary: string
   reference: string
   contact: string
@@ -73,7 +76,9 @@ const EN_LABELS: Labels = {
   bankingDetails: 'Banking Details',
   bank: 'Bank',
   clabe: 'CLABE',
-  swift: 'SWIFT',
+  accountNumber: 'Account Number',
+  routingNumber: 'Routing Number',
+  zelle: 'Zelle',
   beneficiary: 'Beneficiary',
   reference: 'Reference',
   contact: 'Contact',
@@ -99,7 +104,9 @@ const ES_LABELS: Labels = {
   bankingDetails: 'Detalles Bancarios',
   bank: 'Banco',
   clabe: 'CLABE',
-  swift: 'SWIFT',
+  accountNumber: 'Número de cuenta',
+  routingNumber: 'Número de ruta',
+  zelle: 'Zelle',
   beneficiary: 'Beneficiario',
   reference: 'Referencia',
   contact: 'Contacto',
@@ -183,7 +190,7 @@ function renderLegalDocument(doc: jsPDF, document: LegalDocument, startY: number
  * Returns a Buffer containing the PDF data.
  */
 export async function generateBankTransferPDF(params: BankTransferPDFParams): Promise<Buffer> {
-  const { reservation, cruise, bankDetails, contactInfo, termsContent, cancellationContent } = params
+  const { reservation, cruise, bankAccounts, contactInfo, termsContent, cancellationContent } = params
   const lang: 'en' | 'es' = params.lang === 'es' ? 'es' : 'en'
   const labels = lang === 'es' ? ES_LABELS : EN_LABELS
 
@@ -240,14 +247,25 @@ export async function generateBankTransferPDF(params: BankTransferPDFParams): Pr
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
-  const bankingDetails = [
-    `${labels.bank}: ${bankDetails.bankName}`,
-    `${labels.clabe}: ${bankDetails.clabe}`,
-    `${labels.swift}: ${bankDetails.swift}`,
-    `${labels.beneficiary}: ${bankDetails.beneficiary}`,
-    `${labels.reference}: ${reservation.id}`,
-  ]
-  y = renderLines(doc, bankingDetails, 20, y, 8)
+  for (const account of bankAccounts) {
+    // Account heading (localized label), bold
+    doc.setFont('helvetica', 'bold')
+    y = renderLines(doc, [account.label[lang]], 20, y, 8)
+    doc.setFont('helvetica', 'normal')
+
+    const rows: string[] = [
+      `${labels.bank}: ${account.bankName}`,
+      `${labels.beneficiary}: ${account.beneficiary}`,
+    ]
+    if (account.clabe) rows.push(`${labels.clabe}: ${account.clabe}`)
+    if (account.accountNumber) rows.push(`${labels.accountNumber}: ${account.accountNumber}`)
+    if (account.routingNumber) rows.push(`${labels.routingNumber}: ${account.routingNumber}`)
+    if (account.zelle) rows.push(`${labels.zelle}: ${account.zelle}`)
+    y = renderLines(doc, rows, 20, y, 8)
+    y += 4
+  }
+
+  y = renderLines(doc, [`${labels.reference}: ${reservation.id}`], 20, y, 8)
 
   // Contact section
   y += 8
@@ -260,7 +278,7 @@ export async function generateBankTransferPDF(params: BankTransferPDFParams): Pr
   doc.setFontSize(11)
   y = renderLines(
     doc,
-    [`${labels.email}: ${contactInfo.email}`, `${labels.phone}: ${contactInfo.phone}`],
+    [`${labels.email}: ${contactInfo.email}`, `${labels.phone}: ${contactInfo.phones.join(' / ')}`],
     20,
     y,
     8

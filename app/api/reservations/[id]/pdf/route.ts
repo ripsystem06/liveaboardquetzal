@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db'
 import { generateBankTransferPDF } from '@/lib/pdf-generator'
 import { auth, AuthError } from '@/lib/auth'
 import { PaymentMethod } from '@/lib/validations'
-import { bankDetails } from '@/lib/payment-config'
+import { bankAccounts } from '@/lib/payment-config'
 import { contactInfo } from '@/lib/contact'
 import { termsContent } from '@/lib/legal/terms'
 import { cancellationContent } from '@/lib/legal/cancellation'
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         boat: cruise.boat,
         dives: cruise.dives,
       },
-      bankDetails,
+      bankAccounts,
       contactInfo,
       termsContent,
       cancellationContent,

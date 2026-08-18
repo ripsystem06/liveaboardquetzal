@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { generateBankTransferPDF, type ReservationPDFData } from './pdf-generator'
-import { bankDetails } from './payment-config'
+import { bankAccounts } from './payment-config'
 import { contactInfo } from './contact'
 import { termsContent } from './legal/terms'
 import { cancellationContent } from './legal/cancellation'
@@ -43,7 +43,7 @@ function buildParams(lang: 'en' | 'es' = 'en') {
   return {
     reservation: mockReservation,
     cruise: mockCruise,
-    bankDetails,
+    bankAccounts,
     contactInfo,
     termsContent,
     cancellationContent,
@@ -96,10 +96,15 @@ describe('pdf-generator', () => {
     const result = await generateBankTransferPDF(buildParams())
 
     const content = pdfText(result)
-    expect(content).toContain(bankDetails.bankName)
-    expect(content).toContain(bankDetails.clabe)
-    expect(content).toContain(bankDetails.swift)
-    expect(content).toContain(bankDetails.beneficiary)
+    for (const account of bankAccounts) {
+      expect(content).toContain(account.bankName)
+      expect(content).toContain(account.beneficiary)
+    }
+    expect(content).toContain(bankAccounts[0].clabe as string)
+    expect(content).toContain(bankAccounts[0].accountNumber as string)
+    expect(content).toContain(bankAccounts[1].routingNumber as string)
+    expect(content).toContain(bankAccounts[1].accountNumber as string)
+    expect(content).toContain(bankAccounts[1].zelle as string)
   })
 
   it('should NOT contain the legacy hardcoded fake bank values', async () => {
@@ -156,11 +161,13 @@ describe('pdf-generator', () => {
     expect(content).not.toContain(cancellationContent.en.title)
   })
 
-  it('should render contact email and phone from lib/contact', async () => {
+  it('should render contact email and phones from lib/contact', async () => {
     const result = await generateBankTransferPDF(buildParams())
 
     const content = pdfText(result)
     expect(content).toContain(contactInfo.email)
-    expect(content).toContain(contactInfo.phone)
+    for (const phone of contactInfo.phones) {
+      expect(content).toContain(phone)
+    }
   })
 })
