@@ -8,6 +8,7 @@ const mockFindUnique = vi.fn()
 const mockCreate = vi.fn()
 const mockUpdate = vi.fn()
 const mockUserFindUnique = vi.fn()
+const mockCruiseFindUnique = vi.fn()
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -20,6 +21,9 @@ vi.mock('@/lib/db', () => ({
     },
     user: {
       findUnique: mockUserFindUnique,
+    },
+    cruise: {
+      findUnique: mockCruiseFindUnique,
     },
     $transaction: vi.fn(async (cb: (tx: unknown) => Promise<unknown>) => {
       const tx = {
@@ -68,6 +72,7 @@ const { POST, GET } = await import('@/app/api/reservations/route')
 const { GET: GET_SINGLE } = await import('@/app/api/reservations/[id]/route')
 const { GET: GET_PDF } = await import('@/app/api/reservations/[id]/pdf/route')
 const { GET: GET_AVAILABILITY } = await import('@/app/api/reservations/check-availability/route')
+const { generateBankTransferPDF: mockGeneratePDF } = await import('@/lib/pdf-generator')
 
 describe('Reservation API Routes', () => {
   beforeEach(() => {
@@ -285,28 +290,36 @@ describe('Reservation API Routes', () => {
   })
 
   describe('GET /api/reservations/[id]/pdf', () => {
-    it('returns PDF for bank_transfer reservation', async () => {
-      const mockReservation = {
-        id: 'res_123',
-        userId: 'user_123',
-        cruiseId: 'socorro-1',
-        cruiseName: 'Socorro Islands',
-        departureDate: '2026-07-15',
-        route: 'Cabo San Lucas',
-        tier: 'premium',
-        tierPrice: 3200,
-        guestCount: 2,
-        freeSpaces: 4,
-        paidSpaces: 2,
-        totalAmount: 6400,
-        paymentMethod: 'bank_transfer',
-        status: 'pending_approval',
-        holdExpiry: new Date('2026-07-20'),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
+    const mockReservation = {
+      id: 'res_123',
+      userId: 'user_123',
+      cruiseId: 'socorro-1',
+      cruiseName: 'Socorro Islands',
+      departureDate: '2026-07-15',
+      route: 'Cabo San Lucas',
+      tier: 'premium',
+      tierPrice: 3200,
+      guestCount: 2,
+      freeSpaces: 4,
+      paidSpaces: 2,
+      totalAmount: 6400,
+      paymentMethod: 'bank_transfer',
+      status: 'pending_approval',
+      holdExpiry: new Date('2026-07-20'),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
 
+    const mockCruise = {
+      id: 'socorro-1',
+      returnDate: '2026-07-22',
+      boat: 'Quetzal',
+      dives: 5,
+    }
+
+    it('returns PDF for bank_transfer reservation (owner, default lang en)', async () => {
       mockFindUnique.mockResolvedValue(mockReservation)
+      mockCruiseFindUnique.mockResolvedValue(mockCruise)
 
       const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
       const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
@@ -314,19 +327,47 @@ describe('Reservation API Routes', () => {
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('application/pdf')
       expect(response.headers.get('Content-Disposition')).toBe('attachment; filename="transfer-res_123.pdf"')
+
+      expect(mockGeneratePDF).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reservation: expect.objectContaining({ id: 'res_123' }),
+          cruise: expect.objectContaining({ returnDate: '2026-07-22', boat: 'Quetzal', dives: 5 }),
+          lang: 'en',
+        })
+      )
+    })
+
+    it('returns PDF for admin accessing another user\'s reservation', async () => {
+      mockAuthFn.mockResolvedValue({ user: { id: 'admin_1', email: 'admin@x.com', isAdmin: true } })
+      mockFindUnique.mockResolvedValue({ ...mockReservation, userId: 'other_user' })
+      mockCruiseFindUnique.mockResolvedValue(mockCruise)
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
+      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(200)
+      expect(mockGeneratePDF).toHaveBeenCalledWith(expect.objectContaining({ lang: 'en' }))
+    })
+
+    it('passes lang=es to the generator', async () => {
+      mockFindUnique.mockResolvedValue(mockReservation)
+      mockCruiseFindUnique.mockResolvedValue(mockCruise)
+
+      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf?lang=es')
+      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
+
+      expect(response.status).toBe(200)
+      expect(mockGeneratePDF).toHaveBeenCalledWith(expect.objectContaining({ lang: 'es' }))
     })
 
     it('returns 400 for non-bank_transfer reservation', async () => {
-      mockFindUnique.mockResolvedValue({
-        id: 'res_123',
-        userId: 'user_123',
-        paymentMethod: 'paypal',
-      })
+      mockFindUnique.mockResolvedValue({ ...mockReservation, paymentMethod: 'paypal' })
 
       const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
       const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
 
       expect(response.status).toBe(400)
+      expect(mockGeneratePDF).not.toHaveBeenCalled()
     })
 
     it('returns 404 when reservation not found', async () => {
@@ -339,11 +380,7 @@ describe('Reservation API Routes', () => {
     })
 
     it('returns 403 when accessing another user\'s PDF', async () => {
-      mockFindUnique.mockResolvedValue({
-        id: 'res_123',
-        userId: 'other_user',
-        paymentMethod: 'bank_transfer',
-      })
+      mockFindUnique.mockResolvedValue({ ...mockReservation, userId: 'other_user' })
 
       const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
       const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })

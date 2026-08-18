@@ -99,7 +99,7 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
   }
 }
 
-export function BookingPageClient({ oauthStep, paypalClientId }: { oauthStep?: number; paypalClientId?: string }) {
+export function BookingPageClient({ oauthStep, paypalClientId, paypalEnvironment }: { oauthStep?: number; paypalClientId?: string; paypalEnvironment?: 'sandbox' | 'production' }) {
   const { isAuthenticated } = useUser()
 
   // Determine initial step: oauthStep from searchParams takes precedence
@@ -167,6 +167,7 @@ export function BookingPageClient({ oauthStep, paypalClientId }: { oauthStep?: n
         state={state}
         dispatch={dispatch}
         paypalClientId={paypalClientId}
+        paypalEnvironment={paypalEnvironment}
       />
     </div>
   )

@@ -27,7 +27,7 @@ vi.mock('next-auth', () => ({
 }))
 
 vi.mock('next-auth/providers/google', () => ({
-  default: { id: 'google', type: 'oidc', name: 'Google' },
+  default: (options = {}) => ({ id: 'google', type: 'oidc', name: 'Google', ...options }),
 }))
 
 vi.mock('next-auth/providers/credentials', () => ({
