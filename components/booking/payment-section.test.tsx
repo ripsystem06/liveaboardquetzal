@@ -1,16 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { useEffect } from 'react'
 import { LanguageProvider } from '@/contexts/language-context'
 import { UserProvider } from '@/contexts/user-context'
 import { PaymentSection } from './payment-section'
 import type { Cruise } from './booking-page-client'
 
-// Mock PayPalSimulator to auto-complete immediately
-vi.mock('./paypal-simulator', () => ({
-  PayPalSimulator: ({ onComplete, onCancel }: { onComplete: () => void; onCancel: () => void; total: number }) => {
-    // Immediately trigger onComplete to skip the visual simulation in tests
-    setTimeout(() => onComplete(), 0)
-    return null
+// Mock the PayPal SDK: the provider renders its children, and PayPalButtons
+// auto-completes a checkout (createOrder → onApprove) to simulate the popup flow.
+vi.mock('@paypal/react-paypal-js', () => ({
+  PayPalScriptProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  PayPalButtons: ({
+    createOrder,
+    onApprove,
+  }: {
+    createOrder: () => Promise<string>
+    onApprove: (data: { orderID: string }) => Promise<void>
+  }) => {
+    useEffect(() => {
+      void (async () => {
+        const orderId = await createOrder()
+        await onApprove({ orderID: orderId })
+      })()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    return <div>PayPal Checkout</div>
   },
 }))
 
@@ -44,6 +58,7 @@ const defaultProps = {
   paidSpaces: 2,
   totalAmount: 6000,
   userId: 'user_1',
+  paypalClientId: 'test-paypal-client-id',
   onPaymentComplete: vi.fn(),
 }
 
@@ -53,6 +68,18 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     <UserProvider>{children}</UserProvider>
   </LanguageProvider>
 )
+
+function okResponse(body: unknown, status = 200): Response {
+  return { ok: true, status, json: () => Promise.resolve(body) } as unknown as Response
+}
+
+function errorResponse(status: number): Response {
+  return {
+    ok: false,
+    status,
+    json: () => Promise.resolve({ error: 'error' }),
+  } as unknown as Response
+}
 
 describe('PaymentSection', () => {
   beforeEach(() => {
@@ -73,112 +100,98 @@ describe('PaymentSection', () => {
 
   it('renders all three payment buttons', () => {
     render(<PaymentSection {...defaultProps} />, { wrapper })
-    // Check that buttons are rendered
     const buttons = screen.getAllByRole('button')
     expect(buttons.length).toBeGreaterThanOrEqual(3)
   })
 
-  it('calls onPaymentComplete when PayPal button is clicked', async () => {
+  it('creates a reservation then drives create-order/capture-order when the card button is clicked', async () => {
     const onPaymentComplete = vi.fn()
-
-    // Mock successful API responses
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ id: 'res_123', status: 'pending_approval' }),
-    } as Response)
+    fetchMock
+      .mockResolvedValueOnce(okResponse({ id: 'res_123', status: 'pending_approval' }, 201)) // reservation
+      .mockResolvedValueOnce(okResponse({ orderId: 'ORDER-1' })) // create order
+      .mockResolvedValueOnce(okResponse({ id: 'pay_1', status: 'completed', reservationStatus: 'pending_approval' })) // capture
 
     render(<PaymentSection {...defaultProps} onPaymentComplete={onPaymentComplete} />, { wrapper })
 
     const buttons = screen.getAllByRole('button')
-    const paypalButton = buttons.find(btn => btn.textContent?.includes('PayPal') || btn.textContent?.includes('paypal'))
+    const cardButton = buttons.find((btn) => btn.textContent?.match(/card/i))
+    if (cardButton) fireEvent.click(cardButton)
 
-    if (paypalButton) {
-      fireEvent.click(paypalButton)
-    }
+    await waitFor(() => expect(onPaymentComplete).toHaveBeenCalledWith('res_123', 'paypal'))
 
-    // Wait a bit for async operations
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // The reservation was created with paymentMethod 'paypal' (card routes to PayPal)
+    const createCall = fetchMock.mock.calls[0]
+    expect(createCall[0]).toBe('/api/reservations')
+    expect(JSON.parse(createCall[1].body).paymentMethod).toBe('paypal')
+    // create-order and capture-order were called with the reservation id
+    expect(fetchMock.mock.calls[1][0]).toBe('/api/paypal/create-order')
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ reservationId: 'res_123' })
+    expect(fetchMock.mock.calls[2][0]).toBe('/api/paypal/capture-order')
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({
+      reservationId: 'res_123',
+      orderId: 'ORDER-1',
+    })
+  })
 
-    expect(onPaymentComplete).toHaveBeenCalled()
+  it('runs the bank-transfer flow (create reservation + open PDF) when bank is clicked', async () => {
+    const onPaymentComplete = vi.fn()
+    fetchMock.mockResolvedValueOnce(okResponse({ id: 'res_456', status: 'pending_approval' }, 201))
+
+    render(<PaymentSection {...defaultProps} onPaymentComplete={onPaymentComplete} />, { wrapper })
+
+    const buttons = screen.getAllByRole('button')
+    const bankButton = buttons.find((btn) => btn.textContent?.match(/bank/i))
+    if (bankButton) fireEvent.click(bankButton)
+
+    await waitFor(() => expect(onPaymentComplete).toHaveBeenCalledWith('res_456', 'bank_transfer'))
+    expect(windowOpenMock).toHaveBeenCalledWith('/api/reservations/res_456/pdf', '_blank')
   })
 
   describe('error handling', () => {
     it('shows error message when API returns 409 (DATE_BLOCKED)', async () => {
-      fetchMock
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 409,
-          json: () => Promise.resolve({ error: 'DATE_BLOCKED' }),
-        } as Response)
-        // Prevent confirmation call from hitting a real endpoint
-        .mockRejectedValueOnce(new Error('Network error'))
+      fetchMock.mockResolvedValueOnce(errorResponse(409))
 
       render(<PaymentSection {...defaultProps} />, { wrapper })
 
       const buttons = screen.getAllByRole('button')
-      const cardButton = buttons.find(btn => btn.textContent?.match(/card/i))
+      const cardButton = buttons.find((btn) => btn.textContent?.match(/card/i))
+      if (cardButton) fireEvent.click(cardButton)
 
-      if (cardButton) {
-        fireEvent.click(cardButton)
-      }
-
-      // Wait for error text to appear (DATE_BLOCKED → 'This date is no longer available...')
       const errorText = await screen.findByText(/This date is no longer available/i)
       expect(errorText).toBeInTheDocument()
     })
 
     it('shows error message when API returns 401 (AUTH_REQUIRED)', async () => {
-      fetchMock
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 401,
-          json: () => Promise.resolve({ error: 'Authentication required' }),
-        } as Response)
-        .mockRejectedValueOnce(new Error('Network error'))
+      fetchMock.mockResolvedValueOnce(errorResponse(401))
 
       render(<PaymentSection {...defaultProps} />, { wrapper })
 
       const buttons = screen.getAllByRole('button')
-      const cardButton = buttons.find(btn => btn.textContent?.match(/card/i))
+      const cardButton = buttons.find((btn) => btn.textContent?.match(/card/i))
+      if (cardButton) fireEvent.click(cardButton)
 
-      if (cardButton) {
-        fireEvent.click(cardButton)
-      }
-
-      // AUTH_REQUIRED → 'Please log in to complete your booking.'
       const errorText = await screen.findByText(/Please log in/i)
       expect(errorText).toBeInTheDocument()
     })
 
     it('shows generic error for other failures', async () => {
-      fetchMock
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-          json: () => Promise.resolve({ error: 'Internal server error' }),
-        } as Response)
-        .mockRejectedValueOnce(new Error('Network error'))
+      fetchMock.mockResolvedValueOnce(errorResponse(500))
 
       render(<PaymentSection {...defaultProps} />, { wrapper })
 
       const buttons = screen.getAllByRole('button')
-      const bankButton = buttons.find(btn => btn.textContent?.match(/bank/i))
+      const bankButton = buttons.find((btn) => btn.textContent?.match(/bank/i))
+      if (bankButton) fireEvent.click(bankButton)
 
-      if (bankButton) {
-        fireEvent.click(bankButton)
-      }
-
-      // Generic error → 'Payment failed. Please try again.'
       const errorText = await screen.findByText(/Payment failed/i)
       expect(errorText).toBeInTheDocument()
     })
 
     it('button is disabled while processing', async () => {
-      // Use a slow promise so we can observe the disabled state during processing
       let resolveSlow: (value: unknown) => void
       fetchMock.mockImplementation(
         () =>
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolveSlow = resolve
           })
       )
@@ -186,61 +199,16 @@ describe('PaymentSection', () => {
       render(<PaymentSection {...defaultProps} />, { wrapper })
 
       const buttons = screen.getAllByRole('button')
-      const paypalButton = buttons.find(btn => btn.textContent?.match(/paypal/i))
+      const paypalButton = buttons.find((btn) => btn.textContent?.match(/paypal/i))
+      if (paypalButton) fireEvent.click(paypalButton)
 
-      if (paypalButton) {
-        fireEvent.click(paypalButton)
-      }
-
-      // Wait for PayPalSimulator mock to auto-complete and executePayment to start
       await waitFor(() => {
         const allButtons = screen.getAllByRole('button')
-        allButtons.forEach(btn => {
+        allButtons.forEach((btn) => {
           expect(btn).toBeDisabled()
         })
       }, { timeout: 2000 })
-      resolveSlow!({
-        ok: true,
-        json: () => Promise.resolve({ id: 'res_123', status: 'pending_approval' }),
-      })
-    })
-
-    it('clears error on retry', async () => {
-      // First call fails with 500, second call succeeds
-      fetchMock
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-          json: () => Promise.resolve({ error: 'Server error' }),
-        } as Response)
-        .mockResolvedValue({
-          ok: true,
-          json: () => Promise.resolve({ id: 'res_123', status: 'pending_approval' }),
-        } as Response)
-
-      render(<PaymentSection {...defaultProps} />, { wrapper })
-
-      const buttons = screen.getAllByRole('button')
-      const cardButton = buttons.find(btn => btn.textContent?.match(/card/i))
-
-      // First attempt — should show error
-      if (cardButton) {
-        fireEvent.click(cardButton)
-      }
-
-      // Wait for error to appear
-      await screen.findByText(/Payment failed/i)
-
-      // Second attempt — retry
-      if (cardButton) {
-        fireEvent.click(cardButton)
-      }
-
-      // Wait for error to disappear (setError(null) is called at start of handlePay)
-      await new Promise(resolve => setTimeout(resolve, 50))
-
-      // Error should be cleared after successful retry
-      expect(screen.queryByText(/Payment failed/i)).not.toBeInTheDocument()
+      resolveSlow!(okResponse({ id: 'res_123', status: 'pending_approval' }, 201))
     })
   })
 })

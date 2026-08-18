@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   sendExpiryEmail,
   sendReservationCreatedEmail,
-  sendReservationConfirmedEmail,
+  sendPaymentReceivedEmail,
   sendCrewRegistrationInviteEmail,
   sendWelcomeEmail,
   sendOtpEmail,
@@ -89,17 +89,20 @@ describe('email', () => {
     })
   })
 
-  describe('sendReservationConfirmedEmail', () => {
-    it('should log confirmed email with reservation details', async () => {
+  describe('sendPaymentReceivedEmail', () => {
+    it('should log payment-received email (not "confirmed") with reservation details', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-      await sendReservationConfirmedEmail({ ...mockReservation, status: 'confirmed' })
+      await sendPaymentReceivedEmail({ ...mockReservation, status: 'pending_approval' })
 
       const allLoggedContent = getAllLoggedContent(consoleSpy)
       expect(allLoggedContent).toContain('--- EMAIL MOCK ---')
-      expect(allLoggedContent).toContain('Subject: Reservation confirmed — Quetzal Liveaboard')
-      expect(allLoggedContent).toContain('Reservation Confirmed')
+      expect(allLoggedContent).toContain('Subject: Payment received — Quetzal Liveaboard')
+      expect(allLoggedContent).toContain('Payment Received')
       expect(allLoggedContent).toContain(mockReservation.cruiseName)
+      expect(allLoggedContent).toContain('pending review')
+      // It must NOT claim the reservation is confirmed
+      expect(allLoggedContent).not.toContain('has been confirmed')
     })
   })
 

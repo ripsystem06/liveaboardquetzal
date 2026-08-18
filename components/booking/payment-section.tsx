@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { CreditCard, Building2, Wallet, AlertCircle } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 import type { Cruise } from './booking-page-client'
-import { PayPalSimulator } from './paypal-simulator'
 
 interface PaymentSectionProps {
   cruise: Cruise
@@ -18,6 +18,7 @@ interface PaymentSectionProps {
   paidSpaces: number
   totalAmount: number
   userId: string
+  paypalClientId?: string
   onPaymentComplete: (reservationId: string, paymentMethod: 'paypal' | 'bank_transfer') => void
 }
 
@@ -32,71 +33,51 @@ export function PaymentSection({
   freeSpaces,
   paidSpaces,
   totalAmount,
-  userId,
+  paypalClientId,
   onPaymentComplete,
 }: PaymentSectionProps) {
   const { t } = useLanguage()
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer' | null>(null)
-  const [showPayPalSimulator, setShowPayPalSimulator] = useState(false)
-  const [pendingTotal, setPendingTotal] = useState(totalAmount)
+  const [paypalReservationId, setPaypalReservationId] = useState<string | null>(null)
 
   const isHalfCharter = guestCount >= 8
 
-  const executePayment = async (selectedMethod: 'paypal' | 'bank_transfer') => {
+  const createReservation = async (paymentMethod: 'paypal' | 'bank_transfer'): Promise<string> => {
+    const createResponse = await fetch('/api/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cruiseId,
+        cruiseName: cruise.name,
+        departureDate,
+        route,
+        tier: selectedTier,
+        tierPrice,
+        guestCount,
+        freeSpaces,
+        paidSpaces,
+        totalAmount,
+        paymentMethod,
+      }),
+    })
+
+    if (!createResponse.ok) {
+      if (createResponse.status === 409) throw new Error('DATE_BLOCKED')
+      if (createResponse.status === 401) throw new Error('AUTH_REQUIRED')
+      throw new Error('CREATE_FAILED')
+    }
+
+    const reservation = await createResponse.json()
+    return reservation.id
+  }
+
+  const startPayPal = async () => {
     setIsProcessing(true)
     setError(null)
-    setPaymentMethod(selectedMethod)
-
     try {
-      // Step 1: Create reservation
-      const createResponse = await fetch('/api/reservations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cruiseId,
-          cruiseName: cruise.name,
-          departureDate,
-          route,
-          tier: selectedTier,
-          tierPrice,
-          guestCount,
-          freeSpaces,
-          paidSpaces,
-          totalAmount,
-          paymentMethod: selectedMethod,
-        }),
-      })
-
-      if (!createResponse.ok) {
-        if (createResponse.status === 409) {
-          throw new Error('DATE_BLOCKED')
-        }
-        if (createResponse.status === 401) {
-          throw new Error('AUTH_REQUIRED')
-        }
-        throw new Error('CREATE_FAILED')
-      }
-
-      const reservation = await createResponse.json()
-
-      // Step 2: For PayPal, confirm immediately
-      if (selectedMethod === 'paypal') {
-        const confirmResponse = await fetch(`/api/reservations/${reservation.id}/confirm`, {
-          method: 'POST',
-        })
-
-        if (!confirmResponse.ok) {
-          throw new Error('CONFIRM_FAILED')
-        }
-      } else {
-        // Step 2: For bank transfer, download PDF
-        window.open(`/api/reservations/${reservation.id}/pdf`, '_blank')
-      }
-
-      // Step 3: Notify parent
-      onPaymentComplete(reservation.id, selectedMethod)
+      const reservationId = await createReservation('paypal')
+      setPaypalReservationId(reservationId)
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === 'DATE_BLOCKED') {
@@ -111,28 +92,67 @@ export function PaymentSection({
       }
     } finally {
       setIsProcessing(false)
-      setPaymentMethod(null)
+    }
+  }
+
+  const handleBankTransfer = async () => {
+    setIsProcessing(true)
+    setError(null)
+    try {
+      const reservationId = await createReservation('bank_transfer')
+      window.open(`/api/reservations/${reservationId}/pdf`, '_blank')
+      onPaymentComplete(reservationId, 'bank_transfer')
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === 'DATE_BLOCKED') {
+          setError(t('booking.payment.dateBlocked'))
+        } else if (err.message === 'AUTH_REQUIRED') {
+          setError(t('booking.payment.authRequired'))
+        } else {
+          setError(t('booking.payment.error'))
+        }
+      } else {
+        setError(t('booking.payment.error'))
+      }
+    } finally {
+      setIsProcessing(false)
     }
   }
 
   const handlePay = (method: 'card' | 'paypal' | 'bank') => {
-    const selectedMethod: 'paypal' | 'bank_transfer' = method === 'paypal' || method === 'card' ? 'paypal' : 'bank_transfer'
-    setPendingTotal(totalAmount)
-
-    if (selectedMethod === 'paypal') {
-      setShowPayPalSimulator(true)
+    // card + paypal both route to PayPal; bank keeps the transfer-PDF flow.
+    if (method === 'bank') {
+      void handleBankTransfer()
     } else {
-      executePayment('bank_transfer')
+      void startPayPal()
     }
   }
 
-  const handlePayPalComplete = () => {
-    setShowPayPalSimulator(false)
-    executePayment('paypal')
+  const createPayPalOrder = async (): Promise<string> => {
+    if (!paypalReservationId) throw new Error('No pending reservation')
+    const res = await fetch('/api/paypal/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reservationId: paypalReservationId }),
+    })
+    if (!res.ok) throw new Error('CREATE_ORDER_FAILED')
+    const data = (await res.json()) as { orderId: string }
+    return data.orderId
   }
 
-  const handlePayPalCancel = () => {
-    setShowPayPalSimulator(false)
+  const approvePayPalOrder = async (orderId: string): Promise<void> => {
+    if (!paypalReservationId) return
+    const res = await fetch('/api/paypal/capture-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reservationId: paypalReservationId, orderId }),
+    })
+    if (!res.ok) {
+      setError(t('booking.payment.error'))
+      return
+    }
+    setPaypalReservationId(null)
+    onPaymentComplete(paypalReservationId, 'paypal')
   }
 
   return (
@@ -216,20 +236,22 @@ export function PaymentSection({
         </div>
       )}
 
-      {showPayPalSimulator && (
-        <PayPalSimulator
-          total={pendingTotal}
-          onComplete={handlePayPalComplete}
-          onCancel={handlePayPalCancel}
-        />
+      {/* Real PayPal checkout — amount is derived server-side from the reservation */}
+      {paypalReservationId && paypalClientId && (
+        <PayPalScriptProvider
+          options={{ clientId: paypalClientId, currency: 'USD', intent: 'capture' }}
+        >
+          <PayPalButtons
+            style={{ layout: 'vertical' }}
+            createOrder={createPayPalOrder}
+            onApprove={async (data) => {
+              await approvePayPalOrder(data.orderID)
+            }}
+            onCancel={() => setPaypalReservationId(null)}
+            onError={() => setError(t('booking.payment.error'))}
+          />
+        </PayPalScriptProvider>
       )}
     </div>
   )
-}
-
-function calculatePayment(tierPrice: number, guestCount: number) {
-  const freeSpaces = guestCount >= 8 ? Math.floor(guestCount / 8) : 0
-  const paidSpaces = guestCount - freeSpaces
-  const total = tierPrice * paidSpaces
-  return { freeSpaces, paidSpaces, total }
 }

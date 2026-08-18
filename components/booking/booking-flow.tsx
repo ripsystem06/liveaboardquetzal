@@ -25,6 +25,7 @@ interface BookingFlowProps {
   cruisesError: string | null
   state: BookingState
   dispatch: Dispatch<BookingAction>
+  paypalClientId?: string
 }
 
 function calculatePayment(tierPrice: number, guestCount: number) {
@@ -45,6 +46,7 @@ export function BookingFlow({
   cruisesError,
   state,
   dispatch,
+  paypalClientId,
 }: BookingFlowProps) {
   const { t } = useLanguage()
   const { user } = useUser()
@@ -284,6 +286,7 @@ export function BookingFlow({
             paidSpaces={paidSpaces}
             totalAmount={total}
             userId={user?.id || 'demo-user'}
+            paypalClientId={paypalClientId}
             onPaymentComplete={handlePaymentComplete}
           />
 
