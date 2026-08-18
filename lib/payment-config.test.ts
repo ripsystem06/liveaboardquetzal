@@ -18,20 +18,28 @@ describe('bankAccounts', () => {
     }
   })
 
-  it('exposes the BBVA Mexican account (CLABE + account number)', () => {
+  it('exposes the BBVA Mexican account (CLABE + account number + SWIFT)', () => {
     const bbva = bankAccounts[0]
+    expect(bbva.swift).toBe('BCMRMXMMPYM')
     expect(bbva.clabe).toMatch(/^\d{18}$/)
     expect(bbva.accountNumber).toMatch(/^\d+$/)
     expect(bbva.routingNumber).toBeUndefined()
     expect(bbva.zelle).toBeUndefined()
   })
 
-  it('exposes the Wells Fargo US account (routing + account + Zelle)', () => {
+  it('exposes the Wells Fargo US account (routing + account + Zelle + SWIFT)', () => {
     const wellsFargo = bankAccounts[1]
+    expect(wellsFargo.swift).toBe('WFBIUS6SXXX')
     expect(wellsFargo.routingNumber).toMatch(/^\d{9}$/)
     expect(wellsFargo.accountNumber).toMatch(/^\d+$/)
     expect(wellsFargo.zelle).toMatch(/.+@.+\..+/)
     expect(wellsFargo.clabe).toBeUndefined()
+  })
+
+  it('provides a well-formed SWIFT/BIC code for every account', () => {
+    for (const account of bankAccounts) {
+      expect(account.swift).toMatch(/^[A-Z0-9]{8,11}$/)
+    }
   })
 })
 

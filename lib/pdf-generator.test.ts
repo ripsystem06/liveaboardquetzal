@@ -102,9 +102,11 @@ describe('pdf-generator', () => {
     }
     expect(content).toContain(bankAccounts[0].clabe as string)
     expect(content).toContain(bankAccounts[0].accountNumber as string)
+    expect(content).toContain(bankAccounts[0].swift as string)
     expect(content).toContain(bankAccounts[1].routingNumber as string)
     expect(content).toContain(bankAccounts[1].accountNumber as string)
     expect(content).toContain(bankAccounts[1].zelle as string)
+    expect(content).toContain(bankAccounts[1].swift as string)
   })
 
   it('should NOT contain the legacy hardcoded fake bank values', async () => {

@@ -48,6 +48,7 @@ type Labels = {
   bankingDetails: string
   bank: string
   clabe: string
+  swift: string
   accountNumber: string
   routingNumber: string
   zelle: string
@@ -76,6 +77,7 @@ const EN_LABELS: Labels = {
   bankingDetails: 'Banking Details',
   bank: 'Bank',
   clabe: 'CLABE',
+  swift: 'SWIFT',
   accountNumber: 'Account Number',
   routingNumber: 'Routing Number',
   zelle: 'Zelle',
@@ -104,6 +106,7 @@ const ES_LABELS: Labels = {
   bankingDetails: 'Detalles Bancarios',
   bank: 'Banco',
   clabe: 'CLABE',
+  swift: 'SWIFT',
   accountNumber: 'Número de cuenta',
   routingNumber: 'Número de ruta',
   zelle: 'Zelle',
@@ -257,6 +260,7 @@ export async function generateBankTransferPDF(params: BankTransferPDFParams): Pr
       `${labels.bank}: ${account.bankName}`,
       `${labels.beneficiary}: ${account.beneficiary}`,
     ]
+    if (account.swift) rows.push(`${labels.swift}: ${account.swift}`)
     if (account.clabe) rows.push(`${labels.clabe}: ${account.clabe}`)
     if (account.accountNumber) rows.push(`${labels.accountNumber}: ${account.accountNumber}`)
     if (account.routingNumber) rows.push(`${labels.routingNumber}: ${account.routingNumber}`)

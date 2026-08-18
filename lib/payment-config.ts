@@ -4,6 +4,7 @@ export interface BankAccount {
   label: { en: string; es: string }
   bankName: string
   beneficiary: string
+  swift?: string
   clabe?: string
   accountNumber?: string
   routingNumber?: string
@@ -15,6 +16,7 @@ export const bankAccounts: BankAccount[] = [
     label: { en: 'BBVA (Mexico)', es: 'BBVA (México)' },
     bankName: 'BBVA',
     beneficiary: 'Alejandro Vasquez Pila',
+    swift: 'BCMRMXMMPYM',
     clabe: '012022012760605958',
     accountNumber: '1276060595',
   },
@@ -22,6 +24,7 @@ export const bankAccounts: BankAccount[] = [
     label: { en: 'Wells Fargo (United States)', es: 'Wells Fargo (Estados Unidos)' },
     bankName: 'Wells Fargo',
     beneficiary: 'Alejandro Vasquez Pila',
+    swift: 'WFBIUS6SXXX',
     routingNumber: '121000248',
     accountNumber: '9757390019',
     zelle: 'pilaztek@hotmail.com',
