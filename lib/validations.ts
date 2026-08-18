@@ -77,6 +77,17 @@ export const ReservationStatusUpdateSchema = z.object({
   notes: z.string().optional(),
 })
 
+// --- Payments ---
+
+export const PayPalCreateOrderSchema = z.object({
+  reservationId: z.string().min(1),
+})
+
+export const PayPalCaptureOrderSchema = z.object({
+  reservationId: z.string().min(1),
+  orderId: z.string().min(1),
+})
+
 // --- Crew Registration ---
 
 export const CrewRegistrationStatus = z.enum([
