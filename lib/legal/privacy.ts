@@ -100,7 +100,7 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
           'We do not sell, rent, or trade your personal information to third parties. We share data only in the following limited circumstances:',
         ],
         list: [
-          'Payment Processors: Stripe and PayPal process your payments. They receive only the transaction data necessary to complete the payment.',
+          'Payment Processors: Stripe processes your payments. Stripe receives only the transaction data necessary to complete the payment.',
           'Maritime Authorities: Passenger manifests are submitted to Mexican port authorities (Capitanía de Puerto) and immigration authorities as required by law.',
           'Service Providers: Trusted vendors who assist with email delivery, website hosting, and analytics — bound by data processing agreements.',
           'Legal Obligations: When required by law, court order, or government regulation.',
@@ -251,7 +251,7 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
           'No vendemos, rentamos ni intercambiamos tu información personal con terceros. Compartimos datos únicamente en las siguientes circunstancias limitadas:',
         ],
         list: [
-          'Procesadores de Pago: Stripe y PayPal procesan tus pagos. Reciben únicamente los datos de transacción necesarios para completar el pago.',
+          'Procesadores de Pago: Stripe procesa tus pagos. Stripe recibe únicamente los datos de transacción necesarios para completar el pago.',
           'Autoridades Marítimas: Los manifiestos de pasajeros se presentan ante la Capitanía de Puerto y las autoridades migratorias mexicanas según lo exige la ley.',
           'Proveedores de Servicios: Proveedores confiables que ayudan con el envío de correos, alojamiento web y analítica — sujetos a acuerdos de tratamiento de datos.',
           'Obligaciones Legales: Cuando lo requiera la ley, una orden judicial o una regulación gubernamental.',

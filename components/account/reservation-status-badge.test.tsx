@@ -17,6 +17,20 @@ describe('ReservationStatusBadge', () => {
     })
   })
 
+  describe('approved status', () => {
+    it('renders approved label', () => {
+      renderWithProviders(<ReservationStatusBadge status="approved" />)
+      expect(screen.getByText('Approved')).toBeInTheDocument()
+    })
+
+    it('has blue background color', () => {
+      const { container } = renderWithProviders(<ReservationStatusBadge status="approved" />)
+      const span = container.querySelector('span')
+      expect(span?.className).toContain('bg-blue-100')
+      expect(span?.className).toContain('text-blue-800')
+    })
+  })
+
   describe('confirmed status', () => {
     it('renders confirmed label', () => {
       renderWithProviders(<ReservationStatusBadge status="confirmed" />)

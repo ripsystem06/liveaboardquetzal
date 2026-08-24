@@ -26,7 +26,7 @@ const mockReservations = [
     freeSpaces: 0,
     paidSpaces: 4,
     totalAmount: 1400000,
-    paymentMethod: 'bank_transfer',
+    paymentMethod: null,
     status: 'pending_approval',
     holdExpiry: new Date('2026-03-17'),
     createdAt: new Date(),
@@ -45,7 +45,7 @@ const mockReservations = [
     freeSpaces: 0,
     paidSpaces: 2,
     totalAmount: 600000,
-    paymentMethod: 'paypal',
+    paymentMethod: 'wire_transfer',
     status: 'confirmed',
     holdExpiry: new Date('2026-07-10'),
     createdAt: new Date(),
@@ -90,7 +90,7 @@ describe('ReservationList', () => {
     })
   })
 
-  it('renders action buttons for pending bank_transfer reservations', async () => {
+  it('renders share actions (no PDF, no payment) for pending reservations', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ reservations: mockReservations }),
@@ -99,7 +99,7 @@ describe('ReservationList', () => {
     renderWithProviders(<ReservationList userId="user_1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Download PDF')).toBeInTheDocument()
+      expect(screen.queryByText('Download PDF')).not.toBeInTheDocument()
       expect(screen.getByText('Send via Email')).toBeInTheDocument()
       expect(screen.getByText('Send via WhatsApp')).toBeInTheDocument()
     })

@@ -1,5 +1,12 @@
 import type { LegalDocument } from './privacy'
 
+/**
+ * Currently active Terms & Conditions version (design decision #10).
+ * The reservation endpoint compares a submitted `termsVersion` against this
+ * server-side value and rejects stale or missing versions with HTTP 400.
+ */
+export const activeTermsVersion = 3
+
 export const termsContent: Record<'en' | 'es', LegalDocument> = {
   en: {
     title: 'Terms & Conditions',

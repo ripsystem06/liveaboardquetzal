@@ -21,11 +21,22 @@ export interface Cruise {
   boat?: string
 }
 
+export type BookingStep = 1 | 2 | 3 | 4
+export type CabinType = 'single' | 'double' | 'twin' | 'suite'
+
+export interface CabinDetails {
+  count: number | null
+  types: CabinType[]
+}
+
 export interface BookingState {
-  step: 1 | 2 | 3
+  // Guests are always first; authentication is required only before submission.
+  step: BookingStep
   selectedCruise: Cruise | null
   selectedTier: 'basic' | 'standard' | 'premium' | null
   guestCount: number
+  cabinDetails: CabinDetails
+  termsAccepted: boolean
   bookingConfirmed: boolean
   loginCompleted: boolean
   availableCruises: Cruise[]
@@ -38,6 +49,8 @@ export const initialBookingState: BookingState = {
   selectedCruise: null,
   selectedTier: null,
   guestCount: 1,
+  cabinDetails: { count: null, types: [] },
+  termsAccepted: false,
   bookingConfirmed: false,
   loginCompleted: false,
   availableCruises: [],
@@ -49,11 +62,13 @@ export type BookingAction =
   | { type: 'SELECT_CRUISE'; cruise: Cruise }
   | { type: 'SET_TIER'; tier: 'basic' | 'standard' | 'premium' }
   | { type: 'SET_GUEST_COUNT'; count: number }
+  | { type: 'SET_CABIN_COUNT'; count: number | null }
+  | { type: 'TOGGLE_CABIN_TYPE'; cabinType: CabinType; checked: boolean }
+  | { type: 'SET_TERMS_ACCEPTED'; accepted: boolean }
   | { type: 'ADVANCE_STEP' }
   | { type: 'GO_BACK' }
-  | { type: 'CONFIRM_PAYMENT' }
+  | { type: 'CONFIRM_BOOKING' }
   | { type: 'LOGIN_COMPLETED' }
-  | { type: 'RESET_TO_LOGIN' }
   | { type: 'SET_CRUISES'; cruises: Cruise[] }
   | { type: 'SET_CRUISES_ERROR'; error: string }
 
@@ -65,31 +80,31 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
       return { ...state, selectedTier: action.tier }
     case 'SET_GUEST_COUNT':
       return { ...state, guestCount: action.count }
-    case 'ADVANCE_STEP': {
-      // Step gating: reject advancement unless prerequisites are met
-      if (state.step === 2 && (!state.selectedCruise || !state.selectedTier)) return state
-      if (state.step >= 3) return state
-      const newState = { ...state, step: (state.step + 1) as 1 | 2 | 3 }
-      // Mark login as completed when advancing from step 1
-      if (state.step === 1) {
-        return { ...newState, loginCompleted: true }
-      }
-      return newState
+    case 'SET_CABIN_COUNT':
+      return { ...state, cabinDetails: { ...state.cabinDetails, count: action.count } }
+    case 'TOGGLE_CABIN_TYPE': {
+      const types = action.checked
+        ? [...state.cabinDetails.types, action.cabinType]
+        : state.cabinDetails.types.filter((type) => type !== action.cabinType)
+      return { ...state, cabinDetails: { ...state.cabinDetails, types } }
     }
-    case 'GO_BACK':
+    case 'SET_TERMS_ACCEPTED':
+      return { ...state, termsAccepted: action.accepted }
+    case 'ADVANCE_STEP': {
+      // Date selection requires a cruise + tier; everything else advances freely.
+      if (state.step === 2 && (!state.selectedCruise || !state.selectedTier)) return state
+      if (state.step >= 4) return state
+      return { ...state, step: (state.step + 1) as BookingStep }
+    }
+    case 'GO_BACK': {
       if (state.step <= 1) return state
-      const newStep = (state.step - 1) as 1 | 2 | 3
-      // Reset loginCompleted when going back to step 1
-      if (state.step === 2) {
-        return { ...state, step: newStep, loginCompleted: false }
-      }
+      const newStep = (state.step - 1) as BookingStep
       return { ...state, step: newStep }
-    case 'CONFIRM_PAYMENT':
+    }
+    case 'CONFIRM_BOOKING':
       return { ...state, bookingConfirmed: true }
     case 'LOGIN_COMPLETED':
-      return { ...state, loginCompleted: true, step: 2 }
-    case 'RESET_TO_LOGIN':
-      return { ...initialBookingState, step: 1 }
+      return { ...state, loginCompleted: true }
     case 'SET_CRUISES':
       return { ...state, availableCruises: action.cruises, cruisesLoading: false, cruisesError: null }
     case 'SET_CRUISES_ERROR':
@@ -99,31 +114,13 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
   }
 }
 
-export function BookingPageClient({ oauthStep, paypalClientId, paypalEnvironment }: { oauthStep?: number; paypalClientId?: string; paypalEnvironment?: 'sandbox' | 'production' }) {
+export function BookingPageClient({ oauthStep: _oauthStep }: { oauthStep?: number }) {
   const { isAuthenticated } = useUser()
-
-  // Determine initial step: oauthStep from searchParams takes precedence
-  const initialStep = (): 1 | 2 | 3 => {
-    if (oauthStep === 2 && isAuthenticated) return 2
-    if (isAuthenticated) return 2
-    return 1
-  }
 
   const [state, dispatch] = useReducer(bookingReducer, {
     ...initialBookingState,
-    step: initialStep(),
-    loginCompleted: isAuthenticated && oauthStep === 2,
+    loginCompleted: isAuthenticated,
   })
-
-  // Advance to step 2 when session becomes authenticated (race-condition fix)
-  // Reset to login step when user logs out while on a later step
-  useEffect(() => {
-    if (isAuthenticated && state.step === 1 && !state.loginCompleted) {
-      dispatch({ type: 'LOGIN_COMPLETED' })
-    } else if (!isAuthenticated && state.step > 1) {
-      dispatch({ type: 'RESET_TO_LOGIN' })
-    }
-  }, [isAuthenticated, state.step, state.loginCompleted])
 
   useEffect(() => {
     async function fetchCruises() {
@@ -166,8 +163,6 @@ export function BookingPageClient({ oauthStep, paypalClientId, paypalEnvironment
         cruisesError={state.cruisesError}
         state={state}
         dispatch={dispatch}
-        paypalClientId={paypalClientId}
-        paypalEnvironment={paypalEnvironment}
       />
     </div>
   )

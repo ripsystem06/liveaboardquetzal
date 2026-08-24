@@ -485,8 +485,10 @@ const translations = {
     // Booking Page
     'booking.title': 'Book Your Expedition',
     'booking.steps.login': 'Login',
-    'booking.steps.selectCruise': 'Select Cruise',
-    'booking.steps.payment': 'Payment',
+    'booking.steps.guests': 'Guests',
+    'booking.steps.date': 'Date',
+    'booking.steps.cabins': 'Cabins',
+    'booking.steps.terms': 'Terms',
     'booking.flow.back': 'Back',
     'booking.flow.next': 'Next',
     'booking.login.title': 'Login to Your Account',
@@ -528,17 +530,9 @@ const translations = {
     'booking.guest.decrement': 'Remove guest',
     'booking.guest.minReached': 'Minimum 1 guest required',
     'booking.guest.maxReached': 'Maximum 18 guests allowed',
-    'booking.payment.title': 'Complete Your Booking',
-    'booking.payment.summary': 'Booking Summary',
-    'booking.payment.completePaypal': 'Reservation created — complete your payment with the PayPal button below:',
     'booking.payment.cruise': 'Cruise',
     'booking.payment.guests': 'Guests',
     'booking.payment.total': 'Total',
-    'booking.payment.payWithCard': 'Pay with Credit Card',
-    'booking.payment.payWithPaypal': 'Pay with PayPal',
-    'booking.payment.payWithBank': 'Pay with Bank Transfer',
-    'booking.payment.confirming': 'Processing...',
-    'booking.payment.success': 'Booking confirmed! We will contact you shortly.',
     'booking.confirmation.title': 'Booking Confirmed',
     'booking.confirmation.message': 'Thank you for your booking. Our team will be in touch with next steps.',
     'booking.confirmation.backHome': 'Back to Home',
@@ -558,8 +552,8 @@ const translations = {
     'booking.info.signinDesc': 'Create your account or log in to continue. Your information is saved for a faster booking experience next time.',
     'booking.info.guests': 'Select Your Guests',
     'booking.info.guestsDesc': 'Tell us how many adventurers will join you. Solo traveler, couple, or group — we have space for everyone.',
-    'booking.info.confirm': 'Confirm & Pay',
-    'booking.info.confirmDesc': 'Review your selection, complete the payment, and receive your booking confirmation instantly via email.',
+    'booking.info.confirm': 'Review & Submit',
+    'booking.info.confirmDesc': 'Review your selection, accept the terms, and submit. Our team reviews your reservation and will be in touch.',
 
     // Tier Pricing Keys
     'booking.tier.basic': 'Explorer',
@@ -575,6 +569,23 @@ const translations = {
     'booking.fullCharter.cta': 'Contact Us',
     'booking.confirmation.tier': 'Pricing Tier',
     'booking.confirmation.freeSpaces': 'Free Spaces (Half Charter)',
+    'booking.halfCharter.notice': 'Groups of 1–9 guests travel as a shared half charter — your party reserves 9 of the 18 spots.',
+    'booking.cabins.title': 'Cabin Details',
+    'booking.cabins.description': 'Optional — let us know your cabin preferences.',
+    'booking.cabins.placeholder': 'e.g. 2 double cabins, 1 twin',
+    'booking.cabins.count': 'Cabin count',
+    'booking.cabins.types': 'Cabin types',
+    'booking.cabins.types.single': 'Single cabins',
+    'booking.cabins.types.double': 'Double cabins',
+    'booking.cabins.types.twin': 'Twin cabins',
+    'booking.cabins.types.suite': 'Suites',
+    'booking.terms.title': 'Review & Submit',
+    'booking.terms.label': 'I have read and accept the Terms & Conditions',
+    'booking.terms.submit': 'Submit Reservation',
+    'booking.terms.submitting': 'Submitting...',
+    'booking.terms.error': 'Could not submit your reservation. Please try again.',
+    'booking.terms.loginRequired': 'Sign in to submit your reservation.',
+    'booking.summary.title': 'Booking Summary',
 
     // Account Page
     'account.title': 'My Account',
@@ -594,6 +605,7 @@ const translations = {
 
     // Reservation Status
     'reservation.status.pending': 'Pending Approval',
+    'reservation.status.approved': 'Approved',
     'reservation.status.confirmed': 'Confirmed',
     'reservation.status.expired': 'Expired',
     'reservation.status.cancelled': 'Cancelled',
@@ -605,21 +617,20 @@ const translations = {
     'account.reservations.error': 'Failed to load reservations',
 
     // Reservation Actions
-    'reservation.actions.downloadPdf': 'Download PDF',
     'reservation.actions.emailReceipt': 'Send via Email',
     'reservation.actions.whatsappReceipt': 'Send via WhatsApp',
     'reservation.actions.holdExpires': 'Hold expires: {date}',
     'reservation.actions.expiredMessage': 'This reservation has expired and the date has been released.',
-
-    // Payment Section
-    'booking.payment.processing': 'Processing...',
-    'booking.payment.error': 'Payment failed. Please try again.',
-    'booking.payment.dateBlocked': 'This date is no longer available. Please select another.',
-    'booking.payment.authRequired': 'Please log in to complete your booking.',
+    'reservation.actions.payCard': 'Pay with Card',
+    'reservation.actions.payWire': 'Pay by Wire Transfer',
+    'reservation.actions.processing': 'Processing...',
+    'reservation.actions.paymentError': 'Payment could not be started. Please try again.',
+    'reservation.actions.wireInstructions.title': 'Wire Transfer Instructions',
+    'reservation.actions.wireRouting': 'Routing',
+    'reservation.actions.wireAccount': 'Account',
 
     // Confirmation
     'booking.confirmation.reservationId': 'Reservation ID',
-    'booking.confirmation.paymentMethod': 'Payment Method',
     'booking.confirmation.viewAccount': 'View in My Account',
 
     // Admin Panel
@@ -1297,8 +1308,10 @@ const translations = {
     // Booking Page
     'booking.title': 'Reserva Tu Expedición',
     'booking.steps.login': 'Acceso',
-    'booking.steps.selectCruise': 'Seleccionar Crucero',
-    'booking.steps.payment': 'Pago',
+    'booking.steps.guests': 'Huéspedes',
+    'booking.steps.date': 'Fecha',
+    'booking.steps.cabins': 'Cabinas',
+    'booking.steps.terms': 'Términos',
     'booking.flow.back': 'Atrás',
     'booking.flow.next': 'Siguiente',
     'booking.login.title': 'Accede a Tu Cuenta',
@@ -1340,17 +1353,9 @@ const translations = {
     'booking.guest.decrement': 'Quitar huésped',
     'booking.guest.minReached': 'Se requiere mínimo 1 huésped',
     'booking.guest.maxReached': 'Máximo 18 huéspedes permitidos',
-    'booking.payment.title': 'Completa Tu Reserva',
-    'booking.payment.summary': 'Resumen de Reserva',
-    'booking.payment.completePaypal': 'Reserva creada — completá tu pago con el botón de PayPal de abajo:',
     'booking.payment.cruise': 'Crucero',
     'booking.payment.guests': 'Huéspedes',
     'booking.payment.total': 'Total',
-    'booking.payment.payWithCard': 'Pagar con Tarjeta de Crédito',
-    'booking.payment.payWithPaypal': 'Pagar con PayPal',
-    'booking.payment.payWithBank': 'Pagar con Transferencia Bancaria',
-    'booking.payment.confirming': 'Procesando...',
-    'booking.payment.success': '¡Reserva confirmada! Nos pondremos en contacto contigo pronto.',
     'booking.confirmation.title': 'Reserva Confirmada',
     'booking.confirmation.message': 'Gracias por tu reserva. Nuestro equipo se pondrá en contacto contigo con los siguientes pasos.',
     'booking.confirmation.backHome': 'Volver al Inicio',
@@ -1370,8 +1375,8 @@ const translations = {
     'booking.info.signinDesc': 'Crea tu cuenta o inicia sesión para continuar. Tu información se guarda para una reserva más rápida la próxima vez.',
     'booking.info.guests': 'Selecciona tus Huéspedes',
     'booking.info.guestsDesc': 'Dinos cuántos aventureros te acompañarán. Viajero solitario, pareja o grupo — tenemos espacio para todos.',
-    'booking.info.confirm': 'Confirma y Paga',
-    'booking.info.confirmDesc': 'Revisa tu selección, completa el pago y recibe tu confirmación de reserva al instante por correo electrónico.',
+    'booking.info.confirm': 'Revisar y Enviar',
+    'booking.info.confirmDesc': 'Revisa tu selección, acepta los términos y envía. Nuestro equipo revisará tu reserva y se pondrá en contacto.',
 
     // Tier Pricing Keys
     'booking.tier.basic': 'Explorer',
@@ -1387,6 +1392,23 @@ const translations = {
     'booking.fullCharter.cta': 'Contáctanos',
     'booking.confirmation.tier': 'Nivel de Precio',
     'booking.confirmation.freeSpaces': 'Espacios Gratis (Half Charter)',
+    'booking.halfCharter.notice': 'Los grupos de 1 a 9 huéspedes viajan como medio charter compartido — tu grupo reserva 9 de los 18 lugares.',
+    'booking.cabins.title': 'Detalles de Cabina',
+    'booking.cabins.description': 'Opcional — cuéntanos tus preferencias de cabina.',
+    'booking.cabins.placeholder': 'ej. 2 cabinas dobles, 1 gemela',
+    'booking.cabins.count': 'Cantidad de cabinas',
+    'booking.cabins.types': 'Tipos de cabina',
+    'booking.cabins.types.single': 'Cabinas individuales',
+    'booking.cabins.types.double': 'Cabinas dobles',
+    'booking.cabins.types.twin': 'Cabinas gemelas',
+    'booking.cabins.types.suite': 'Suites',
+    'booking.terms.title': 'Revisar y Enviar',
+    'booking.terms.label': 'He leído y acepto los Términos y Condiciones',
+    'booking.terms.submit': 'Enviar Reserva',
+    'booking.terms.submitting': 'Enviando...',
+    'booking.terms.error': 'No se pudo enviar tu reserva. Inténtalo de nuevo.',
+    'booking.terms.loginRequired': 'Inicia sesión para enviar tu reserva.',
+    'booking.summary.title': 'Resumen de Reserva',
 
     // Account Page
     'account.title': 'Mi Cuenta',
@@ -1406,6 +1428,7 @@ const translations = {
 
     // Reservation Status
     'reservation.status.pending': 'Pendiente de Aprobación',
+    'reservation.status.approved': 'Aprobada',
     'reservation.status.confirmed': 'Confirmada',
     'reservation.status.expired': 'Expirada',
     'reservation.status.cancelled': 'Cancelada',
@@ -1417,21 +1440,20 @@ const translations = {
     'account.reservations.error': 'Error al cargar las reservaciones',
 
     // Reservation Actions
-    'reservation.actions.downloadPdf': 'Descargar PDF',
     'reservation.actions.emailReceipt': 'Enviar por Email',
     'reservation.actions.whatsappReceipt': 'Enviar por WhatsApp',
     'reservation.actions.holdExpires': 'El hold expira: {date}',
     'reservation.actions.expiredMessage': 'Esta reservación ha expirado y la fecha fue liberada.',
-
-    // Payment Section
-    'booking.payment.processing': 'Procesando...',
-    'booking.payment.error': 'El pago falló. Intenta de nuevo.',
-    'booking.payment.dateBlocked': 'Esta fecha ya no está disponible. Selecciona otra.',
-    'booking.payment.authRequired': 'Inicia sesión para completar tu reserva.',
+    'reservation.actions.payCard': 'Pagar con Tarjeta',
+    'reservation.actions.payWire': 'Pagar por Transferencia',
+    'reservation.actions.processing': 'Procesando...',
+    'reservation.actions.paymentError': 'No se pudo iniciar el pago. Inténtalo de nuevo.',
+    'reservation.actions.wireInstructions.title': 'Instrucciones de Transferencia',
+    'reservation.actions.wireRouting': 'Routing',
+    'reservation.actions.wireAccount': 'Cuenta',
 
     // Confirmation
     'booking.confirmation.reservationId': 'ID de Reservación',
-    'booking.confirmation.paymentMethod': 'Método de Pago',
     'booking.confirmation.viewAccount': 'Ver en Mi Cuenta',
 
     // Admin Panel

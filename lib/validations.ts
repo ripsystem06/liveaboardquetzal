@@ -2,17 +2,27 @@ import { z } from 'zod'
 
 export const ReservationStatus = z.enum([
   'pending_approval',
+  'approved',
   'confirmed',
   'cancelled',
   'expired',
 ])
 export type ReservationStatus = z.infer<typeof ReservationStatus>
 
-export const PaymentMethod = z.enum(['paypal', 'bank_transfer'])
+export const CharterType = z.enum(['none', 'medio', 'full'])
+export type CharterType = z.infer<typeof CharterType>
+
+export const PaymentMethod = z.enum(['stripe', 'wire_transfer'])
 export type PaymentMethod = z.infer<typeof PaymentMethod>
 
 export const BlogPostStatus = z.enum(['draft', 'published'])
 export type BlogPostStatus = z.infer<typeof BlogPostStatus>
+
+export const CabinType = z.enum(['single', 'double', 'twin', 'suite'])
+export const CabinDetailsSchema = z.object({
+  count: z.number().int().min(1).max(18),
+  types: z.array(CabinType).min(1),
+}).strict()
 
 export const CreateReservationSchema = z.object({
   cruiseId: z.string().min(1),
@@ -25,7 +35,11 @@ export const CreateReservationSchema = z.object({
   freeSpaces: z.number().int().min(0),
   paidSpaces: z.number().int().min(0),
   totalAmount: z.number().int().positive(),
-  paymentMethod: PaymentMethod,
+  // Server-side T&C acceptance: version validated against `activeTermsVersion`.
+  termsVersion: z.number().int().positive(),
+  // Guest bookings are never admin-registered contracts; shared<10 stays "none".
+  charterType: CharterType.optional().default('none'),
+  cabinDetails: CabinDetailsSchema.optional(),
 })
 
 export const CreateCruiseSchema = z.object({
@@ -73,19 +87,31 @@ export const AvailabilityQuerySchema = z.object({
 })
 
 export const ReservationStatusUpdateSchema = z.object({
-  status: z.enum(['confirmed', 'cancelled', 'pending_approval']).optional(),
+  status: ReservationStatus.exclude(['expired']).optional(),
   notes: z.string().optional(),
+  // Admin wire-receipt confirmation: marks PaymentRecord completed + status confirmed.
+  confirmWireReceipt: z.boolean().optional(),
 })
 
-// --- Payments ---
+// --- Reservation v2: Stripe, charters, payment-method selection ---
 
-export const PayPalCreateOrderSchema = z.object({
+export const StripeCreateIntentSchema = z.object({
   reservationId: z.string().min(1),
 })
 
-export const PayPalCaptureOrderSchema = z.object({
-  reservationId: z.string().min(1),
-  orderId: z.string().min(1),
+export const CharterRegistrationSchema = z.object({
+  cruiseId: z.string().min(1),
+  cruiseName: z.string().min(1),
+  departureDate: z.string().min(1),
+  route: z.string().min(1),
+  // Admin-registered contracts are only medio (9) or full (18) — never "none".
+  charterType: CharterType.exclude(['none']),
+  // Records the charter group size; spot closure is derived from charterType.
+  guestCount: z.number().int().nonnegative().optional().default(0),
+})
+
+export const PaymentMethodSelectionSchema = z.object({
+  paymentMethod: PaymentMethod,
 })
 
 // --- Crew Registration ---

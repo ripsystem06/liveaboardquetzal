@@ -30,7 +30,15 @@ export default auth((request: NextRequest) => {
   const response = NextResponse.next()
 
   // ── CSRF protection for API mutations ────────────────────────────────────
-  if (request.nextUrl.pathname.startsWith('/api/') && !validateCsrfOrigin(request)) {
+  // The Stripe webhook is POSTed server-to-server by Stripe (no matching
+  // Origin), so it is exempt from the origin check; its own signature
+  // verification is the security boundary.
+  const isStripeWebhook = request.nextUrl.pathname === '/api/stripe/webhook'
+  if (
+    request.nextUrl.pathname.startsWith('/api/') &&
+    !isStripeWebhook &&
+    !validateCsrfOrigin(request)
+  ) {
     return Response.json({ error: 'Invalid origin' }, { status: 403 })
   }
 
@@ -56,16 +64,17 @@ export default auth((request: NextRequest) => {
     )
   }
 
-  // CSP: hardened for production, relaxed for dev (Next.js requires unsafe-inline for hydration)
+  // CSP: hardened for production, relaxed for dev (Next.js requires unsafe-inline for hydration).
+  // Payment provider domains are Stripe-only: PayPal was fully removed (slice 6).
   if (isProduction) {
     response.headers.set(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.paypal.com https://www.sandbox.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.vercel-insights.com https://*.paypal.com https://*.sandbox.paypal.com; frame-src https://www.paypal.com https://www.sandbox.paypal.com; frame-ancestors 'none';"
+      "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.vercel-insights.com https://api.stripe.com; frame-src https://js.stripe.com; frame-ancestors 'none';"
     )
   } else {
     response.headers.set(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.vercel-insights.com https://*.paypal.com https://*.sandbox.paypal.com; frame-src https://www.paypal.com https://www.sandbox.paypal.com; frame-ancestors 'none';"
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.vercel-insights.com https://api.stripe.com; frame-src https://js.stripe.com; frame-ancestors 'none';"
     )
   }
 

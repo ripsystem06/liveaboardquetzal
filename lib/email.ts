@@ -14,7 +14,7 @@ export interface ReservationEmailData {
   freeSpaces: number
   paidSpaces: number
   totalAmount: number
-  paymentMethod: string
+  paymentMethod: string | null
   status: string
   holdExpiry: Date
   createdAt: Date
@@ -131,6 +131,71 @@ export async function sendPaymentReceivedEmail(reservation: ReservationEmailData
     subject,
     html,
   })
+}
+
+export interface ConfirmationEmailData {
+  id: string
+  userEmail: string
+  cruiseName: string
+  departureDate: string
+  route: string
+  tier: string
+  guestCount: number
+  totalAmount: number
+  confirmationEmailSentAt?: Date | null
+}
+
+/**
+ * Sends the reservation confirmation email once a reservation is `approved` AND
+ * payment is validated (Stripe success or admin wire confirmation).
+ *
+ * At-most-once guard: if `confirmationEmailSentAt` is already set, this is a
+ * no-op and returns `false`. On a successful send the timestamp is persisted via
+ * Prisma (lazy-imported to avoid a `db` ↔ `email` cycle) so duplicate events can
+ * never produce a second email.
+ *
+ * Route wiring (Stripe webhook / admin confirm) is intentionally NOT done here.
+ */
+export async function sendConfirmationEmail(data: ConfirmationEmailData): Promise<boolean> {
+  if (data.confirmationEmailSentAt) {
+    return false
+  }
+
+  const client = getEmailClient()
+  const subject = `Your reservation is confirmed — Quetzal Liveaboard`
+
+  const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #2563eb;">Reservation Confirmed</h1>
+  <p>Your reservation for <strong>${data.cruiseName}</strong> is confirmed and your payment has been validated.</p>
+  <hr style="border: 0; border-top: 1px solid #e5e7eb;" />
+  <h3>Reservation Details</h3>
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr><td style="padding: 4px 0; color: #6b7280;">Reservation ID</td><td>${data.id}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Cruise</td><td>${data.cruiseName}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Departure Date</td><td>${data.departureDate}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Route</td><td>${data.route}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Tier</td><td>${data.tier}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Guests</td><td>${data.guestCount}</td></tr>
+    <tr><td style="padding: 4px 0; color: #6b7280;">Total</td><td><strong>${formatCurrency(data.totalAmount)}</strong></td></tr>
+  </table>
+  <p style="margin-top: 16px;">Thank you for booking with Quetzal Liveaboard. We look forward to having you aboard.</p>
+</div>`
+
+  await client.emails.send({
+    from: process.env.FROM_EMAIL || 'reservations@quetzal.com',
+    to: data.userEmail,
+    subject,
+    html,
+  })
+
+  // Persist the at-most-once guard so a duplicate event never sends twice.
+  const { prisma } = await import('./db')
+  await prisma.reservation.update({
+    where: { id: data.id },
+    data: { confirmationEmailSentAt: new Date() },
+  })
+
+  return true
 }
 
 export interface CrewInviteEmailData {

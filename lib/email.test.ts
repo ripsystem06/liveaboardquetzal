@@ -1,4 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+const { mockConfirmationUpdate } = vi.hoisted(() => ({
+  mockConfirmationUpdate: vi.fn(),
+}))
+
+// `sendConfirmationEmail` lazy-imports `./db` to persist the at-most-once guard.
+vi.mock('./db', () => ({
+  prisma: {
+    reservation: {
+      update: mockConfirmationUpdate,
+    },
+  },
+}))
+
 import {
   sendExpiryEmail,
   sendReservationCreatedEmail,
@@ -6,6 +20,7 @@ import {
   sendCrewRegistrationInviteEmail,
   sendWelcomeEmail,
   sendOtpEmail,
+  sendConfirmationEmail,
   type ReservationEmailData,
 } from './email'
 
@@ -23,7 +38,7 @@ const mockReservation: ReservationEmailData = {
   freeSpaces: 8,
   paidSpaces: 2,
   totalAmount: 7000,
-  paymentMethod: 'bank_transfer',
+  paymentMethod: 'wire_transfer',
   status: 'expired',
   holdExpiry: new Date('2026-03-10T12:00:00Z'),
   createdAt: new Date('2026-03-08T12:00:00Z'),
@@ -153,6 +168,52 @@ describe('email', () => {
       expect(allLoggedContent).toContain('Subject: Your Quetzal Liveaboard login code')
       expect(allLoggedContent).toContain('123456')
       expect(allLoggedContent).toContain('10 minutes')
+    })
+  })
+
+  describe('sendConfirmationEmail', () => {
+    const confirmationData = {
+      id: 'res_test_123',
+      userEmail: 'test@example.com',
+      cruiseName: 'Socorro Islands',
+      departureDate: '2026-03-15',
+      route: 'Revillagigedo Archipelago',
+      tier: 'premium',
+      guestCount: 2,
+      totalAmount: 7000,
+    }
+
+    it('sends once and persists the at-most-once guard when not yet sent', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      mockConfirmationUpdate.mockResolvedValue({})
+
+      const result = await sendConfirmationEmail({
+        ...confirmationData,
+        confirmationEmailSentAt: null,
+      })
+
+      expect(result).toBe(true)
+      const allLoggedContent = getAllLoggedContent(consoleSpy)
+      expect(allLoggedContent).toContain('Subject: Your reservation is confirmed — Quetzal Liveaboard')
+      expect(mockConfirmationUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'res_test_123' },
+          data: expect.objectContaining({ confirmationEmailSentAt: expect.any(Date) }),
+        })
+      )
+    })
+
+    it('skips (no send, no persist) when confirmationEmailSentAt is already set', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+      const result = await sendConfirmationEmail({
+        ...confirmationData,
+        confirmationEmailSentAt: new Date('2026-03-16T12:00:00Z'),
+      })
+
+      expect(result).toBe(false)
+      expect(getAllLoggedContent(consoleSpy)).not.toContain('Reservation Confirmed')
+      expect(mockConfirmationUpdate).not.toHaveBeenCalled()
     })
   })
 })

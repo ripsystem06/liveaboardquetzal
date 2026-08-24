@@ -266,7 +266,28 @@ describe('Admin API Integration Tests', () => {
       })
       mockReservationUpdate.mockResolvedValue({
         id: 'r1',
-        status: 'confirmed',
+        status: 'approved',
+        guestCount: 2,
+      })
+
+      const request = new NextRequest('http://localhost/api/admin/reservations/r1', {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'approved' }),
+      })
+      const response = await RESERVATION_PATCH(request, { params: Promise.resolve({ id: 'r1' }) })
+
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.status).toBe('approved')
+    })
+
+    it('rejects pending_approval → confirmed (approval must precede confirmation)', async () => {
+      const { requireAdmin } = await import('@/lib/admin-auth')
+      vi.mocked(requireAdmin).mockResolvedValue({ email: 'admin@quetzal.com', userId: 'admin', name: 'Admin' })
+
+      mockReservationFindUnique.mockResolvedValue({
+        id: 'r1',
+        status: 'pending_approval',
         guestCount: 2,
       })
 
@@ -276,9 +297,7 @@ describe('Admin API Integration Tests', () => {
       })
       const response = await RESERVATION_PATCH(request, { params: Promise.resolve({ id: 'r1' }) })
 
-      expect(response.status).toBe(200)
-      const body = await response.json()
-      expect(body.status).toBe('confirmed')
+      expect(response.status).toBe(400)
     })
 
     it('returns 400 for invalid status transition', async () => {

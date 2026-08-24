@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/db'
 import { sendExpiryEmail } from '@/lib/email'
 
@@ -57,6 +58,12 @@ export async function GET(request: NextRequest) {
         },
         data: { status: 'expired' },
       })
+
+      // Expiry frees previously-held spots: invalidate the calendar cache so
+      // stale availability is never served (design decision #11).
+      if (count > 0) {
+        revalidateTag('cruises-calendar', 'default')
+      }
 
       // Fire-and-forget expiry emails
       for (const reservation of expired) {

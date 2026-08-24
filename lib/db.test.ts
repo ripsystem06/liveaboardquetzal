@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // All mocks must be defined inside hoisted so they're available at module-evaluation time
-const { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock, mockUserFindUnique } = vi.hoisted(() => {
+const { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock, mockUserFindUnique, mockRevalidateTag } = vi.hoisted(() => {
   const mockUpdate = vi.fn()
   const mockSendExpiryEmail = vi.fn()
   const mockAuditLogCreate = vi.fn()
   const mockUserFindUnique = vi.fn()
+  const mockRevalidateTag = vi.fn()
   const mockPrisma = {
     reservation: {
       update: mockUpdate,
@@ -22,7 +23,7 @@ const { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock, mockUserF
     user = mockPrisma.user
     auditLog = mockPrisma.auditLog
   }
-  return { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock: MockPrismaClient, mockUserFindUnique, mockAuditLogCreate }
+  return { mockUpdate, mockSendExpiryEmail, mockPrisma, PrismaClientMock: MockPrismaClient, mockUserFindUnique, mockAuditLogCreate, mockRevalidateTag }
 })
 
 vi.mock('./email', () => ({
@@ -31,6 +32,10 @@ vi.mock('./email', () => ({
 
 vi.mock('@prisma/client', () => ({
   PrismaClient: PrismaClientMock,
+}))
+
+vi.mock('next/cache', () => ({
+  revalidateTag: mockRevalidateTag,
 }))
 
 const { checkAndExpireHolds } = await import('./db')
@@ -49,7 +54,7 @@ const baseReservation = (overrides: Partial<ReservationData> = {}): ReservationD
   freeSpaces: 0,
   paidSpaces: 2,
   totalAmount: 6400,
-  paymentMethod: 'bank_transfer',
+  paymentMethod: 'wire_transfer',
   status: 'pending_approval',
   holdExpiry: new Date('2026-07-20'),
   createdAt: new Date(),
@@ -89,6 +94,28 @@ describe('checkAndExpireHolds', () => {
     })
     expect(mockUserFindUnique).toHaveBeenCalledWith({ where: { id: 'user_123' } })
     expect(mockSendExpiryEmail).toHaveBeenCalled()
+  })
+
+  it('invalidates the calendar cache when a hold expires', async () => {
+    const pastExpiry = new Date(Date.now() - 86_400_000)
+    const reservation = baseReservation({ holdExpiry: pastExpiry })
+
+    mockUpdate.mockResolvedValue({ ...reservation, status: 'expired' })
+    mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
+
+    await checkAndExpireHolds(reservation)
+
+    expect(mockRevalidateTag).toHaveBeenCalledWith('cruises-calendar', 'default')
+  })
+
+  it('does not invalidate the calendar cache when the hold is still active', async () => {
+    const futureExpiry = new Date(Date.now() + 86_400_000)
+    const reservation = baseReservation({ holdExpiry: futureExpiry })
+
+    await checkAndExpireHolds(reservation)
+
+    expect(mockUpdate).not.toHaveBeenCalled()
+    expect(mockRevalidateTag).not.toHaveBeenCalled()
   })
 
   it('returns already confirmed reservation unchanged', async () => {

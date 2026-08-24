@@ -16,10 +16,6 @@ export default async function BookingPage({
 }) {
   const params = await searchParams
   const oauthStep = typeof params.step === 'string' ? parseInt(params.step, 10) : undefined
-  // PayPal client id is a server-only env var passed to the client SDK as a prop
-  // (never NEXT_PUBLIC_*), keeping the client id out of the static bundle.
-  const paypalClientId = process.env.PAYPAL_CLIENT_ID
-  const paypalEnvironment = process.env.PAYPAL_ENV === 'live' ? 'production' : 'sandbox'
 
   return (
     <main className="min-h-screen">
@@ -44,7 +40,7 @@ export default async function BookingPage({
       </section>
 
       {/* Booking Flow (Login first, then cruise selection) */}
-      <BookingPageClient oauthStep={oauthStep} paypalClientId={paypalClientId} paypalEnvironment={paypalEnvironment} />
+      <BookingPageClient oauthStep={oauthStep} />
 
       {/* Reservation Info — always visible, below the booking flow */}
       <section className="py-12 bg-[#f3f1ec]">

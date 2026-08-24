@@ -143,5 +143,5 @@ function ReservationCard({ reservation }: { reservation: ReservationData }) {
 }
 
 type ReservationStatusBadgeProps = {
-  status: 'pending_approval' | 'confirmed' | 'expired' | 'cancelled'
+  status: 'pending_approval' | 'approved' | 'confirmed' | 'expired' | 'cancelled'
 }

@@ -9,6 +9,7 @@ const mockCreate = vi.fn()
 const mockUpdate = vi.fn()
 const mockUserFindUnique = vi.fn()
 const mockCruiseFindUnique = vi.fn()
+const mockExecuteRaw = vi.fn()
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -27,7 +28,9 @@ vi.mock('@/lib/db', () => ({
     },
     $transaction: vi.fn(async (cb: (tx: unknown) => Promise<unknown>) => {
       const tx = {
+        $executeRaw: mockExecuteRaw,
         reservation: {
+          findMany: mockFindMany,
           findFirst: mockFindFirst,
           create: mockCreate,
         },
@@ -36,6 +39,12 @@ vi.mock('@/lib/db', () => ({
     }),
   },
   checkAndExpireHolds: vi.fn((r) => Promise.resolve(r)),
+}))
+
+const mockRevalidateTag = vi.fn()
+vi.mock('next/cache', () => ({
+  revalidateTag: mockRevalidateTag,
+  unstable_cache: vi.fn((fn: () => unknown) => fn),
 }))
 
 vi.mock('@/lib/email', () => ({
@@ -49,10 +58,6 @@ const mockGetClientIP = vi.fn()
 vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIP: mockGetClientIP,
-}))
-
-vi.mock('@/lib/pdf-generator', () => ({
-  generateBankTransferPDF: vi.fn(() => Promise.resolve(Buffer.from('%PDF-1.4 mock'))),
 }))
 
 const mockAuthFn = vi.fn().mockResolvedValue({ user: { id: 'user_123', name: 'Test', email: 'test@test.com', isAdmin: false } })
@@ -70,9 +75,7 @@ vi.mock('@/lib/auth', () => ({
 // Import route handlers after mocking
 const { POST, GET } = await import('@/app/api/reservations/route')
 const { GET: GET_SINGLE } = await import('@/app/api/reservations/[id]/route')
-const { GET: GET_PDF } = await import('@/app/api/reservations/[id]/pdf/route')
 const { GET: GET_AVAILABILITY } = await import('@/app/api/reservations/check-availability/route')
-const { generateBankTransferPDF: mockGeneratePDF } = await import('@/lib/pdf-generator')
 
 describe('Reservation API Routes', () => {
   beforeEach(() => {
@@ -95,85 +98,148 @@ describe('Reservation API Routes', () => {
       freeSpaces: 4,
       paidSpaces: 2,
       totalAmount: 6400,
-      paymentMethod: 'bank_transfer',
+      termsVersion: 3,
     }
 
-    it('creates reservation successfully', async () => {
+    function postRequest(body: Record<string, unknown>) {
+      return new NextRequest('http://localhost/api/reservations', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+    }
+
+    it('creates reservation successfully and invalidates the calendar cache', async () => {
       const mockReservation = {
         id: 'res_new_123',
         userId: 'user_123',
         ...validBody,
+        charterType: 'none',
+        cabinDetails: null,
+        termsAcceptedAt: new Date(),
+        paymentMethod: null,
         status: 'pending_approval',
         holdExpiry: expect.any(Date),
         createdAt: new Date(),
         updatedAt: new Date(),
       }
 
-      mockFindFirst.mockResolvedValue(null)
+      mockFindMany.mockResolvedValue([]) // no active occupancy
       mockCreate.mockResolvedValue(mockReservation)
       mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
 
-      const request = new NextRequest('http://localhost/api/reservations', {
-        method: 'POST',
-        body: JSON.stringify(validBody),
-      })
-
-      const response = await POST(request)
+      const response = await POST(postRequest(validBody))
       expect(response.status).toBe(201)
 
       const body = await response.json()
       expect(body.id).toBe('res_new_123')
       expect(body.status).toBe('pending_approval')
+
+      // Guest booking is always a non-charter; terms accepted + version recorded.
+      expect(mockCreate).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          charterType: 'none',
+          termsVersion: 3,
+          termsAcceptedAt: expect.any(Date),
+        }),
+      })
+      expect(mockRevalidateTag).toHaveBeenCalledWith('cruises-calendar', 'default')
     })
 
-    it('returns 409 when date is blocked', async () => {
-      mockFindFirst.mockResolvedValue({ id: 'existing_res', status: 'pending_approval' })
+    it('returns 400 OVER_CAPACITY for guestCount > 18 and creates no row', async () => {
+      const response = await POST(postRequest({ ...validBody, guestCount: 19 }))
+      expect(response.status).toBe(400)
+      expect((await response.json()).error).toBe('OVER_CAPACITY')
+      expect(mockCreate).not.toHaveBeenCalled()
+      expect(mockExecuteRaw).not.toHaveBeenCalled()
+    })
 
-      const request = new NextRequest('http://localhost/api/reservations', {
-        method: 'POST',
-        body: JSON.stringify(validBody),
-      })
+    it('accepts exactly 18 guests on an empty date', async () => {
+      const mockReservation = {
+        id: 'res_18',
+        userId: 'user_123',
+        ...validBody,
+        guestCount: 18,
+        charterType: 'none',
+        status: 'pending_approval',
+        holdExpiry: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+      mockFindMany.mockResolvedValue([])
+      mockCreate.mockResolvedValue(mockReservation)
+      mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
 
-      const response = await POST(request)
-      expect(response.status).toBe(409)
+      const response = await POST(postRequest({ ...validBody, guestCount: 18 }))
+      expect(response.status).toBe(201)
+    })
 
+    it('returns 400 TERMS_VERSION_MISMATCH for a stale terms version', async () => {
+      const response = await POST(postRequest({ ...validBody, termsVersion: 2 }))
+      expect(response.status).toBe(400)
+      expect((await response.json()).error).toBe('TERMS_VERSION_MISMATCH')
+      expect(mockCreate).not.toHaveBeenCalled()
+    })
+
+    it('returns 400 for a missing termsVersion', async () => {
+      const { termsVersion: _omit, ...withoutTerms } = validBody
+      const response = await POST(postRequest(withoutTerms))
+      expect(response.status).toBe(400)
+      expect(mockCreate).not.toHaveBeenCalled()
+    })
+
+    it('closes 9 spots for a shared group under 10, not the guest count', async () => {
+      // 10 already occupied → 8 remaining, so a 2-guest shared booking (9 spots) is rejected.
+      mockFindMany.mockResolvedValue([{ guestCount: 10, charterType: 'none' }])
+
+      const response = await POST(postRequest(validBody)) // guestCount 2
+      expect(response.status).toBe(400)
       const body = await response.json()
-      expect(body.error).toBe('DATE_BLOCKED')
+      expect(body.error).toBe('INSUFFICIENT_SPOTS')
+      expect(body.remainingSpots).toBe(8)
+      expect(mockCreate).not.toHaveBeenCalled()
+    })
+
+    it('returns 400 INSUFFICIENT_SPOTS when spots are insufficient', async () => {
+      // Full date (18 occupied) → 0 remaining, a 10-guest booking is rejected.
+      mockFindMany.mockResolvedValue([{ guestCount: 18, charterType: 'none' }])
+
+      const response = await POST(postRequest({ ...validBody, guestCount: 10 }))
+      expect(response.status).toBe(400)
+      const body = await response.json()
+      expect(body.error).toBe('INSUFFICIENT_SPOTS')
+      expect(body.remainingSpots).toBe(0)
+      expect(mockCreate).not.toHaveBeenCalled()
+    })
+
+    it('re-checks capacity atomically inside a transaction with a per-date lock', async () => {
+      mockFindMany.mockResolvedValue([])
+      mockCreate.mockResolvedValue({ id: 'res_ok', userId: 'user_123', ...validBody, status: 'pending_approval' })
+      mockUserFindUnique.mockResolvedValue({ id: 'user_123', email: 'test@example.com' })
+
+      await POST(postRequest(validBody))
+      // The advisory-lock guard ran before occupancy was re-counted.
+      expect(mockExecuteRaw).toHaveBeenCalled()
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            departureDate: '2026-07-15',
+            status: { notIn: ['expired', 'cancelled'] },
+          }),
+        })
+      )
     })
 
     it('returns 400 for missing required fields', async () => {
       const incompleteBody = { cruiseId: 'socorro-1' }
 
-      const request = new NextRequest('http://localhost/api/reservations', {
-        method: 'POST',
-        body: JSON.stringify(incompleteBody),
-      })
-
-      const response = await POST(request)
-      expect(response.status).toBe(400)
-    })
-
-    it('returns 400 for invalid paymentMethod', async () => {
-      mockFindFirst.mockResolvedValue(null)
-
-      const request = new NextRequest('http://localhost/api/reservations', {
-        method: 'POST',
-        body: JSON.stringify({ ...validBody, paymentMethod: 'crypto' }),
-      })
-
-      const response = await POST(request)
+      const response = await POST(postRequest(incompleteBody))
       expect(response.status).toBe(400)
     })
 
     it('returns 401 when no session cookie', async () => {
       mockAuthFn.mockResolvedValue(null)
 
-      const request = new NextRequest('http://localhost/api/reservations', {
-        method: 'POST',
-        body: JSON.stringify(validBody),
-      })
-
-      const response = await POST(request)
+      const response = await POST(postRequest(validBody))
       expect(response.status).toBe(401)
 
       const body = await response.json()
@@ -197,7 +263,7 @@ describe('Reservation API Routes', () => {
           freeSpaces: 4,
           paidSpaces: 2,
           totalAmount: 6400,
-          paymentMethod: 'bank_transfer',
+          paymentMethod: 'wire_transfer',
           status: 'pending_approval',
           holdExpiry: new Date('2026-07-20'),
           createdAt: new Date(),
@@ -241,7 +307,7 @@ describe('Reservation API Routes', () => {
         freeSpaces: 4,
         paidSpaces: 2,
         totalAmount: 6400,
-        paymentMethod: 'bank_transfer',
+        paymentMethod: 'wire_transfer',
         status: 'pending_approval',
         holdExpiry: new Date('2026-07-20'),
         createdAt: new Date(),
@@ -289,196 +355,76 @@ describe('Reservation API Routes', () => {
     })
   })
 
-  describe('GET /api/reservations/[id]/pdf', () => {
-    const mockReservation = {
-      id: 'res_123',
-      userId: 'user_123',
-      cruiseId: 'socorro-1',
-      cruiseName: 'Socorro Islands',
-      departureDate: '2026-07-15',
-      route: 'Cabo San Lucas',
-      tier: 'premium',
-      tierPrice: 3200,
-      guestCount: 2,
-      freeSpaces: 4,
-      paidSpaces: 2,
-      totalAmount: 6400,
-      paymentMethod: 'bank_transfer',
-      status: 'pending_approval',
-      holdExpiry: new Date('2026-07-20'),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
+  describe('GET /api/reservations/check-availability', () => {
+    const url = 'http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15'
 
-    const mockCruise = {
-      id: 'socorro-1',
-      returnDate: '2026-07-22',
-      boat: 'Quetzal',
-      dives: 5,
-    }
+    it('returns available: true and remainingSpots 18 on an empty date', async () => {
+      mockFindMany.mockResolvedValue([])
 
-    it('returns PDF for bank_transfer reservation (owner, default lang en)', async () => {
-      mockFindUnique.mockResolvedValue(mockReservation)
-      mockCruiseFindUnique.mockResolvedValue(mockCruise)
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
-      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
-
+      const response = await GET_AVAILABILITY(new NextRequest(url))
       expect(response.status).toBe(200)
-      expect(response.headers.get('Content-Type')).toBe('application/pdf')
-      expect(response.headers.get('Content-Disposition')).toBe('attachment; filename="transfer-res_123.pdf"')
+      const body = await response.json()
+      expect(body.available).toBe(true)
+      expect(body.remainingSpots).toBe(18)
+    })
 
-      expect(mockGeneratePDF).toHaveBeenCalledWith(
+    it('closes 9 spots for a shared group under 10, not the guest count', async () => {
+      mockFindMany.mockResolvedValue([{ guestCount: 4, charterType: 'none' }])
+
+      const response = await GET_AVAILABILITY(new NextRequest(url))
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.available).toBe(true)
+      expect(body.remainingSpots).toBe(9)
+    })
+
+    it('returns available: false and remainingSpots 0 when the date is full', async () => {
+      mockFindMany.mockResolvedValue([{ guestCount: 18, charterType: 'none' }])
+
+      const response = await GET_AVAILABILITY(new NextRequest(url))
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.available).toBe(false)
+      expect(body.remainingSpots).toBe(0)
+    })
+
+    it('queries only active reservations (excludes expired and cancelled)', async () => {
+      mockFindMany.mockResolvedValue([])
+
+      await GET_AVAILABILITY(new NextRequest(url))
+      expect(mockFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          reservation: expect.objectContaining({ id: 'res_123' }),
-          cruise: expect.objectContaining({ returnDate: '2026-07-22', boat: 'Quetzal', dives: 5 }),
-          lang: 'en',
+          where: expect.objectContaining({
+            departureDate: '2026-07-15',
+            status: { notIn: ['expired', 'cancelled'] },
+          }),
         })
       )
     })
 
-    it('returns PDF for admin accessing another user\'s reservation', async () => {
-      mockAuthFn.mockResolvedValue({ user: { id: 'admin_1', email: 'admin@x.com', isAdmin: true } })
-      mockFindUnique.mockResolvedValue({ ...mockReservation, userId: 'other_user' })
-      mockCruiseFindUnique.mockResolvedValue(mockCruise)
+    it('never reports negative remaining spots', async () => {
+      // Over-booked date (defensive) still clamps to 0.
+      mockFindMany.mockResolvedValue([
+        { guestCount: 18, charterType: 'none' },
+        { guestCount: 18, charterType: 'none' },
+      ])
 
-      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
-      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(200)
-      expect(mockGeneratePDF).toHaveBeenCalledWith(expect.objectContaining({ lang: 'en' }))
-    })
-
-    it('passes lang=es to the generator', async () => {
-      mockFindUnique.mockResolvedValue(mockReservation)
-      mockCruiseFindUnique.mockResolvedValue(mockCruise)
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf?lang=es')
-      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(200)
-      expect(mockGeneratePDF).toHaveBeenCalledWith(expect.objectContaining({ lang: 'es' }))
-    })
-
-    it('returns 400 for non-bank_transfer reservation', async () => {
-      mockFindUnique.mockResolvedValue({ ...mockReservation, paymentMethod: 'paypal' })
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
-      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(400)
-      expect(mockGeneratePDF).not.toHaveBeenCalled()
-    })
-
-    it('returns 404 when reservation not found', async () => {
-      mockFindUnique.mockResolvedValue(null)
-
-      const request = new NextRequest('http://localhost/api/reservations/nonexistent/pdf')
-      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'nonexistent' }) })
-
-      expect(response.status).toBe(404)
-    })
-
-    it('returns 403 when accessing another user\'s PDF', async () => {
-      mockFindUnique.mockResolvedValue({ ...mockReservation, userId: 'other_user' })
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
-      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(403)
-    })
-
-    it('returns 401 when no session cookie', async () => {
-      mockAuthFn.mockResolvedValue(null)
-
-      const request = new NextRequest('http://localhost/api/reservations/res_123/pdf')
-      const response = await GET_PDF(request, { params: Promise.resolve({ id: 'res_123' }) })
-
-      expect(response.status).toBe(401)
-    })
-  })
-
-  describe('GET /api/reservations/check-availability', () => {
-    it('returns available: true when no conflicting reservation', async () => {
-      mockFindFirst.mockResolvedValue(null)
-
-      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
-      const response = await GET_AVAILABILITY(request)
-
-      expect(response.status).toBe(200)
+      const response = await GET_AVAILABILITY(new NextRequest(url))
       const body = await response.json()
-      expect(body.available).toBe(true)
-    })
-
-    it('returns available: false when conflicting reservation exists', async () => {
-      mockFindFirst.mockResolvedValue({ id: 'blocked_res', status: 'pending_approval' })
-
-      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
-      const response = await GET_AVAILABILITY(request)
-
-      expect(response.status).toBe(200)
-      const body = await response.json()
+      expect(body.remainingSpots).toBe(0)
       expect(body.available).toBe(false)
-      expect(body.blockedBy).toBe('blocked_res')
     })
 
     it('returns 400 for missing cruiseId', async () => {
       const request = new NextRequest('http://localhost/api/reservations/check-availability?departureDate=2026-07-15')
       const response = await GET_AVAILABILITY(request)
-
       expect(response.status).toBe(400)
     })
 
     it('returns 400 for missing departureDate', async () => {
       const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1')
       const response = await GET_AVAILABILITY(request)
-
       expect(response.status).toBe(400)
-    })
-
-    it('returns available: true when existing reservation is expired', async () => {
-      mockFindFirst.mockResolvedValue(null) // Only pending_approval blocks
-
-      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
-      const response = await GET_AVAILABILITY(request)
-
-      expect(response.status).toBe(200)
-      const body = await response.json()
-      expect(body.available).toBe(true)
-    })
-
-    it('returns available: true when existing reservation is cancelled', async () => {
-      mockFindFirst.mockResolvedValue(null) // Cancelled does not block
-
-      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
-      const response = await GET_AVAILABILITY(request)
-
-      expect(response.status).toBe(200)
-      const body = await response.json()
-      expect(body.available).toBe(true)
-    })
-
-    it('returns available: true when existing reservation is confirmed', async () => {
-      mockFindFirst.mockResolvedValue(null) // Confirmed does not block
-
-      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=socorro-1&departureDate=2026-07-15')
-      const response = await GET_AVAILABILITY(request)
-
-      expect(response.status).toBe(200)
-      const body = await response.json()
-      expect(body.available).toBe(true)
-    })
-
-    it('does not block when two different cruises have the same date', async () => {
-      // A pending reservation for a DIFFERENT cruiseId on the same date should not block
-      mockFindFirst.mockResolvedValue(null)
-
-      const request = new NextRequest('http://localhost/api/reservations/check-availability?cruiseId=coronado-1&departureDate=2026-07-15')
-      const response = await GET_AVAILABILITY(request)
-
-      expect(response.status).toBe(200)
-      const body = await response.json()
-      expect(body.available).toBe(true)
     })
   })
 })

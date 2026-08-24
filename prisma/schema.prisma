@@ -22,8 +22,13 @@ model Reservation {
   freeSpaces    Int      @default(0)
   paidSpaces    Int
   totalAmount   Int      // total in USD (whole dollars)
-  paymentMethod String   // "paypal" | "bank_transfer"
-  status        String   @default("pending_approval") // pending_approval, confirmed, expired, cancelled
+  paymentMethod String?  // "stripe" | "wire_transfer"; NULL for legacy paypal rows
+  charterType   String   @default("none") // "none" | "medio" | "full" (admin-registered contracts only)
+  cabinDetails  Json?    // informational cabin count/types; no auto-assignment
+  termsVersion     Int?
+  termsAcceptedAt  DateTime?
+  confirmationEmailSentAt DateTime?
+  status        String   @default("pending_approval") // pending_approval, approved, confirmed, expired, cancelled
   notes         String?
   crewRegistration CrewRegistration?
   paymentRecords PaymentRecord[]
@@ -62,6 +67,7 @@ model Cruise {
   standardPrice Int
   premiumPrice  Int
   dives         Int      @default(5)
+  capacity      Int      @default(18) // fixed vessel capacity; locked by PostgreSQL CHECK (capacity = 18)
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -211,6 +217,8 @@ enum BloodType {
 
 enum PaymentProvider {
   paypal
+  stripe
+  wire_transfer
 }
 
 enum PaymentStatus {

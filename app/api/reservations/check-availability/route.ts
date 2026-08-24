@@ -1,11 +1,13 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { AvailabilityQuerySchema, ReservationStatus } from '@/lib/validations'
+import { VESSEL_CAPACITY, sumClosedSpots } from '@/lib/reservation-config'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 
 /**
  * GET /api/reservations/check-availability?cruiseId=X&departureDate=Y
- * Checks if a cruise+date combination is available (no pending_approval reservation).
+ * Reports remaining spots for a departure date: occupied = sum of closed spots
+ * over active (non-expired, non-cancelled) reservations for that date.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -33,21 +35,20 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       )
     }
-    const { cruiseId: validCruiseId, departureDate: validDepartureDate } = parsed.data
+    const { departureDate: validDepartureDate } = parsed.data
 
-    const conflicting = await prisma.reservation.findFirst({
+    const active = await prisma.reservation.findMany({
       where: {
-        cruiseId: validCruiseId,
         departureDate: validDepartureDate,
-        status: ReservationStatus.enum.pending_approval,
+        status: { notIn: [ReservationStatus.enum.expired, ReservationStatus.enum.cancelled] },
       },
+      select: { guestCount: true, charterType: true },
     })
 
-    if (conflicting) {
-      return Response.json({ available: false, blockedBy: conflicting.id })
-    }
+    const occupied = sumClosedSpots(active)
+    const remainingSpots = Math.max(0, VESSEL_CAPACITY - occupied)
 
-    return Response.json({ available: true })
+    return Response.json({ available: remainingSpots > 0, remainingSpots })
   } catch (error) {
     console.error('GET /api/reservations/check-availability error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })

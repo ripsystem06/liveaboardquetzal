@@ -1,7 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/contexts/language-context'
-import { User, Users, Ship, Compass, LogIn, UserPlus, CreditCard } from 'lucide-react'
+import { User, Users, Ship, Compass, LogIn, UserPlus, CheckCircle2 } from 'lucide-react'
 
 const reservationTypes = [
   {
@@ -28,17 +28,17 @@ const howItWorks = [
     descKey: 'booking.info.signinDesc',
   },
   {
-    icon: Compass,
-    titleKey: 'booking.info.choose',
-    descKey: 'booking.info.chooseDesc',
-  },
-  {
     icon: UserPlus,
     titleKey: 'booking.info.guests',
     descKey: 'booking.info.guestsDesc',
   },
   {
-    icon: CreditCard,
+    icon: Compass,
+    titleKey: 'booking.info.choose',
+    descKey: 'booking.info.chooseDesc',
+  },
+  {
+    icon: CheckCircle2,
     titleKey: 'booking.info.confirm',
     descKey: 'booking.info.confirmDesc',
   },

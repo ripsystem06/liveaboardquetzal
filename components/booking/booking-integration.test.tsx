@@ -20,9 +20,6 @@ const sessionListeners = new Set<() => void>()
 
 function emitSessionChange(next: typeof currentSession) {
   currentSession = next
-  // Flush synchronously so isAuthenticated reflects the new session BEFORE the
-  // login form's optimistic LOGIN_COMPLETED dispatch runs (mirrors next-auth's
-  // session event → useSession update ordering).
   flushSync(() => {
     sessionListeners.forEach((listener) => listener())
   })
@@ -40,27 +37,6 @@ mockUseSession.mockImplementation(() => {
   return { ...currentSession, update: vi.fn() }
 })
 
-// Mock the PayPal SDK: provider renders children, buttons auto-complete (createOrder → onApprove).
-vi.mock('@paypal/react-paypal-js', () => ({
-  PayPalScriptProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  PayPalButtons: ({
-    createOrder,
-    onApprove,
-  }: {
-    createOrder: () => Promise<string>
-    onApprove: (data: { orderID: string }) => Promise<void>
-  }) => {
-    React.useEffect(() => {
-      void (async () => {
-        const orderId = await createOrder()
-        await onApprove({ orderID: orderId })
-      })()
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-    return <div>PayPal Checkout</div>
-  },
-}))
-
 const mockCruises = [
   {
     id: 'socorro-1',
@@ -77,20 +53,20 @@ const mockCruises = [
 ]
 
 async function completeLogin(user: ReturnType<typeof userEvent.setup>, email = 'demo@quetzal.com', otp = '123456') {
-  // Step 1: request code
   await user.type(screen.getByLabelText(/email/i), email)
   await user.click(screen.getByRole('button', { name: /send code/i }))
   await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
 
-  // Step 2: verify code
   await user.type(screen.getByLabelText(/code/i), otp)
   await user.click(screen.getByRole('button', { name: /verify/i }))
 
-  // Advance to step 2 (select cruise)
-  await waitFor(() => expect(screen.getByText(/select your cruise/i)).toBeInTheDocument())
+  // Authentication unlocks the existing terms step without resetting booking progress.
+  await waitFor(() => expect(screen.queryByText(/sign in to submit your reservation/i)).not.toBeInTheDocument())
 }
 
 describe('BookingPageClient integration', () => {
+  let reservationFetchMock: ReturnType<typeof vi.fn>
+
   beforeEach(() => {
     currentSession = { data: null, status: 'unauthenticated' }
     sessionListeners.clear()
@@ -114,7 +90,6 @@ describe('BookingPageClient integration', () => {
       return { ok: false, error: 'CredentialsSignin' }
     })
 
-    // Stub sessionStorage for UserProvider
     vi.stubGlobal('sessionStorage', {
       getItem: vi.fn(() => null),
       setItem: vi.fn(),
@@ -123,7 +98,7 @@ describe('BookingPageClient integration', () => {
     vi.stubGlobal('open', vi.fn())
 
     // Mock fetch: OTP request + cruise data + reservation endpoints
-    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    reservationFetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
       const isPost = init?.method === 'POST'
 
@@ -136,76 +111,80 @@ describe('BookingPageClient integration', () => {
       if (url.includes('/api/cruises/calendar')) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ expeditions: mockCruises }) })
       }
-      if (url.includes('/api/paypal/create-order') && isPost) {
-        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ orderId: 'ORDER-1' }) })
-      }
-      if (url.includes('/api/paypal/capture-order') && isPost) {
-        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ id: 'pay-1', status: 'completed', reservationStatus: 'pending_approval' }) })
-      }
       if (url.includes('/api/reservations') && isPost) {
         return Promise.resolve({ ok: true, status: 201, json: () => Promise.resolve({ id: 'res-1', status: 'pending_approval' }) })
       }
       return Promise.resolve({ ok: false, json: () => Promise.resolve({}) })
-    }))
+    })
+    vi.stubGlobal('fetch', reservationFetchMock)
   })
 
-  describe('Full 3-step flow', () => {
-    it('completes the booking flow: OTP login → select cruise → payment → confirmation', async () => {
+  describe('Full guests-first flow', () => {
+    it('walks guests → date → cabins → terms and submits without any booking-time payment', async () => {
       const user = userEvent.setup()
-      renderWithProviders(<BookingPageClient paypalClientId="test-paypal-client-id" />)
+      renderWithProviders(<BookingPageClient />)
 
-      await completeLogin(user)
+      // Guests are first, before any authentication form.
+      expect(screen.getByText(/shared half charter/i)).toBeInTheDocument()
+      expect(screen.queryByLabelText(/email/i)).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /pay/i })).not.toBeInTheDocument()
 
-      // Step 2: select cruise + tier
+      // Advance guests → date
+      await user.click(screen.getByRole('button', { name: /next/i }))
+      await waitFor(() => expect(screen.getByText(/select your cruise/i)).toBeInTheDocument())
+
+      // Date step: select cruise + tier, then advance
       await user.click(screen.getAllByRole('button', { name: /select/i })[0])
       await user.click(screen.getAllByRole('button', { name: /Explorer/i })[0])
+      const nextFromDate = screen.getByRole('button', { name: /next/i })
+      expect(nextFromDate).toBeEnabled()
+      await user.click(nextFromDate)
 
-      const nextButton = screen.getByRole('button', { name: /next/i })
-      expect(nextButton).toBeEnabled()
-      await user.click(nextButton)
+      // Cabins step retains structured optional data.
+      await waitFor(() => expect(screen.getByRole('spinbutton', { name: /cabin count/i })).toBeInTheDocument())
+      await user.type(screen.getByRole('spinbutton', { name: /cabin count/i }), '2')
+      await user.click(screen.getByRole('checkbox', { name: /double cabins/i }))
+      await user.click(screen.getByRole('button', { name: /next/i }))
 
+      // Authentication is gated at submission, not before the first booking input.
       await waitFor(() => expect(screen.getByText(/booking summary/i)).toBeInTheDocument())
+      const submitButton = screen.getByRole('button', { name: /submit reservation/i })
+      expect(submitButton).toBeDisabled()
+      await completeLogin(user)
 
-      // Step 3: pay
-      await user.click(screen.getByRole('button', { name: /pay with credit card/i }))
+      await user.click(screen.getByRole('checkbox', { name: /terms/i }))
+      expect(submitButton).toBeEnabled()
 
-      await waitFor(() => expect(screen.getByText(/booking confirmed/i)).toBeInTheDocument(), { timeout: 3000 })
+      await user.click(submitButton)
+
+      // Confirmation without any payment at booking.
+      await waitFor(() => expect(screen.getByText(/booking confirmed/i)).toBeInTheDocument())
+
+      const reservationCall = reservationFetchMock.mock.calls.find(([u]) =>
+        typeof u === 'string' && u.includes('/api/reservations')
+      )
+      expect(reservationCall).toBeTruthy()
+      expect(screen.queryByRole('button', { name: /pay/i })).not.toBeInTheDocument()
     })
 
-    it('does not persist any session token after login', async () => {
-      const user = userEvent.setup()
+    it('does not persist a session token while guests are collected first', async () => {
       renderWithProviders(<BookingPageClient />)
 
-      await completeLogin(user)
-      // Login succeeded: we are now on step 2.
-      expect(screen.getByText(/select your cruise/i)).toBeInTheDocument()
+      expect(screen.getByText(/number of guests/i)).toBeInTheDocument()
+      expect(sessionStorage.setItem).not.toHaveBeenCalled()
     })
   })
 
-  describe('Step 3 is inaccessible without completing steps 1-2', () => {
-    it('step 3 cannot be reached without selecting a cruise first', async () => {
+  describe('Step gating', () => {
+    it('cannot advance past the date step without selecting a cruise', async () => {
       const user = userEvent.setup()
       renderWithProviders(<BookingPageClient />)
 
-      await completeLogin(user)
+      await user.click(screen.getByRole('button', { name: /next/i }))
+      await waitFor(() => expect(screen.getByText(/select your cruise/i)).toBeInTheDocument())
 
       const nextButton = screen.getByRole('button', { name: /next/i })
       expect(nextButton).toBeDisabled()
-    })
-
-    it('does not advance on a wrong code', async () => {
-      const user = userEvent.setup()
-      renderWithProviders(<BookingPageClient />)
-
-      await user.type(screen.getByLabelText(/email/i), 'demo@quetzal.com')
-      await user.click(screen.getByRole('button', { name: /send code/i }))
-      await waitFor(() => expect(screen.getByLabelText(/code/i)).toBeInTheDocument())
-
-      await user.type(screen.getByLabelText(/code/i), '000000')
-      await user.click(screen.getByRole('button', { name: /verify/i }))
-
-      await waitFor(() => expect(screen.getByText(/invalid or expired code/i)).toBeInTheDocument())
-      expect(screen.queryByText(/select your cruise/i)).not.toBeInTheDocument()
     })
   })
 })

@@ -1,14 +1,21 @@
 import { NextRequest } from 'next/server'
+import { revalidateTag } from 'next/cache'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { auth, AuthError } from '@/lib/auth'
 import { CreateReservationSchema, ReservationStatus } from '@/lib/validations'
+import { activeTermsVersion } from '@/lib/legal/terms'
+import { VESSEL_CAPACITY, closedSpots, sumClosedSpots } from '@/lib/reservation-config'
 import { sendReservationCreatedEmail } from '@/lib/email'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 
 /**
  * POST /api/reservations
- * Creates a new reservation with pending_approval status and calculated holdExpiry.
- * Uses a database transaction to prevent double-booking race conditions.
+ * Creates a new reservation with `pending_approval` status and a calculated
+ * holdExpiry. Capacity is enforced per departure date (18 spots): requests over
+ * 18 are rejected outright, terms are validated against the active server
+ * version, and the atomic availability check runs inside a `$transaction`
+ * guarded by a per-date advisory lock so concurrent bookings cannot over-commit.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -41,25 +48,56 @@ export async function POST(request: NextRequest) {
     }
     const body = parsed.data
 
+    // Absolute capacity rejection: no reservation row may exceed the vessel.
+    if (body.guestCount > VESSEL_CAPACITY) {
+      return Response.json(
+        {
+          error: 'OVER_CAPACITY',
+          message: `Maximum ${VESSEL_CAPACITY} guests per departure`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // Server-side T&C validation against the active version (design decision #10).
+    if (body.termsVersion !== activeTermsVersion) {
+      return Response.json(
+        {
+          error: 'TERMS_VERSION_MISMATCH',
+          message: `Terms version ${body.termsVersion} is not active (current: ${activeTermsVersion})`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // Guest bookings are never admin-registered contracts: always "none".
+    const charterType = 'none' as const
+    const spotsToClose = closedSpots({ charterType, guestCount: body.guestCount })
+
     // Calculate holdExpiry based on day of week
     const now = new Date()
     const dayOfWeek = now.getDay() // 0=Sun, 6=Sat
     const holdHours = (dayOfWeek === 0 || dayOfWeek === 6) ? 72 : 48
     const holdExpiry = new Date(now.getTime() + holdHours * 60 * 60 * 1000)
 
-    // Wrap in transaction to prevent double-booking
+    // Atomic availability check: per-date advisory lock + occupied-spots recount
+    // inside a transaction to prevent over-capacity races.
     const reservation = await prisma.$transaction(async (tx) => {
-      // Date blocking check: prevent duplicate reservations for same cruise+date
-      const conflicting = await tx.reservation.findFirst({
+      // Serialize capacity checks for this departure date (released on commit).
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${body.departureDate}, 0))`
+
+      const active = await tx.reservation.findMany({
         where: {
-          cruiseId: body.cruiseId,
           departureDate: body.departureDate,
-          status: ReservationStatus.enum.pending_approval,
+          status: { notIn: [ReservationStatus.enum.expired, ReservationStatus.enum.cancelled] },
         },
+        select: { guestCount: true, charterType: true },
       })
 
-      if (conflicting) {
-        throw { code: 'DATE_BLOCKED' }
+      const occupied = sumClosedSpots(active)
+      const remainingSpots = VESSEL_CAPACITY - occupied
+      if (remainingSpots < spotsToClose) {
+        throw { code: 'INSUFFICIENT_SPOTS', remainingSpots }
       }
 
       return tx.reservation.create({
@@ -75,12 +113,20 @@ export async function POST(request: NextRequest) {
           freeSpaces: body.freeSpaces,
           paidSpaces: body.paidSpaces,
           totalAmount: body.totalAmount,
-          paymentMethod: body.paymentMethod,
+          charterType,
+          cabinDetails: body.cabinDetails === undefined
+            ? undefined
+            : (body.cabinDetails as unknown as Prisma.InputJsonValue),
+          termsVersion: body.termsVersion,
+          termsAcceptedAt: now,
           status: ReservationStatus.enum.pending_approval,
           holdExpiry,
         },
       })
     })
+
+    // Any occupancy change invalidates the calendar cache (design decision #11).
+    revalidateTag('cruises-calendar', 'default')
 
     const user = await prisma.user.findUnique({ where: { id: reservation.userId } })
 
@@ -109,11 +155,18 @@ export async function POST(request: NextRequest) {
 
     return Response.json(reservation, { status: 201 })
   } catch (error) {
-    if (error && typeof error === 'object' && 'code' in error && (error as Record<string, unknown>).code === 'DATE_BLOCKED') {
-      return Response.json(
-        { error: 'DATE_BLOCKED', message: 'Cruise date is currently held by another reservation' },
-        { status: 409 }
-      )
+    if (error && typeof error === 'object' && 'code' in error) {
+      const coded = error as Record<string, unknown>
+      if (coded.code === 'INSUFFICIENT_SPOTS') {
+        return Response.json(
+          {
+            error: 'INSUFFICIENT_SPOTS',
+            message: 'Not enough spots remaining for this departure',
+            remainingSpots: coded.remainingSpots,
+          },
+          { status: 400 }
+        )
+      }
     }
     if (error instanceof AuthError) {
       return Response.json({ error: 'Authentication required' }, { status: 401 })

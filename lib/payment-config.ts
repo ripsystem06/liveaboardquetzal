@@ -1,4 +1,4 @@
-// Bank accounts rendered on the bank-transfer PDF.
+// Bank accounts surfaced as wire-transfer instructions (single source of truth).
 // `label` is the localized section heading shown above each account.
 export interface BankAccount {
   label: { en: string; es: string }
