@@ -18,7 +18,7 @@ const destinations = [
     id: 'magbay',
     titleKey: 'destinations.magbay.title',
     descKey: 'destinations.magbay.description',
-    image: '/images/panoramicas/loreto-magdalena-bay.webp',
+    image: '/balllenahero.webp',
     href: '/destinos/bahia-magdalena',
     align: 'right' as const,
   },

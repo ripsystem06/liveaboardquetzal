@@ -61,7 +61,7 @@ describe('Destination translations — Socorro (EN)', () => {
 
   // Gallery
   it('socorro.gallery.title', () => testKey('en', 'socorro.gallery.title', 'Gallery'))
-  it('socorro.gallery.images', () => testKey('en', 'socorro.gallery.images', '[{"src":"/images/panoramicas/Isla Socorro.webp","alt":"Volcanic cliffs of Socorro Island rising from the Pacific"},{"src":"/images/panoramicas/Manta el Boiler 1.webp","alt":"Giant oceanic manta at The Boiler cleaning station"},{"src":"/images/panoramicas/Cabo Pearce .webp","alt":"Dramatic seascape at Cabo Pearce dive site"},{"src":"/images/panoramicas/Clariones.webp","alt":"The remote volcanic island of Clarion"},{"src":"/images/panoramicas/Pargos Roca.webp","alt":"School of snappers swarming Roca Partida"},{"src":"/images/panoramicas/Delfin Kike.webp","alt":"Bottlenose dolphins riding the bow wave"}]'))
+  it('socorro.gallery.images', () => testKey('en', 'socorro.gallery.images', '[{"src":"/images/panoramicas/Isla Socorro.webp","alt":"Volcanic cliffs of Socorro Island rising from the Pacific"},{"src":"/images/panoramicas/Manta el Boiler 1.webp","alt":"Giant oceanic manta at The Boiler cleaning station"},{"src":"/images/panoramicas/Cabo Pearce .webp","alt":"Dramatic seascape at Cabo Pearce dive site"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"Roca Partida rising from the open Pacific"},{"src":"/images/panoramicas/Pargos Roca.webp","alt":"School of snappers swarming Roca Partida"},{"src":"/images/panoramicas/Delfin Kike.webp","alt":"Bottlenose dolphins riding the bow wave"}]'))
 })
 
 describe('Destination translations — Socorro (ES)', () => {
@@ -110,7 +110,7 @@ describe('Destination translations — Socorro (ES)', () => {
 
   // Gallery
   it('socorro.gallery.title', () => testKey('es', 'socorro.gallery.title', 'Galería'))
-  it('socorro.gallery.images', () => testKey('es', 'socorro.gallery.images', '[{"src":"/images/panoramicas/Isla Socorro.webp","alt":"Acantilados volcánicos de la Isla Socorro emergiendo del Pacífico"},{"src":"/images/panoramicas/Manta el Boiler 1.webp","alt":"Manta oceánica gigante en la estación de limpieza de El Boiler"},{"src":"/images/panoramicas/Cabo Pearce .webp","alt":"Paisaje marino en el sitio de buceo Cabo Pearce"},{"src":"/images/panoramicas/Clariones.webp","alt":"La remota isla volcánica de Clarion"},{"src":"/images/panoramicas/Pargos Roca.webp","alt":"Cardumen de pargos en Roca Partida"},{"src":"/images/panoramicas/Delfin Kike.webp","alt":"Delfines nariz de botella jugando en la proa"}]'))
+  it('socorro.gallery.images', () => testKey('es', 'socorro.gallery.images', '[{"src":"/images/panoramicas/Isla Socorro.webp","alt":"Acantilados volcánicos de la Isla Socorro emergiendo del Pacífico"},{"src":"/images/panoramicas/Manta el Boiler 1.webp","alt":"Manta oceánica gigante en la estación de limpieza de El Boiler"},{"src":"/images/panoramicas/Cabo Pearce .webp","alt":"Paisaje marino en el sitio de buceo Cabo Pearce"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"Roca Partida emergiendo del Pacífico abierto"},{"src":"/images/panoramicas/Pargos Roca.webp","alt":"Cardumen de pargos en Roca Partida"},{"src":"/images/panoramicas/Delfin Kike.webp","alt":"Delfines nariz de botella jugando en la proa"}]'))
 })
 
 describe('Destination translations — Cortez (EN)', () => {
@@ -184,7 +184,7 @@ describe('Destination translations — Cortez (EN)', () => {
 
   // Gallery
   it('cortez.gallery.title', () => testKey('en', 'cortez.gallery.title', 'Gallery'))
-  it('cortez.gallery.images', () => testKey('en', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Rugged coastline of Punta Tosca, Baja California Sur"},{"src":"/seacortes.webp","alt":"Sea of Cortez"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"The iconic pinnacle of Roca Partida in open ocean"},{"src":"/images/panoramicas/Quetzal San Bene.webp","alt":"The Quetzal anchored off San Benedicto Island"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta ray gliding through crystal-clear waters"}]'))
+  it('cortez.gallery.images', () => testKey('en', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Rugged coastline of Punta Tosca, Baja California Sur"},{"src":"/seacortes.webp","alt":"Sea of Cortez"},{"src":"/images/panoramicas/Delfin Kike.webp","alt":"Bottlenose dolphin swimming beside a scuba diver"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Whitetip reef shark swimming among reef fish"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta ray gliding through crystal-clear waters"}]'))
 })
 
 describe('Destination translations — Cortez (ES)', () => {
@@ -258,7 +258,7 @@ describe('Destination translations — Cortez (ES)', () => {
 
   // Gallery
   it('cortez.gallery.title', () => testKey('es', 'cortez.gallery.title', 'Galería'))
-  it('cortez.gallery.images', () => testKey('es', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Escarpada costa de Punta Tosca, Baja California Sur"},{"src":"/seacortes.webp","alt":"Mar de Cortés"},{"src":"/images/panoramicas/ROca Partida .webp","alt":"El icónico pináculo de Roca Partida en mar abierto"},{"src":"/images/panoramicas/Quetzal San Bene.webp","alt":"El Quetzal anclado frente a la Isla San Benedicto"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta raya deslizándose en aguas cristalinas"}]'))
+  it('cortez.gallery.images', () => testKey('es', 'cortez.gallery.images', '[{"src":"/images/panoramicas/PuntaTosca.webp","alt":"Escarpada costa de Punta Tosca, Baja California Sur"},{"src":"/seacortes.webp","alt":"Mar de Cortés"},{"src":"/images/panoramicas/Delfin Kike.webp","alt":"Delfín nariz de botella nadando junto a un buzo"},{"src":"/images/panoramicas/Puntas blancas 1.webp","alt":"Tiburón de arrecife de punta blanca nadando entre peces"},{"src":"/images/panoramicas/Manta Clariones.webp","alt":"Manta raya deslizándose en aguas cristalinas"}]'))
 })
 
 describe('Destination translations — Magbay (EN)', () => {
@@ -283,7 +283,7 @@ describe('Destination translations — Magbay (EN)', () => {
 
   // Gallery
   it('magbay.gallery.title', () => testKey('en', 'magbay.gallery.title', 'Gallery'))
-  it('magbay.gallery.images', () => testKey('en', 'magbay.gallery.images', '[{"src":"/balllenahero.webp","alt":"Gray whale breaching in the protected waters of Magdalena Bay"},{"src":"/espada.webp","alt":"Swordfish in the sardine run"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curious whitetip sharks patrolling the reef"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Panoramic view from the Balcón dive site"}]'))
+  it('magbay.gallery.images', () => testKey('en', 'magbay.gallery.images', '[{"src":"/balllenahero.webp","alt":"Gray whale breaching in the protected waters of Magdalena Bay"},{"src":"/espada.webp","alt":"Swordfish in the sardine run"},{"src":"/ballena1.jpeg","alt":"Gray whale tail at sunset in Magdalena Bay"},{"src":"/ballena2.jpeg","alt":"Gray whale spyhopping near the coast of Magdalena Bay"}]'))
 })
 
 describe('Destination translations — Magbay (ES)', () => {
@@ -308,5 +308,5 @@ describe('Destination translations — Magbay (ES)', () => {
 
   // Gallery
   it('magbay.gallery.title', () => testKey('es', 'magbay.gallery.title', 'Galería'))
-  it('magbay.gallery.images', () => testKey('es', 'magbay.gallery.images', '[{"src":"/balllenahero.webp","alt":"Ballena gris emergiendo en las aguas protegidas de Bahía Magdalena"},{"src":"/espada.webp","alt":"Pez espada en la corrida de sardinas"},{"src":"/images/panoramicas/Puntas blancas 4.webp","alt":"Curiosos tiburones punta blanca patrullando el arrecife"},{"src":"/images/panoramicas/Puntas blancas Balcón.webp","alt":"Vista panorámica desde el sitio de buceo El Balcón"}]'))
+  it('magbay.gallery.images', () => testKey('es', 'magbay.gallery.images', '[{"src":"/balllenahero.webp","alt":"Ballena gris emergiendo en las aguas protegidas de Bahía Magdalena"},{"src":"/espada.webp","alt":"Pez espada en la corrida de sardinas"},{"src":"/ballena1.jpeg","alt":"Cola de ballena gris al atardecer en Bahía Magdalena"},{"src":"/ballena2.jpeg","alt":"Ballena gris asomando la cabeza cerca de la costa de Bahía Magdalena"}]'))
 })
