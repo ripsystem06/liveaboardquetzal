@@ -1,51 +1,44 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
-import { BookingPageClient } from '@/components/booking/booking-page-client'
-import { ReservationInfoCards } from '@/components/booking/reservation-info-cards'
 
 export const metadata: Metadata = {
-  title: 'Book Your Expedition — Quetzal Liveaboard',
-  description: 'Reserve your diving expedition to Socorro Islands, Sea of Cortez, and Magdalena Bay. Curated tiers aboard the finest liveaboard in Baja California, Mexico.',
+  title: 'Upcoming Adventures — Quetzal Liveaboard',
+  description: 'Quetzal Liveaboard is preparing its upcoming diving adventures in Baja California, Mexico. Online reservations will be available soon.',
 }
 
-export default async function BookingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  const params = await searchParams
-  const oauthStep = typeof params.step === 'string' ? parseInt(params.step, 10) : undefined
-
+export default function BookingPage() {
   return (
     <main className="min-h-screen">
       <Navigation />
 
-      {/* Header */}
-      <section className="relative pt-32 pb-16 bg-muted/30 overflow-hidden">
-        {/* Subtle decorative line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent/0 via-accent/40 to-accent/0" />
-        <div className="container mx-auto px-4 lg:px-8 text-center relative">
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-4">
-            Expeditions
+      <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-muted/30 px-4 pb-20 pt-32 sm:px-6 lg:px-8">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent/0 via-accent/50 to-accent/0" />
+        <div className="container relative mx-auto max-w-4xl text-center">
+          <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+            Quetzal Liveaboard · Coming soon
           </p>
-          <h1 className="font-serif text-4xl md:text-5xl font-normal text-foreground mb-4 text-balance">
-            Book Your Expedition
+          <h1 className="mx-auto max-w-3xl font-serif text-4xl font-normal leading-tight text-foreground text-balance sm:text-5xl lg:text-6xl">
+            Upcoming adventures are taking shape.
           </h1>
-          <p className="font-sans text-base text-muted-foreground max-w-xl mx-auto text-pretty">
-            Reserve your spot on one of our curated liveaboard expeditions.
-            Complete the booking flow below.
+          <p className="mx-auto mt-6 max-w-2xl font-sans text-lg leading-8 text-muted-foreground text-pretty">
+            Our team is working on the next Quetzal adventures. Online reservations will be available here soon.
           </p>
-        </div>
-      </section>
-
-      {/* Booking Flow (Login first, then cruise selection) */}
-      <BookingPageClient oauthStep={oauthStep} />
-
-      {/* Reservation Info — always visible, below the booking flow */}
-      <section className="py-12 bg-[#f3f1ec]">
-        <div className="container mx-auto px-4 lg:px-8">
-          <ReservationInfoCards />
+          <div className="mx-auto mt-8 max-w-2xl border-t border-foreground/10 pt-8">
+            <h2 className="font-serif text-2xl font-normal text-foreground sm:text-3xl">
+              Próximas aventuras en preparación.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl font-sans text-base leading-7 text-muted-foreground text-pretty">
+              Nuestro equipo está preparando las próximas aventuras de Quetzal. Las reservaciones en línea estarán disponibles aquí muy pronto.
+            </p>
+          </div>
+          <Link
+            href="/contacto"
+            className="mt-10 inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-6 py-3 font-sans text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          >
+            Contact the team · Contactar al equipo
+          </Link>
         </div>
       </section>
 

@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { ChevronDown, Calendar, LogOut, User } from "lucide-react";
+import { ChevronDown, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,18 +20,13 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { language, setLanguage, t } = useLanguage();
-  const { isAuthenticated, isAdmin, logout } = useUser();
+  const { isAdmin } = useUser();
   const { direction, isPastThreshold } = useScrollDirection(50);
   const isCompactDesktop = direction === "down" && isPastThreshold;
-  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Defer auth-dependent UI until after hydration to avoid Radix ID mismatches
-  const showAuthUI = mounted && isAuthenticated;
-  const hideBookNow = mounted && isAuthenticated && pathname === "/booking";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f3f1ec]/95 backdrop-blur-sm border-b border-black/10 transition-all duration-300">
@@ -105,12 +99,6 @@ export function Navigation() {
               </Link>
 
               <Link
-                href="/testimonios"
-                className="text-foreground hover:text-accent transition-colors text-sm font-medium tracking-wide"
-              >
-                {t("nav.calendar")}
-              </Link>
-              <Link
                 href="/blog"
                 className="text-foreground hover:text-accent transition-colors text-sm font-medium tracking-wide"
               >
@@ -137,39 +125,16 @@ export function Navigation() {
           <div
             className={`hidden lg:flex items-center gap-3 transition-all duration-300 ${isCompactDesktop ? "opacity-0 pointer-events-none absolute" : "opacity-100"}`}
           >
-            {/* Profile icon — always visible: /account when authenticated, /booking?step=1 (login) otherwise */}
             <Button
               asChild
-              size="icon-sm"
-              className="bg-muted text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground"
-              title={showAuthUI ? "My Account" : t("booking.cruise.signIn")}
+              size="sm"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2"
             >
-              <Link href={showAuthUI ? "/account" : "/booking?step=1"}>
-                <User className="h-4 w-4" />
+              <Link href="/booking">
+                <Calendar className="h-4 w-4" aria-hidden="true" />
+                {t("nav.bookNow")}
               </Link>
             </Button>
-            {showAuthUI && (
-              <Button
-                size="icon-sm"
-                onClick={logout}
-                className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
-                title={t("nav.signOut")}
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            )}
-            {!hideBookNow && (
-              <Button
-                asChild
-                size="sm"
-                className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold whitespace-nowrap gap-2"
-              >
-                <Link href="/booking">
-                  <Calendar className="h-4 w-4" />
-                  {t("nav.bookNow")}
-                </Link>
-              </Button>
-            )}
             <button
               onClick={() => setLanguage(language === "en" ? "es" : "en")}
               className="flex items-center justify-center w-10 h-10 hover:scale-110 transition-transform cursor-pointer rounded-full border-2 border-black/10 hover:border-accent bg-black/5"
@@ -261,12 +226,6 @@ export function Navigation() {
                     {t("nav.aboutUs")}
                   </Link>
                   <Link
-                    href="/testimonios"
-                    className="text-foreground hover:text-accent py-2 text-lg font-bold"
-                  >
-                    {t("nav.calendar")}
-                  </Link>
-                  <Link
                     href="/blog"
                     className="text-foreground hover:text-accent py-2 text-lg font-bold"
                   >
@@ -287,40 +246,15 @@ export function Navigation() {
                     {t("nav.contact")}
                   </Link>
                   <div className="flex items-center justify-center gap-3 pt-4 border-t border-primary-foreground/20">
-                    {/* Profile icon — always visible */}
                     <Button
                       asChild
-                      size="icon-sm"
-                      className="bg-muted text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground"
-                      title={
-                        showAuthUI ? "My Account" : t("booking.cruise.signIn")
-                      }
+                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2"
                     >
-                      <Link href={showAuthUI ? "/account" : "/booking?step=1"}>
-                        <User className="h-4 w-4" />
+                      <Link href="/booking">
+                        <Calendar className="h-4 w-4" aria-hidden="true" />
+                        {t("nav.bookNow")}
                       </Link>
                     </Button>
-                    {showAuthUI && (
-                      <Button
-                        size="icon-sm"
-                        onClick={logout}
-                        className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
-                        title={t("nav.signOut")}
-                      >
-                        <LogOut className="h-4 w-4" />
-                      </Button>
-                    )}
-                    {!hideBookNow && (
-                      <Button
-                        asChild
-                        className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2"
-                      >
-                        <Link href="/booking">
-                          <Calendar className="h-4 w-4" />
-                          {t("nav.bookNow")}
-                        </Link>
-                      </Button>
-                    )}
                     <button
                       onClick={() =>
                         setLanguage(language === "en" ? "es" : "en")
@@ -357,6 +291,8 @@ export function Navigation() {
           <button
             className="lg:hidden text-foreground"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label={t("nav.menu")}
+            aria-expanded={isOpen}
           >
             <svg
               className="w-6 h-6"
@@ -434,13 +370,6 @@ export function Navigation() {
               {t("nav.aboutUs")}
             </Link>
             <Link
-              href="/testimonios"
-              className="block text-foreground hover:text-accent py-2 font-bold"
-              onClick={() => setIsOpen(false)}
-            >
-              {t("nav.calendar")}
-            </Link>
-            <Link
               href="/blog"
               className="block text-foreground hover:text-accent py-2 font-bold"
               onClick={() => setIsOpen(false)}
@@ -466,44 +395,15 @@ export function Navigation() {
 
             {/* Mobile Language & Calendar */}
             <div className="flex items-center justify-center gap-3 pt-4">
-              {/* Profile icon — always visible */}
               <Button
                 asChild
-                size="icon-sm"
-                className="bg-muted text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground"
-                title={showAuthUI ? "My Account" : t("booking.cruise.signIn")}
+                className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2"
               >
-                <Link
-                  href={showAuthUI ? "/account" : "/booking?step=1"}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <User className="h-4 w-4" />
+                <Link href="/booking" onClick={() => setIsOpen(false)}>
+                  <Calendar className="h-4 w-4" aria-hidden="true" />
+                  {t("nav.bookNow")}
                 </Link>
               </Button>
-              {showAuthUI && (
-                <Button
-                  size="icon-sm"
-                  onClick={() => {
-                    logout();
-                    setIsOpen(false);
-                  }}
-                  className="bg-muted text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
-                  title={t("nav.signOut")}
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              )}
-              {!hideBookNow && (
-                <Button
-                  asChild
-                  className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold gap-2"
-                >
-                  <Link href="/booking" onClick={() => setIsOpen(false)}>
-                    <Calendar className="h-4 w-4" />
-                    {t("nav.bookNow")}
-                  </Link>
-                </Button>
-              )}
               <button
                 onClick={() => setLanguage(language === "en" ? "es" : "en")}
                 className="flex items-center justify-center w-12 h-12 hover:scale-110 transition-transform cursor-pointer rounded-full border-2 border-black/10 hover:border-accent bg-black/5"
