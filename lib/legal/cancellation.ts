@@ -47,7 +47,7 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
       {
         heading: 'How to Cancel',
         content: [
-          'All cancellations must be submitted in writing via email to info@quetzalliveaboard.com. The cancellation date is the date we receive your email, not the date you send it. Please include your reservation number and full name in the cancellation request.',
+          'All cancellations must be submitted in writing via email to info@liveaboardquetzal.com. The cancellation date is the date we receive your email, not the date you send it. Please include your reservation number and full name in the cancellation request.',
           'We will acknowledge receipt of your cancellation within 48 hours. If you do not receive an acknowledgment, please follow up — it is your responsibility to ensure we have received your notice.',
         ],
       },
@@ -70,7 +70,7 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
         content: [
           'If you are a consumer residing in the European Union and you booked your expedition entirely online (distance contract), you may have a statutory right to withdraw from the contract within 14 days of booking without giving any reason, in accordance with EU consumer protection law (Directive 2011/83/EU).',
           'However, this right does NOT apply if your expedition departure date falls within the 14-day withdrawal period, as travel services with a specific date are exempt. Additionally, once services have been fully performed, the right of withdrawal expires.',
-          'To exercise your right of withdrawal, contact us in writing at info@quetzalliveaboard.com within 14 days of your booking. If eligible, we will refund all payments within 14 days of receiving your withdrawal notice.',
+          'To exercise your right of withdrawal, contact us in writing at info@liveaboardquetzal.com within 14 days of your booking. If eligible, we will refund all payments within 14 days of receiving your withdrawal notice.',
         ],
       },
       {
@@ -79,8 +79,8 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
           'For cancellation requests or questions about this policy:',
         ],
         list: [
-          'Email: info@quetzalliveaboard.com',
-          'Phone: +52 (612) XXX-XXXX',
+          'Email: info@liveaboardquetzal.com',
+          'Phone: +52 1 646 146 1000',
           'Address: La Paz, Baja California Sur, Mexico',
         ],
       },
@@ -132,7 +132,7 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
       {
         heading: 'Cómo Cancelar',
         content: [
-          'Todas las cancelaciones deben enviarse por escrito por correo electrónico a info@quetzalliveaboard.com. La fecha de cancelación es la fecha en que recibimos tu correo, no la fecha en que lo enviaste. Por favor incluye tu número de reserva y nombre completo en la solicitud de cancelación.',
+          'Todas las cancelaciones deben enviarse por escrito por correo electrónico a info@liveaboardquetzal.com. La fecha de cancelación es la fecha en que recibimos tu correo, no la fecha en que lo enviaste. Por favor incluye tu número de reserva y nombre completo en la solicitud de cancelación.',
           'Acusaremos recibo de tu cancelación dentro de las 48 horas. Si no recibes una confirmación, por favor haznos seguimiento — es tu responsabilidad asegurarte de que hayamos recibido tu notificación.',
         ],
       },
@@ -155,7 +155,7 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
         content: [
           'Si sos un consumidor residente en la Unión Europea y reservaste tu expedición completamente en línea (contrato a distancia), podés tener el derecho legal de desistir del contrato dentro de los 14 días posteriores a la reserva sin necesidad de justificación, conforme a la legislación de protección al consumidor de la UE (Directiva 2011/83/UE).',
           'Sin embargo, este derecho NO aplica si la fecha de salida de tu expedición cae dentro del período de desistimiento de 14 días, ya que los servicios de viaje con una fecha específica están exentos. Además, una vez que los servicios se hayan realizado completamente, el derecho de desistimiento expira.',
-          'Para ejercer tu derecho de desistimiento, contactanos por escrito en info@quetzalliveaboard.com dentro de los 14 días posteriores a tu reserva. Si corresponde, reembolsaremos todos los pagos dentro de los 14 días posteriores a la recepción de tu notificación de desistimiento.',
+          'Para ejercer tu derecho de desistimiento, contactanos por escrito en info@liveaboardquetzal.com dentro de los 14 días posteriores a tu reserva. Si corresponde, reembolsaremos todos los pagos dentro de los 14 días posteriores a la recepción de tu notificación de desistimiento.',
         ],
       },
       {
@@ -164,8 +164,8 @@ export const cancellationContent: Record<'en' | 'es', LegalDocument> = {
           'Para solicitudes de cancelación o preguntas sobre esta política:',
         ],
         list: [
-          'Correo: info@quetzalliveaboard.com',
-          'Teléfono: +52 (612) XXX-XXXX',
+          'Correo: info@liveaboardquetzal.com',
+          'Teléfono: +52 1 646 146 1000',
           'Dirección: La Paz, Baja California Sur, México',
         ],
       },

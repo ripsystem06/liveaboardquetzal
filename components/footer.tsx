@@ -101,7 +101,7 @@ export function Footer() {
             </h3>
             <ul className="space-y-2 font-sans text-sm">
               <li className="text-primary-foreground/80">
-                contact@quetzalliveaboard.com
+                info@liveaboardquetzal.com
               </li>
               <li>
                 <Link

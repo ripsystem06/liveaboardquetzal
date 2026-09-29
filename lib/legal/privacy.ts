@@ -155,8 +155,8 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
           'To exercise your ARCO, GDPR, or CCPA rights, or if you have questions about this Privacy Policy, contact us at:',
         ],
         list: [
-          'Email: info@quetzalliveaboard.com',
-          'Phone: +52 (612) XXX-XXXX',
+          'Email: info@liveaboardquetzal.com',
+          'Phone: +52 1 646 146 1000',
           'Address: La Paz, Baja California Sur, Mexico',
         ],
       },
@@ -306,8 +306,8 @@ export const privacyContent: Record<'en' | 'es', LegalDocument> = {
           'Para ejercer tus derechos ARCO, GDPR o CCPA, o si tienes preguntas sobre esta Política de Privacidad, contáctanos en:',
         ],
         list: [
-          'Correo: info@quetzalliveaboard.com',
-          'Teléfono: +52 (612) XXX-XXXX',
+          'Correo: info@liveaboardquetzal.com',
+          'Teléfono: +52 1 646 146 1000',
           'Dirección: La Paz, Baja California Sur, México',
         ],
       },

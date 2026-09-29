@@ -103,8 +103,8 @@ export const termsContent: Record<'en' | 'es', LegalDocument> = {
           'If you have any questions about these Terms & Conditions, please contact us:',
         ],
         list: [
-          'Email: info@quetzalliveaboard.com',
-          'Phone: +52 (612) XXX-XXXX',
+          'Email: info@liveaboardquetzal.com',
+          'Phone: +52 1 646 146 1000',
           'Address: La Paz, Baja California Sur, Mexico',
         ],
       },
@@ -205,8 +205,8 @@ export const termsContent: Record<'en' | 'es', LegalDocument> = {
           'Si tienes preguntas sobre estos Términos y Condiciones, contáctanos en:',
         ],
         list: [
-          'Correo: info@quetzalliveaboard.com',
-          'Teléfono: +52 (612) XXX-XXXX',
+          'Correo: info@liveaboardquetzal.com',
+          'Teléfono: +52 1 646 146 1000',
           'Dirección: La Paz, Baja California Sur, México',
         ],
       },

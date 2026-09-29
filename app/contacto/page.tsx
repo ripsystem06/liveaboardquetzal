@@ -30,8 +30,8 @@ export default function ContactoPage() {
                 <MessageCircle className="w-6 h-6 text-accent" />
               </div>
               <h3 className="font-sans font-semibold text-foreground mb-1">{t('contact.emailField')}</h3>
-              <a href="mailto:contact@quetzalliveaboard.com" className="font-sans text-accent hover:text-accent/80 transition-colors text-sm">
-                contact@quetzalliveaboard.com
+              <a href="mailto:info@liveaboardquetzal.com" className="font-sans text-accent hover:text-accent/80 transition-colors text-sm">
+                info@liveaboardquetzal.com
               </a>
             </div>
             <div className="p-6 bg-card rounded-lg border border-border text-center">

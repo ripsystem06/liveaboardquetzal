@@ -141,8 +141,8 @@ export const divingRisksContent: Record<'en' | 'es', LegalDocument> = {
           'If you have questions about diving safety, certification requirements, or any content on this page, please reach out:',
         ],
         list: [
-          'Email: info@quetzalliveaboard.com',
-          'Phone: +52 (612) XXX-XXXX',
+          'Email: info@liveaboardquetzal.com',
+          'Phone: +52 1 646 146 1000',
           'Address: La Paz, Baja California Sur, Mexico',
         ],
       },
@@ -288,8 +288,8 @@ export const divingRisksContent: Record<'en' | 'es', LegalDocument> = {
           'Si tienes preguntas sobre seguridad de buceo, requisitos de certificación o cualquier contenido de esta página, contáctanos:',
         ],
         list: [
-          'Correo: info@quetzalliveaboard.com',
-          'Teléfono: +52 (612) XXX-XXXX',
+          'Correo: info@liveaboardquetzal.com',
+          'Teléfono: +52 1 646 146 1000',
           'Dirección: La Paz, Baja California Sur, México',
         ],
       },

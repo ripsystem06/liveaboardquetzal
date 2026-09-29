@@ -53,13 +53,13 @@ export function ContactFormSection() {
 
             <div className="space-y-5 mt-8">
               <a
-                href="mailto:contact@quetzalliveaboard.com"
+                href="mailto:info@liveaboardquetzal.com"
                 className="flex items-center gap-3 text-white/90 hover:text-white transition-colors group"
               >
                 <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
                   <Mail className="w-4 h-4" />
                 </div>
-                <span className="font-sans text-sm">contact@quetzalliveaboard.com</span>
+                <span className="font-sans text-sm">info@liveaboardquetzal.com</span>
               </a>
 
               <div className="flex items-center gap-3 text-white/70">
